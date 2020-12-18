@@ -1,0 +1,96 @@
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0.5em;
+}
+
+mat-card {
+  margin: 0.5em;
+  text-align: left;
+}
+
+mat-card-actions {
+  text-align: center;
+}
+
+mat-card-content {
+  margin: 0.5em;
+}
+
+table {
+  width: 100%;
+}
+
+.avatar {
+  margin: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+button {
+  margin: 10px;
+}
+
+.table-button {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+
+.pointer {
+  cursor: pointer;
+}
+
+p {
+  margin: 0;
+}
+
+.mat-chip.mat-standard-chip.mat-chip-disabled {
+  opacity: inherit;
+}
+
+.mat-input-element:disabled {
+  color: inherit;
+}
+
+.mat-select-disabled {
+  ::ng-deep .mat-select-value {
+    color: inherit;
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+mat-tab-group {
+  width: 90%;
+}
+
+fa-icon {
+  color: white;
+}
+
+mat-horizontal-stepper {
+  background-color: transparent;
+}
+
+::ng-deep .mat-horizontal-stepper-header {
+  pointer-events: none !important; // disable stepper navigation
+}
+
+.social {
+  text-align: center;
+  padding-top: 15px;
+  min-width: 200px;
+}
+
+.widerField {
+  width: 49%;
+}

@@ -1,0 +1,17 @@
+.mat-h1 {
+  font-size: 2.5em;
+  text-align: center;
+}
+
+.recent {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 20px;
+  grid-row-gap: 10px;
+}
+
+@media only screen and (max-width: 600px) {
+  .mat-h1 {
+    font-size: 2em;
+  }
+}

@@ -1,0 +1,25 @@
+<ng-container>
+  <h2 class="mat-h2 myReviewsTitle">My reviews</h2>
+  <div class="paper" *ngIf="reviews.length">
+    <mat-card class="noshadow" *ngFor="let review of reviews">
+      <div class="flex">
+        <span *ngIf="review.status==REVIEW_STATUS.draft" class="badge-info badge-impact">Draft</span>
+        <span *ngIf="review.status==REVIEW_STATUS.published" class="badge-info badge-secondary">Published</span>
+        <span *ngIf="review.reward" class="badge-info badge-primary">{{review.reward}} ORVs</span>
+      </div>
+      <mat-card-header>
+        <img mat-card-avatar ngxGravatar [md5Hash]="review.gravatar"/>
+        <mat-card-title>
+          <a [routerLink]="['/deposits/', review.deposit.$oid, 'reviews', review._id.$oid, 'view']">
+            {{ review.author }}
+          </a>
+        </mat-card-title>
+        <mat-card-subtitle>
+          Peer Review
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>{{review.comments}}</mat-card-content>
+    </mat-card>
+  </div>
+  <div *ngIf="!reviews.length" class="myReviewsTitle mat-title">No reviews found.</div>
+</ng-container>

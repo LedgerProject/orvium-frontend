@@ -1,0 +1,31 @@
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+mat-card {
+  margin: 40px;
+}
+
+table {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 40%;
+}
+
+.paper {
+  margin-top: 20px;
+  width: 90%;
+  max-width: 1000px;
+}
+
+.mat-row {
+  height: auto;
+}
+
+.mat-cell {
+  padding: 8px 8px 8px 8px;
+}

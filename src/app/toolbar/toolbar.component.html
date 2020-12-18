@@ -1,0 +1,156 @@
+<mat-toolbar class="mat-elevation-z6 backgroundColor">
+  <button *ngIf="profile" mat-icon-button (click)="toggleSidenav()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <a *ngIf="!smallScreen" mat-button [routerLink]="['/']">
+    <mat-icon color="primary" class="logo md-48" aria-label="Orvium logo" svgIcon="orvium"></mat-icon>
+  </a>
+  <a *ngIf="smallScreen" mat-button [routerLink]="['/']">
+    <mat-icon color="primary" class="logoIcon" aria-label="Orvium logo" svgIcon="orviumIcon"></mat-icon>
+  </a>
+  <mat-form-field *ngIf="!tinyScreen" class="search" appearance="outline">
+    <mat-label>Search Publications</mat-label>
+    <input matInput placeholder="Search papers by title, abstract, etc." [(ngModel)]="searchInput"
+           (keyup.enter)="searchPapers()">
+    <button mat-button *ngIf="searchInput" matSuffix mat-icon-button aria-label="Clear" (click)="searchInput=''">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <span class="right"></span>
+  <ng-container *ngIf="ethereumIsEnabled">
+    <button mat-button matTooltip="You are connected to this Ethereum network">
+      <mat-icon svgIcon="ethereum" aria-label="Ethereum logo"></mat-icon>
+      {{ this.ethereumService.currentNetwork.value.displayName }}
+    </button>
+  </ng-container>
+  <mat-slide-toggle *ngIf="!smallScreen" color="primary" [checked]="ethereumIsEnabled" [disabled]="!ethereumIsAvailable"
+                    (change)="toggleBlockchain($event)">Blockchain
+  </mat-slide-toggle>
+
+  <mat-divider *ngIf="!smallScreen" [vertical]="true" class="style-fix"></mat-divider>
+
+  <button mat-icon-button *ngIf="tinyScreen" [matMenuTriggerFor]="searchMenu">
+    <mat-icon>search</mat-icon>
+  </button>
+
+  <mat-menu #searchMenu="matMenu">
+    <mat-form-field class="search" appearance="outline" (click)="$event.stopPropagation()">
+      <mat-label>Search Publications</mat-label>
+      <input matInput placeholder="Search papers by title, abstract, etc." [(ngModel)]="searchInput"
+             (keyup.enter)="searchPapers()">
+      <button mat-button *ngIf="searchInput" matSuffix mat-icon-button aria-label="Clear" (click)="searchInput=''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+  </mat-menu>
+
+  <div>
+    <ng-container *ngIf="profile">
+      <button mat-icon-button (click)="create()" class="toolbar-create-button">
+        <mat-icon>create</mat-icon>
+      </button>
+      <button class="overflow-visible" mat-icon-button [matMenuTriggerFor]="notificationsMenu">
+        <mat-icon matBadge="{{notifications?.length}}" matBadgeColor="accent"
+                  [matBadgeHidden]="notifications?.length == 0">
+          notifications
+        </mat-icon>
+      </button>
+      <button class="overflow-visible toolbar-profile" mat-icon-button [matMenuTriggerFor]="profileMenu">
+        <div class="avatar-wrapper">
+          <img mat-card-avatar ngxGravatar [md5Hash]="profile.gravatar" class="mat-avatar avatar"/>
+        </div>
+      </button>
+
+      <mat-menu #notificationsMenu="matMenu" [overlapTrigger]="false" xPosition="before">
+        <div class="mat-subheading-2 push-none textThemeColor">Notifications</div>
+        <mat-nav-list dense>
+          <mat-divider></mat-divider>
+          <mat-list-item *ngFor="let notification of notifications; let index = index">
+            <mat-icon class="notification-icon" matListIcon>{{notification.icon}}</mat-icon>
+            <a *ngIf="notification.action.includes('http')" matLine
+               href="{{notification.action}}"
+               target="_blank">
+              <h4 class="text-wrap primary">{{notification.title}}</h4>
+              <p class="text-wrap">{{notification.body}}</p>
+            </a>
+            <a *ngIf="!notification.action.includes('http')" matLine
+               [routerLink]="notification.action">
+              <h4 class="text-wrap primary">{{notification.title}}</h4>
+              <p class="text-wrap">{{notification.body}}</p>
+            </a>
+            <p matLine>{{notification.date | date:'medium'}}</p>
+            <mat-action-list>
+              <mat-icon class="notification-close-icon" (click)="deleteNotification(index, $event)">cancel</mat-icon>
+            </mat-action-list>
+            <mat-divider></mat-divider>
+          </mat-list-item>
+        </mat-nav-list>
+      </mat-menu>
+
+
+      <mat-menu #profileMenu="matMenu" [overlapTrigger]="false" xPosition="before">
+        <div class="mat-subheading-2 push-none textThemeColor">Profile</div>
+        <mat-nav-list dense>
+          <mat-divider></mat-divider>
+          <section>
+            <div class="profile-info">
+              <div class="avatar-wrapper" fxFlex="0 1 auto" fxLayoutAlign="center center">
+                <img mat-card-avatar ngxGravatar [md5Hash]="profile.gravatar" size="70"/>
+              </div>
+              <div class="mat-subheading-1 primary">{{ profile?.firstName }} {{ profile?.lastName }}</div>
+              <div class="mat-subheading-1 pending">{{ profile?.userType }}</div>
+              <div>
+                <span class="mat-subheading-1 pending">{{ profile?.institution }}</span>
+              </div>
+            </div>
+            <mat-divider></mat-divider>
+            <div>
+              <div class="verified-info flex">
+                <span class="mat-subheading-1 textThemeColor">Institution</span>
+                <span *ngIf="profile?.institution" class="push badge-info badge-primary">Verified</span>
+                <span *ngIf="!profile?.institution" class="push badge-info badge-secondary">Pending</span>
+              </div>
+              <div class="verified-info flex">
+                <span class="mat-subheading-1 textThemeColor">Email</span>
+                <span *ngIf="profile?.emailConfirmed;" class="push badge-info badge-primary">Verified</span>
+                <span *ngIf="!profile?.emailConfirmed;" class="push badge-info badge-secondary">Pending</span>
+              </div>
+              <div class="verified-info flex">
+                <span class="mat-subheading-1 textThemeColor">Reviewer</span>
+                <span *ngIf="profile?.isReviewer" class="push badge-info badge-primary">Verified</span>
+                <span *ngIf="!profile?.isReviewer" class="push badge-info badge-secondary">Pending</span>
+              </div>
+            </div>
+            <mat-divider></mat-divider>
+            <button class="nav-button" matSubheader mat-menu-item [routerLink]="['profile']" routerLinkActive="active-sub-link">
+              <mat-icon>perm_identity</mat-icon>
+              Profile
+            </button>
+            <button class="nav-button" matSubheader mat-menu-item (click)="logout()">
+              <mat-icon>exit_to_app</mat-icon>
+              Logout
+            </button>
+          </section>
+        </mat-nav-list>
+      </mat-menu>
+
+
+    </ng-container>
+    <button *ngIf="!profile" mat-flat-button color="primary" (click)="login()">
+      <mat-icon>person</mat-icon>
+      Log In
+    </button>
+  </div>
+</mat-toolbar>
+
+<ngx-smart-modal #createDeposit identifier="createDeposit" class="modal">
+  <h2 class="mat-h2 primary">Please, enter below a title for your new publication:</h2>
+  <mat-form-field class="flex flex-direction-column">
+    <mat-label>Publication title</mat-label>
+    <input required matInput [(ngModel)]="newTitle" (keydown.enter)="save()">
+  </mat-form-field>
+  <br>
+  <button mat-raised-button class="dialogButton" color="primary" (click)="save()" [disabled]="!newTitle">
+    Create
+  </button>
+</ngx-smart-modal>

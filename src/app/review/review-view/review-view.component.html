@@ -1,0 +1,79 @@
+<mat-card role="main" class="noshadow flex-basis-0 flex-grow-1 container">
+  <mat-card-header class="flex-wrap">
+    <img mat-card-avatar ngxGravatar class="avatar" [md5Hash]="peerReview.gravatar" />
+    <mat-card-title>
+      <a>Peer Review</a>
+    </mat-card-title>
+    <span *ngIf="!smallScreen" class="spacer"></span>
+    <button *ngIf="isOwner && peerReview.status==REVIEW_STATUS.draft" mat-icon-button
+      [routerLink]="['/deposits/', deposit._id.$oid, 'reviews', peerReview._id.$oid, 'edit']">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </mat-card-header>
+  <mat-card-content class="flex flex-direction-column">
+    <div class="publicationContent">
+      <div class="firstInformation">
+        <h2 class="mat-h2 primary">
+          <mat-icon>menu_book</mat-icon>
+          Publication
+        </h2>
+        <p>{{deposit.title}}</p>
+      </div>
+      <div class="information">
+        <h2 class="mat-h2 primary">
+          <mat-icon>people_alt</mat-icon>
+          Author
+        </h2>
+        <p>{{peerReview.author}}</p>
+      </div>
+      <div class="information">
+        <h2 class="mat-h2 primary">
+          <mat-icon>comment</mat-icon>
+          Comments
+        </h2>
+        <p mathjax>{{peerReview.comments}}</p>
+      </div>
+      <div class="information">
+        <h2 class="mat-h2 primary">
+          <mat-icon>attach_file</mat-icon>
+          Files
+        </h2>
+        <mat-table [dataSource]="files">
+          <ng-container matColumnDef="filename">
+            <mat-header-cell *matHeaderCellDef>Filename</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              <a *ngIf="peerReview.file" [href]="filelink" target="_blank">
+                {{element.filename}}
+              </a>
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="contentType">
+            <mat-header-cell *matHeaderCellDef>Content Type</mat-header-cell>
+            <mat-cell *matCellDef="let element"> {{element.contentType}}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="length">
+            <mat-header-cell *matHeaderCellDef>Bytes</mat-header-cell>
+            <mat-cell *matCellDef="let element"> {{element.contentLength}}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="edit">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element">
+              <a class="table-button badge-info" mat-button *ngIf="canOpenOverleaf(element.filename)"
+                href="https://www.overleaf.com/docs?snip_uri=http://{{environment.backend}}/deposits/{{deposit._id?.$oid}}/files/{{element.filename}}"
+                target="_blank" aria-label="Open in overleaf" download>
+                <mat-icon>open_in_new</mat-icon>
+                Open in Overleaf
+              </a></mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: columnsToDisplay;"></mat-row>
+        </mat-table>
+      </div>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-raised-button color="primary" [routerLink]="['/deposits/', deposit._id.$oid]">
+      Go to publication
+    </button>
+  </mat-card-actions>
+</mat-card>

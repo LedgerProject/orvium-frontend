@@ -1,0 +1,236 @@
+<mat-horizontal-stepper linear #stepper>
+  <mat-step>
+    <ng-template matStepLabel>Draft</ng-template>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>In review</ng-template>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Published</ng-template>
+  </mat-step>
+</mat-horizontal-stepper>
+
+<div class="container">
+  <mat-tab-group>
+    <mat-tab label="Publication">
+      <mat-card role="main">
+        <mat-card-header class="flex-wrap">
+          <img mat-card-avatar ngxGravatar class="avatar"
+               [md5Hash]="deposit.gravatar"/>
+          <mat-card-title>
+            <a>{{deposit.title}}</a>
+          </mat-card-title>
+          <span *ngIf="!smallScreen" class="spacer"></span>
+          <button *ngIf="isOwner" mat-icon-button [routerLink]="redirection(deposit)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button>
+            <mat-icon *ngIf="isStarred" (click)="star()" matTooltip="Unstar '{{deposit.title}}'" class="accent"
+                      aria-hidden="false" aria-label="Starred icon">
+              star
+            </mat-icon>
+            <mat-icon *ngIf="!isStarred" (click)="star()" matTooltip="Star '{{deposit.title}}'" aria-hidden="false"
+                      aria-label="Unstar icon">
+              star_border
+            </mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content class="flex flex-direction-column">
+          <div *ngIf="deposit.authors">
+            <div class="firstInformation">
+              <h2 class="mat-h2 primary">
+                <mat-icon>people_alt</mat-icon>
+                Authors
+              </h2>
+              <p *ngIf="deposit.status==DEPOSIT_STATUS.inReview && deposit.authors.length==0">Paper authors are hidden</p>
+              <mat-chip-list>
+                <mat-chip *ngFor="let author of deposit.authors">{{author}}</mat-chip>
+              </mat-chip-list>
+            </div>
+          </div>
+          <div class="information">
+            <h2 class="mat-h2 primary">
+              <mat-icon>short_text</mat-icon>
+              Abstract
+            </h2>
+            <app-show-more [text]="deposit.abstract" [id]="deposit._id.$oid"></app-show-more>
+          </div>
+          <div class="information">
+            <h2 class="mat-h2 primary">
+              <mat-icon>category</mat-icon>
+              Disciplines
+            </h2>
+            <mat-chip-list>
+              <mat-chip *ngFor="let discipline of deposit.disciplines">{{discipline}}</mat-chip>
+            </mat-chip-list>
+          </div>
+          <div class="information">
+            <h2 class="mat-h2 primary">
+              <mat-icon>vpn_key</mat-icon>
+              Keywords
+            </h2>
+            <mat-chip-list>
+              <mat-chip *ngFor="let key of deposit.keywords">{{key}}</mat-chip>
+            </mat-chip-list>
+          </div>
+          <div class="information">
+            <h2 class="mat-h2 primary">
+              <mat-icon>attach_file</mat-icon>
+              Files
+            </h2>
+            <table mat-table [dataSource]="deposit.files" class="flex-wrap">
+              <ng-container matColumnDef="filename">
+                <th mat-header-cell *matHeaderCellDef>Filename</th>
+                <td mat-cell *matCellDef="let element">
+                  <a class="table-button" mat-button matTooltip="Open file in another window"
+                     href="{{environment.backend}}/deposits/{{deposit._id?.$oid}}/files/{{element.filename}}"
+                     target="_blank">
+                    {{element.filename}}
+                  </a>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="contentType">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element"></td>
+              </ng-container>
+              <ng-container matColumnDef="length">
+                <th mat-header-cell *matHeaderCellDef>MB</th>
+                <td mat-cell *matCellDef="let element"> {{element.contentLength / 1024 / 1024 | number}}</td>
+              </ng-container>
+              <ng-container matColumnDef="edit">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element">
+                  <a class="table-button badge-info" mat-button *ngIf="canOpenOverleaf(element.filename)"
+                     href="https://www.overleaf.com/docs?snip_uri=http://{{environment.backend}}/deposits/{{deposit._id?.$oid}}/files/{{element.filename}}"
+                     target="_blank" aria-label="Open in overleaf" download>
+                     <mat-icon>open_in_new</mat-icon>
+                    Open in Overleaf
+                  </a></td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+              <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+            </table>
+          </div>
+          <mat-expansion-panel class="noshadow">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                More details
+              </mat-panel-title>
+              <mat-panel-description *ngIf="!smallScreen">
+                DOI, Review Type, Access right...
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <table class="details">
+              <tr>
+                <td class="detailsBold">DOI:</td>
+                <td>{{deposit.doi}}</td>
+              </tr>
+              <tr>
+                <td class="detailsBold">Review type:</td>
+                <td>{{deposit.reviewType}}</td>
+              </tr>
+              <tr>
+                <td class="detailsBold">Access right:</td>
+                <td>{{deposit.accessRight}}</td>
+              </tr>
+              <tr>
+                <td class="detailsBold">Publication tye:</td>
+                <td>{{deposit.publicationType}}</td>
+              </tr>
+              <tr>
+                <td class="detailsBold">Publication date:</td>
+                <td>{{deposit.publicationDate}}</td>
+              </tr>
+            </table>
+          </mat-expansion-panel>
+          <div class="social">
+            <button mat-fab shareButton="facebook" [style.backgroundColor]="share.prop.facebook.color">
+              <fa-icon [icon]="faFacebookF" size="lg"></fa-icon>
+            </button>
+            <button mat-fab shareButton="twitter" description="{{twitterDescription}}" [style.backgroundColor]="share.prop.twitter.color">
+              <fa-icon [icon]="faTwitter" size="lg"></fa-icon>
+            </button>
+            <button mat-fab shareButton="linkedin" [style.backgroundColor]="share.prop.linkedin.color">
+              <fa-icon [icon]="faLinkedin" size="lg"></fa-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+    <mat-tab>
+      <ng-template matTabLabel>
+        <span matBadge="{{deposit.peerReviews.length}}" matBadgePosition="after" matBadgeColor="primary"
+              matBadgeOverlap="false">Peer Review</span>
+      </ng-template>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Peer Reviews</mat-card-title>
+          <mat-card-subtitle>List of reviews for this publication:</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table class="table" [dataSource]="reviews">
+            <ng-container matColumnDef="author">
+              <th mat-header-cell *matHeaderCellDef>Reviewer</th>
+              <td mat-cell *matCellDef="let element">
+                <div class="avatar">
+                  <img mat-card-avatar ngxGravatar [md5Hash]="element.gravatar"/>
+                  <div style="padding: 10px">
+                    <a [routerLink]="['/deposits/', deposit._id.$oid, 'reviews', element._id.$oid, 'view']">
+                      {{element.author}}
+                    </a>
+                    <span *ngIf="element.status==REVIEW_STATUS.draft" class="badge-info badge-impact">Draft</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="file">
+              <th mat-header-cell *matHeaderCellDef>File</th>
+              <td mat-cell *matCellDef="let element">
+                <a *ngIf="element.file"
+                   href="{{ environment.backend + '/deposits/' + deposit._id?.$oid + '/reviews/' + element._id?.$oid + '/files' }}"
+                   target="blank">
+                  <mat-icon>attach_file</mat-icon>
+                </a>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="rewards">
+              <th mat-header-cell *matHeaderCellDef>Reward</th>
+              <td mat-cell *matCellDef="let element">
+                <button mat-mini-fab matTooltip="Number of ORV tokens rewarded to this reviewer"
+                        color="primary">{{ element.reward }}
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="reviewColumnsToDisplay"></tr>
+            <tr mat-row *matRowDef="let element; columns: reviewColumnsToDisplay;"></tr>
+          </table>
+          <mat-card-actions *ngIf="!isOwner">
+            <div matTooltip="You need to complete your profile to create a review">
+              <button mat-raised-button color="primary" (click)="createReview()" [disabled]="!this.profile?.isReviewer">
+                <mat-icon>rate_review</mat-icon>
+                Create Review
+              </button>
+            </div>
+          </mat-card-actions>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+    <mat-tab label="Blockchain">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Blockchain</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="mat-body">Authors can deposit ORV tokens to reward reviewers for their work</p>
+          <a *ngFor="let transaction of deposit.transactions | keyvalue"
+             mat-button
+             class="green"
+             href="{{ this.orviumService.getNetworkByName(transaction.key).explorerUrl + transaction.value.blockHash }}"
+             target="_blank">
+            <mat-icon aria-hidden="false" aria-label="Published icon">verified_user</mat-icon>
+            Proof of Ownership in {{ this.orviumService.getNetworkByName(transaction.key).displayName }}</a>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+</div>

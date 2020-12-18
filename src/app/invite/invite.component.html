@@ -1,0 +1,62 @@
+<div class="container">
+  <mat-tab-group>
+    <mat-tab label="Invite by email">
+      <mat-card role="main" [formGroup]="sendEmailFormGroup" class="flex-basis-0 flex-grow-1 noshadow">
+        <mat-card-header>
+          <mat-card-title>Send an email to your colleagues</mat-card-title>
+          <mat-card-subtitle>You can add multiple email addresses</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="flex flex-direction-column">
+          <mat-form-field appearance="outline">
+            <mat-label>Emails</mat-label>
+            <mat-chip-list required #emailsChips formControlName="emails">
+              <mat-chip *ngFor="let email of emails" [selectable]="selectable" [removable]="removable"
+                        (removed)="remove(email)">
+                {{email}}
+                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+              </mat-chip>
+              <input matInput id="inputEmails" [matChipInputFor]="emailsChips" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                     [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="add($event)">
+            </mat-chip-list>
+          </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions>
+          <button class="button" mat-raised-button color="primary" (click)="send()" ga-on="click"
+                  ga-event-category="Deposit" ga-event-action="Save">
+            <mat-icon>email</mat-icon>
+            Send
+          </button>
+          <button mat-button (click)="onNoClick()">Close</button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-tab>
+    <mat-tab label="Invite by SN">
+      <mat-card class="flex-basis-0 flex-grow-1 noshadow">
+        <mat-card-header>
+          <mat-card-title>Promote Orvium in social networks</mat-card-title>
+          <mat-card-subtitle>Click on your favourite site</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="flex flex-direction-column">
+          <div class="social">
+            <button mat-fab shareButton="facebook" [url]="'https://dapp.orvium.io/'" [title]="'Try Orvium platform now'"
+                    [description]="'Orvium connect researchers and publishers with trusted reviewers to accelerate publishing along with incentivized peer review.'"
+                    [style.backgroundColor]="share.prop.facebook.color">
+              <fa-icon [icon]="faFacebookF" size="lg"></fa-icon>
+            </button>
+            <button mat-fab shareButton="twitter" [url]="'https://dapp.orvium.io/'" [title]="'Try Orvium platform now'"
+                    [description]="'Orvium connect researchers and publishers with trusted reviewers to accelerate publishing along with incentivized peer review.'"
+                    [style.backgroundColor]="share.prop.twitter.color">
+              <fa-icon [icon]="faTwitter" size="lg"></fa-icon>
+            </button>
+            <button mat-fab shareButton="linkedin" [url]="'https://dapp.orvium.io/'" [title]="'Try Orvium platform now'"
+                    [description]="'Orvium connect researchers and publishers with trusted reviewers to accelerate publishing along with incentivized peer review.'"
+                    [style.backgroundColor]="share.prop.linkedin.color">
+              <fa-icon [icon]="faLinkedin" size="lg"></fa-icon>
+            </button>
+            <p>Thank you!!</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+</div>

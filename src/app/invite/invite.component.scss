@@ -1,0 +1,41 @@
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0.5em;
+}
+
+mat-card {
+  margin: 0.5em;
+  text-align: left;
+}
+
+mat-card-actions {
+  text-align: center;
+}
+
+mat-card-content {
+  margin: 0.5em;
+}
+
+button {
+  margin: 10px;
+}
+
+.mat-chip.mat-standard-chip.mat-chip-disabled {
+  opacity: inherit;
+}
+
+.mat-input-element:disabled {
+  color: inherit;
+}
+
+fa-icon {
+  color: white;
+}
+
+.social {
+  text-align: center;
+  padding-top: 15px;
+  min-width: 200px;
+}

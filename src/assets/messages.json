@@ -1,0 +1,15 @@
+{
+  "validators": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "minlength": "This field should have minimum characters",
+    "maxlength": "This field should have maximum characters",
+    "min": "Invalid minimum value",
+    "max": "Invalid maximum values",
+    "pattern": "This field have invalid format",
+    "invalidORCID": "Invalid ORCID",
+    "invalidEmail": "Invalid email address",
+    "invalidLinkedIn": "Invalid LinkedIn url",
+    "invalidDomain": "This email provider not permitted, you need an institution email"
+  }
+}

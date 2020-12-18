@@ -1,0 +1,205 @@
+@import '~@angular/material/theming';
+@import 'light-theme.scss';
+
+// fonts
+@import url("https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700");
+
+$dialog-position-top: 50%;
+@import "~ngx-smart-modal/ngx-smart-modal";
+// Define a custom typography config that overrides the font-family as well as the
+// `headlines` and `body-1` levels.
+$custom-typography: mat-typography-config(
+  $font-family: 'Poppins, Helvetica, Arial, sans-serif',
+  $headline: mat-typography-level(32px, 48px, 400),
+  $body-1: mat-typography-level(16px, 24px, 300),
+  $button: mat-typography-level(16px, 24px, 300)
+);
+
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat-core($custom-typography);
+
+@include angular-material-theme($light-theme);
+
+.primary {
+  color: mat-color($light-theme-primary);
+}
+
+.warn {
+  color: mat-color($light-theme-warn);
+}
+
+.textThemeColor {
+  color: black;
+}
+
+.backgroundColor {
+  background-color: white;
+}
+
+//
+// Snackbar styles
+//
+
+.error-snackbar {
+  background-color: #febabb;
+  color: #a74544;
+}
+
+.ok-snackbar {
+  background-color: #dfefd9;
+  color: #3e754f;
+}
+
+.warning-snackbar {
+  background-color: #fcf8e4;
+  color: #896d3f;
+}
+
+.info-snackbar {
+  background-color: #d9edf6;
+  color: #34718e;
+}
+
+//
+// Global classes
+//
+
+body {
+  margin: 0;
+  background-color: whitesmoke;
+}
+
+.right {
+  flex: 1 1 auto;
+}
+
+.green {
+  color: #28B463;
+}
+
+.red {
+  color: #E3645B;
+}
+
+.black {
+  color: black;
+}
+
+.white {
+  color: white;
+}
+
+.dialogButton {
+  margin: 0px 10px 0px 10px;
+  float: right;
+}
+
+//
+// Global flex classes
+//
+
+.flex {
+  display: flex !important;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-direction-column {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-basis-0 {
+  flex-basis: 0;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.noshadow {
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  box-shadow: none !important;
+}
+
+.badge-info {
+  padding: 0em .8em;
+  font-size: 75%;
+  font-weight: 300;
+  line-height: 2;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 0.25em;
+  margin-right: 1.5em;
+}
+
+//
+// Global badge classes
+//
+
+.badge-secondary {
+  background-color: #E2E4EA;
+  color: #909AA1;
+}
+
+.badge-primary {
+  background-color: #EBF2FF;
+  color: #4284FF;
+}
+
+.badge-accent {
+  background-color: #F7E9EB;
+  color: #E3645B;
+}
+
+.badge-impact {
+  background-color: #D5F5E3;
+  color: #28B463;
+}
+
+//
+// Smart modal style settings
+//
+
+.modal ::ng-deep .mat-focused .mat-form-field-label {
+  /*change color of label*/
+  color: black !important;
+}
+
+.modal ::ng-deep .mat-form-field-underline {
+  /*change color of underline*/
+  background-color: black !important;
+}
+
+.modal .mat-form-field-ripple {
+  /*change color of underline when focused*/
+  background-color: black !important;
+}
+
+.modal .mat-focused .mat-form-field-label {
+  /*change color of label*/
+  color: black !important;
+}
+
+.modal .mat-form-field-underline {
+  /*change color of underline*/
+  background-color: black !important;
+}
+
+.modal .mat-form-field-ripple {
+  /*change color of underline when focused*/
+  background-color: black !important;
+}

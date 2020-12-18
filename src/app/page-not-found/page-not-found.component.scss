@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  align-items: center;
+}
+
+.mat-icon {
+  height: 100%;
+}
+
+.scientist {
+  flex-shrink: 0;
+  flex-basis: 50%;
+}
+
+.item {
+  flex-basis: 40%;
+}
+
+button {
+  margin: 40px;
+}

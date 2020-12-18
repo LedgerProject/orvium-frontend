@@ -1,0 +1,27 @@
+.container {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 100%;
+}
+
+.toolbar {
+  place-self: start stretch;
+  display: grid;
+}
+
+.footer {
+  place-self: end stretch;
+}
+
+:host {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+
+.sidenav {
+  position: relative;
+}

@@ -1,0 +1,72 @@
+@import '../../styles';
+
+.active-link {
+  @extend .active-sub-link;
+  border-left: 3px solid mat-color($primary);
+  mat-panel-description {
+    color: mat-color($primary) !important;
+  }
+}
+
+.mat-sidenav {
+  padding-top: 10px;
+}
+
+.active-sub-link {
+  color: mat-color($primary) !important;
+  mat-icon {
+    color: mat-color($primary) !important;
+  }
+}
+
+mat-nav-list {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.sidenav-container {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.icon-reviewer {
+   transform: scale(.5);
+}
+
+.badge {
+  display: inline-block;
+  padding: .25em .8em;
+  font-size: 75%;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25em;
+  margin: 0.25em;
+}
+
+.badge-success {
+  margin-left: 10px;
+  color: #fff;
+  background-color: mat-color($primary);
+}
+
+::ng-deep .mat-expansion-panel-body {
+  padding-bottom: 0 !important;
+}
+
+::ng-deep .mat-expansion-panel-header {
+  @extend .mat-subheader;
+  height: auto !important;
+  align-items: end !important;
+  padding: 16px !important;
+  mat-icon {
+    margin-right: 16px;
+  }
+}

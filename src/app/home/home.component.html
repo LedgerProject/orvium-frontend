@@ -1,0 +1,5 @@
+<div class="recent">
+  <app-deposits-list [pagination]="false"></app-deposits-list>
+  <a mat-raised-button color="primary" aria-label="Show more publications"
+     [routerLink]="['search']" [queryParams]="{query: '', page: 1, size: 10}">More Publications</a>
+</div>

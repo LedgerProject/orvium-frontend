@@ -1,0 +1,29 @@
+mat-horizontal-stepper {
+  height: 100%;
+}
+
+.center-form {
+  text-align: center;
+  align-items: center;
+
+  mat-form-field {
+    width: 500px;
+  }
+}
+
+button {
+  margin-top: 40px;
+}
+
+mat-button-toggle {
+  padding: 10px;
+  border-left: none !important;
+  width: 40%;
+  word-wrap: break-word; /* IE 5.5-7 */
+  white-space: -moz-pre-wrap; /* Firefox 1.0-2.0 */
+  white-space: pre-wrap; /* current browsers */
+}
+
+mat-form-field {
+  margin: 5px;
+}
