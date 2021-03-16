@@ -1,25 +1,27 @@
-<ng-container>
-  <h2 class="mat-h2 myReviewsTitle">My reviews</h2>
-  <div class="paper" *ngIf="reviews.length">
-    <mat-card class="noshadow" *ngFor="let review of reviews">
-      <div class="flex">
-        <span *ngIf="review.status==REVIEW_STATUS.draft" class="badge-info badge-impact">Draft</span>
-        <span *ngIf="review.status==REVIEW_STATUS.published" class="badge-info badge-secondary">Published</span>
-        <span *ngIf="review.reward" class="badge-info badge-primary">{{review.reward}} ORVs</span>
-      </div>
-      <mat-card-header>
-        <img mat-card-avatar ngxGravatar [md5Hash]="review.gravatar"/>
-        <mat-card-title>
-          <a [routerLink]="['/deposits/', review.deposit.$oid, 'reviews', review._id.$oid, 'view']">
-            {{ review.author }}
-          </a>
-        </mat-card-title>
-        <mat-card-subtitle>
-          Peer Review
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>{{review.comments}}</mat-card-content>
-    </mat-card>
-  </div>
-  <div *ngIf="!reviews.length" class="myReviewsTitle mat-title">No reviews found.</div>
-</ng-container>
+<mat-table [dataSource]="reviews">
+  <ng-container matColumnDef="publication">
+    <mat-header-cell *matHeaderCellDef>Publication</mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <a routerLink="../../reviews/{{element._id}}/view">{{element.deposit.title}}</a>
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="comments">
+    <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">Comments</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="orv-mobile-hidden">{{element.comments}}</mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="decision">
+    <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">Decision</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="orv-mobile-hidden">{{element.decision | titlecase}}</mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="action">
+    <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <a *ngIf="element.status == 'draft'" mat-flat-button routerLink="../../reviews/{{element._id}}/edit"
+         class="primary"><strong>Edit</strong></a>
+      <a *ngIf="element.status == 'published'" mat-flat-button routerLink="../../reviews/{{element._id}}/view"
+         class="primary"><strong>View</strong></a>
+    </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let element; columns: displayedColumns;"></mat-row>
+</mat-table>

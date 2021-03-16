@@ -3,15 +3,13 @@
 // The list of file replacements can be found in `angular.json`.
 import { NgxLoggerLevel } from 'ngx-logger';
 
-
 export const environment = {
   name: 'development',
   production: false,
-  backend: 'api',
-  backendSSR: 'http://localhost:5000',
+  apiEndpoint: 'http://localhost:4200/api/v1',
   version: 'VERSION',
   logLevel: NgxLoggerLevel.DEBUG,
-  url: 'http://localhost:4200/'
+  publicUrl: 'http://localhost:4200'
 };
 
 /*

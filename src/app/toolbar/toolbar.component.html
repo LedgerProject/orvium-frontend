@@ -1,64 +1,64 @@
 <mat-toolbar class="mat-elevation-z6 backgroundColor">
-  <button *ngIf="profile" mat-icon-button (click)="toggleSidenav()">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <a *ngIf="!smallScreen" mat-button [routerLink]="['/']">
-    <mat-icon color="primary" class="logo md-48" aria-label="Orvium logo" svgIcon="orvium"></mat-icon>
-  </a>
-  <a *ngIf="smallScreen" mat-button [routerLink]="['/']">
-    <mat-icon color="primary" class="logoIcon" aria-label="Orvium logo" svgIcon="orviumIcon"></mat-icon>
-  </a>
-  <mat-form-field *ngIf="!tinyScreen" class="search" appearance="outline">
-    <mat-label>Search Publications</mat-label>
-    <input matInput placeholder="Search papers by title, abstract, etc." [(ngModel)]="searchInput"
-           (keyup.enter)="searchPapers()">
-    <button mat-button *ngIf="searchInput" matSuffix mat-icon-button aria-label="Clear" (click)="searchInput=''">
-      <mat-icon>close</mat-icon>
+  <div class="toolbar-container">
+
+    <button *ngIf="profile" mat-icon-button (click)="toggleSidenav()">
+      <mat-icon>menu</mat-icon>
     </button>
-  </mat-form-field>
-  <span class="right"></span>
-  <ng-container *ngIf="ethereumIsEnabled">
-    <button mat-button matTooltip="You are connected to this Ethereum network">
-      <mat-icon svgIcon="ethereum" aria-label="Ethereum logo"></mat-icon>
-      {{ this.ethereumService.currentNetwork.value.displayName }}
-    </button>
-  </ng-container>
-  <mat-slide-toggle *ngIf="!smallScreen" color="primary" [checked]="ethereumIsEnabled" [disabled]="!ethereumIsAvailable"
-                    (change)="toggleBlockchain($event)">Blockchain
-  </mat-slide-toggle>
+    <a *ngIf="!smallScreen" mat-button [routerLink]="['/']">
+      <mat-icon color="primary" class="logo md-48" aria-label="Orvium logo" svgIcon="orvium"></mat-icon>
+    </a>
+    <a *ngIf="smallScreen" mat-button [routerLink]="['/']">
+      <mat-icon color="primary" class="logoIcon" aria-label="Orvium logo" svgIcon="orviumIcon"></mat-icon>
+    </a>
+    <p class="search">
+      <mat-form-field *ngIf="!smallScreen" appearance="outline">
+        <mat-label>Search Publications</mat-label>
+        <input matInput placeholder="Search papers by title, abstract, etc." [(ngModel)]="searchInput"
+               (keyup.enter)="searchPapers()">
+        <button mat-button *ngIf="searchInput" matSuffix mat-icon-button aria-label="Clear" (click)="searchInput=''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </p>
 
-  <mat-divider *ngIf="!smallScreen" [vertical]="true" class="style-fix"></mat-divider>
-
-  <button mat-icon-button *ngIf="tinyScreen" [matMenuTriggerFor]="searchMenu">
-    <mat-icon>search</mat-icon>
-  </button>
-
-  <mat-menu #searchMenu="matMenu">
-    <mat-form-field class="search" appearance="outline" (click)="$event.stopPropagation()">
-      <mat-label>Search Publications</mat-label>
-      <input matInput placeholder="Search papers by title, abstract, etc." [(ngModel)]="searchInput"
-             (keyup.enter)="searchPapers()">
-      <button mat-button *ngIf="searchInput" matSuffix mat-icon-button aria-label="Clear" (click)="searchInput=''">
-        <mat-icon>close</mat-icon>
+    <span class="right"></span>
+    <ng-container *ngIf="ethereumIsEnabled">
+      <button mat-button matTooltip="You are connected to this Ethereum network">
+        <mat-icon svgIcon="ethereum" aria-label="Ethereum logo"></mat-icon>
+        {{ this.ethereumService.currentNetwork?.value?.displayName }}
       </button>
-    </mat-form-field>
-  </mat-menu>
+    </ng-container>
+    <mat-slide-toggle *ngIf="!smallScreen" color="primary" [checked]="ethereumIsEnabled" [disabled]="!ethereumIsAvailable"
+                      (change)="toggleBlockchain($event)">Blockchain
+    </mat-slide-toggle>
 
-  <div>
-    <ng-container *ngIf="profile">
-      <button mat-icon-button (click)="create()" class="toolbar-create-button">
+    <mat-divider *ngIf="!smallScreen" [vertical]="true" class="style-fix"></mat-divider>
+
+    <button mat-icon-button *ngIf="smallScreen" [matMenuTriggerFor]="searchMenu">
+      <mat-icon>search</mat-icon>
+    </button>
+
+    <mat-menu #searchMenu="matMenu">
+      <mat-form-field class="search" appearance="outline" (click)="$event.stopPropagation()">
+        <mat-label>Search Publications</mat-label>
+        <input matInput placeholder="Search papers by title, abstract, etc." [(ngModel)]="searchInput"
+               (keyup.enter)="searchPapers()">
+        <button mat-button *ngIf="searchInput" matSuffix mat-icon-button aria-label="Clear" (click)="searchInput=''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </mat-menu>
+
+
+    <div *ngIf="profile">
+      <button mat-icon-button (click)="create()">
         <mat-icon>create</mat-icon>
       </button>
-      <button class="overflow-visible" mat-icon-button [matMenuTriggerFor]="notificationsMenu">
+      <button mat-icon-button [matMenuTriggerFor]="notificationsMenu">
         <mat-icon matBadge="{{notifications?.length}}" matBadgeColor="accent"
                   [matBadgeHidden]="notifications?.length == 0">
           notifications
         </mat-icon>
-      </button>
-      <button class="overflow-visible toolbar-profile" mat-icon-button [matMenuTriggerFor]="profileMenu">
-        <div class="avatar-wrapper">
-          <img mat-card-avatar ngxGravatar [md5Hash]="profile.gravatar" class="mat-avatar avatar"/>
-        </div>
       </button>
 
       <mat-menu #notificationsMenu="matMenu" [overlapTrigger]="false" xPosition="before">
@@ -86,71 +86,62 @@
           </mat-list-item>
         </mat-nav-list>
       </mat-menu>
-
-
-      <mat-menu #profileMenu="matMenu" [overlapTrigger]="false" xPosition="before">
+    </div>
+    <a mat-icon-button href="https://help.orvium.io/" target="_blank">
+      <mat-icon>help_outline</mat-icon>
+    </a>
+    <div *ngIf="profile">
+      <button mat-icon-button [matMenuTriggerFor]="profileMenu">
+        <img mat-card-avatar ngxGravatar [md5Hash]="profile.gravatar || '2e7854c294602808422223306eff0e33'" class="mat-avatar avatar"/>
+      </button>
+      <mat-menu #profileMenu="matMenu" [overlapTrigger]="false" xPosition="before" class="profile-menu">
         <div class="mat-subheading-2 push-none textThemeColor">Profile</div>
         <mat-nav-list dense>
           <mat-divider></mat-divider>
           <section>
             <div class="profile-info">
-              <div class="avatar-wrapper" fxFlex="0 1 auto" fxLayoutAlign="center center">
-                <img mat-card-avatar ngxGravatar [md5Hash]="profile.gravatar" size="70"/>
-              </div>
-              <div class="mat-subheading-1 primary">{{ profile?.firstName }} {{ profile?.lastName }}</div>
-              <div class="mat-subheading-1 pending">{{ profile?.userType }}</div>
               <div>
-                <span class="mat-subheading-1 pending">{{ profile?.institution }}</span>
+                <img mat-card-avatar ngxGravatar [md5Hash]="profile.gravatar || '2e7854c294602808422223306eff0e33'" [size]="70"/>
               </div>
+              <div class="mat-body primary">{{ profile?.firstName }} {{ profile?.lastName }}</div>
+              <div class="mat-body">{{ profile.userType | titlecase }}</div>
+              <div class="mat-body">{{ profile?.institution }}</div>
             </div>
             <mat-divider></mat-divider>
-            <div>
-              <div class="verified-info flex">
-                <span class="mat-subheading-1 textThemeColor">Institution</span>
-                <span *ngIf="profile?.institution" class="push badge-info badge-primary">Verified</span>
-                <span *ngIf="!profile?.institution" class="push badge-info badge-secondary">Pending</span>
-              </div>
-              <div class="verified-info flex">
-                <span class="mat-subheading-1 textThemeColor">Email</span>
-                <span *ngIf="profile?.emailConfirmed;" class="push badge-info badge-primary">Verified</span>
-                <span *ngIf="!profile?.emailConfirmed;" class="push badge-info badge-secondary">Pending</span>
-              </div>
-              <div class="verified-info flex">
-                <span class="mat-subheading-1 textThemeColor">Reviewer</span>
-                <span *ngIf="profile?.isReviewer" class="push badge-info badge-primary">Verified</span>
-                <span *ngIf="!profile?.isReviewer" class="push badge-info badge-secondary">Pending</span>
-              </div>
-            </div>
-            <mat-divider></mat-divider>
+            <button class="nav-button" (click)="changeTheme()" matSubheader mat-menu-item>
+              <mat-icon>brightness_6</mat-icon>
+              Switch theme
+            </button>
             <button class="nav-button" matSubheader mat-menu-item [routerLink]="['profile']" routerLinkActive="active-sub-link">
               <mat-icon>perm_identity</mat-icon>
               Profile
             </button>
-            <button class="nav-button" matSubheader mat-menu-item (click)="logout()">
+            <button class="nav-button" (click)="logout()"
+                    matSubheader mat-menu-item>
               <mat-icon>exit_to_app</mat-icon>
               Logout
             </button>
           </section>
         </mat-nav-list>
       </mat-menu>
+    </div>
 
-
-    </ng-container>
-    <button *ngIf="!profile" mat-flat-button color="primary" (click)="login()">
+    <button *ngIf="!profile" (click)="login()" mat-flat-button color="primary">
       <mat-icon>person</mat-icon>
       Log In
     </button>
   </div>
+
 </mat-toolbar>
 
-<ngx-smart-modal #createDeposit identifier="createDeposit" class="modal">
-  <h2 class="mat-h2 primary">Please, enter below a title for your new publication:</h2>
+<ngx-smart-modal #createNewDeposit identifier="createNewDeposit" class="modal light-theme" [formGroup]="newPublicationForm">
+  <h2 class="mat-h2 primary">Please, enter below a title for your publication:</h2>
   <mat-form-field class="flex flex-direction-column">
     <mat-label>Publication title</mat-label>
-    <input required matInput [(ngModel)]="newTitle" (keydown.enter)="save()">
+    <input matInput formControlName="title" (keydown.enter)="save()">
   </mat-form-field>
   <br>
-  <button mat-raised-button class="dialogButton" color="primary" (click)="save()" [disabled]="!newTitle">
+  <button mat-raised-button class="dialogButton" color="primary" (click)="save()" [disabled]="!newPublicationForm.valid">
     Create
   </button>
 </ngx-smart-modal>

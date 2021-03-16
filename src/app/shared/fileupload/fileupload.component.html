@@ -1,14 +1,16 @@
 <div>
   <div class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
-    <button mat-button (click)="advancedfileinput.click()"
+    <button mat-raised-button (click)="advancedfileinput.click()"
             [ngClass]="{'ui-state-focus': focus, 'ui-state-disabled':disabled || isChooseDisabled()}">
-      <input hidden #advancedfileinput type="file" (change)="onFileSelect($event)" [multiple]="multiple" [accept]="accept"
+      <input hidden #advancedfileinput type="file" (change)="onFileSelect($event)"
+             [multiple]="multiple"
+             [accept]="accept"
              [disabled]="disabled || isChooseDisabled()"
              (focus)="onFocus()" (blur)="onBlur()" [attr.title]="''">{{chooseLabel}}</button>
 
-    <button *ngIf="!auto&&showUploadButton" mat-button (click)="upload()"
+    <button *ngIf="!auto&&showUploadButton" mat-raised-button (click)="upload()"
             [disabled]="!hasFiles() || isFileLimitExceeded()">{{uploadLabel}}</button>
-    <button *ngIf="!auto&&showCancelButton" mat-button (click)="clear()"
+    <button *ngIf="!auto&&showCancelButton" mat-raised-button (click)="onClear()"
             [disabled]="!hasFiles() || uploading">{{cancelLabel}}</button>
   </div>
   <div #content [ngClass]="{'ui-fileupload-content ui-widget-content ui-corner-bottom':true}"
@@ -17,12 +19,12 @@
     <div class="ui-fileupload-files" *ngIf="hasFiles()">
       <div class="ui-fileupload-row" *ngFor="let file of files; let i = index;">
         <div>
-          <img [src]="file.objectURL" *ngIf="isImage(file)" [width]="previewWidth"/>
+          <img [src]="$any(file).objectURL" *ngIf="isImage(file)" [width]="previewWidth"/>
         </div>
         <div>{{file.name}}</div>
         <div>{{formatSize(file.size)}}</div>
         <div>
-          <button mat-icon-button (click)="remove($event,i)" [disabled]="uploading">
+          <button mat-icon-button (click)="onRemove($event,i)" [disabled]="uploading">
             <mat-icon>delete</mat-icon>
           </button>
         </div>

@@ -6,20 +6,7 @@
 }
 
 mat-card {
-  margin: 0.5em;
   text-align: left;
-}
-
-mat-card-actions {
-  text-align: center;
-}
-
-mat-card-content {
-  margin: 0.5em;
-}
-
-button {
-  margin: 10px;
 }
 
 .mat-chip.mat-standard-chip.mat-chip-disabled {
@@ -32,10 +19,4 @@ button {
 
 fa-icon {
   color: white;
-}
-
-.social {
-  text-align: center;
-  padding-top: 15px;
-  min-width: 200px;
 }

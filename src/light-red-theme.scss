@@ -1,0 +1,9 @@
+@import '~@angular/material/theming';
+
+$light-red-theme-primary: mat-palette($mat-purple);
+$light-red-theme-accent: mat-palette($mat-amber);
+$light-red-theme-warn: mat-palette($mat-deep-orange);
+$light-red-theme: mat-light-theme($light-red-theme-primary, $light-red-theme-accent, $light-red-theme-warn);
+$primary: $light-red-theme-primary;
+$accent: $light-red-theme-accent;
+$warn: $light-red-theme-warn;

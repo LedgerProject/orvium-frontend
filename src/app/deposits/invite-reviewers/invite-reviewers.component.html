@@ -1,0 +1,23 @@
+<app-access-denied *ngIf="!canInviteReviewers"></app-access-denied>
+
+<div *ngIf="canInviteReviewers">
+  <div>
+    <h1 class="mat-h1 primary">Invite Reviewers</h1>
+    <h2 class="mat-h2">Publication title: <a [routerLink]="['..','view']">{{ deposit.title }}</a></h2>
+  </div>
+  <div class="section" [formGroup]="inviteForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput id="emailInput" placeholder="Email" formControlName="email" required>
+    </mat-form-field>
+  </div>
+  <div>
+    <button mat-raised-button color="primary"
+            [disabled]="!inviteForm.valid"
+            (click)="createInvitation()"
+            [routerLink]="['..','reviewers']">
+      <mat-icon>send</mat-icon>
+      Send invitation
+    </button>
+  </div>
+</div>

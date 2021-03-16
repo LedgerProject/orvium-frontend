@@ -11,6 +11,12 @@ declare const require: {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+console.error = (message?: any, ...optionalParams: any[]): void => {
+  const params = optionalParams ? `\nParams: ${optionalParams}` : '';
+  fail(`Test contained console error:\n${message}${params}`);
+};
+
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(
   BrowserDynamicTestingModule,

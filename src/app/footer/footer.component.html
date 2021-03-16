@@ -1,2 +1,11 @@
 <footer>
+  <mat-toolbar *ngIf="showBanner" class="mat-elevation-z6 cookie-consent">
+    <span class="mat-small">
+      This website uses cookies to ensure you get the best experience on our website.
+          <a href="https://help.orvium.io/privacy/" target="_blank">Learn more</a>
+    </span>
+    <div>
+      <button mat-flat-button color="primary" (click)="dismissBanner()">Accept</button>
+    </div>
+  </mat-toolbar>
 </footer>

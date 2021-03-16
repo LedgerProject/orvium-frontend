@@ -1,0 +1,8 @@
+<div class="container">
+  <h2 class="mat-h2 primary">Versions</h2>
+  <ul *ngFor="let deposit of deposits">
+    <li>
+      <a class="mat-body" [routerLink]="['/deposits', deposit._id, 'view']">Version {{deposit.version}}</a>
+    </li>
+  </ul>
+</div>

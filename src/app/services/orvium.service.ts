@@ -1,232 +1,170 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {
   AppNotification,
+  Citation,
+  Community,
   Deposit,
-  DEPOSIT_STATUS,
   DepositsQuery,
+  Domain,
   Institution,
-  Network,
+  Invite,
   PeerReview,
-  Profile,
-  REVIEW_STATUS
+  Profile
 } from '../model/orvium';
-import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
+import { tap } from 'rxjs/operators';
 
 
 @Injectable({ providedIn: 'root' })
 export class OrviumService {
 
-  networks: Network[] = [];
-  deposits: Deposit[] = [];
-  notifications: AppNotification[] = [];
-  host: string;
+  public profile = new BehaviorSubject<Profile | undefined>(undefined);
 
-  public profile = new BehaviorSubject<Profile>(null);
-
-  constructor(private router: Router) {
-    this.deposits = [
-      {
-        _id: { $oid: 'deposit1' },
-        owner: 'myuserid',
-        title: 'Big data analytics as a service infrastructure: challenges, desired properties and solutions',
-        abstract: 'CERN’s accelerator complex generates a very large amount of data. A large volumen of heterogeneous data is constantly generated from control equipment and monitoring agents. These data must be stored and analysed. Over the decades, CERN’s researching and engineering teams have applied different approaches, techniques and technologies for this purpose. This situation has minimised the necessary collaboration and, more relevantly, the cross data analytics over different domains. These two factors are essential to unlock hidden insights and correlations between the underlying processes, which enable better and more efficient daily-based accelerator operations and more informed decisions. The proposed Big Data Analytics as a Service Infrastructure aims to: (1) integrate the existing developments; (2) centralise and standardise the complex data analytics needs for CERN’s research and engineering community; (3) deliver real-time, batch data analytics and information discovery capabilities; and (4) provide transparent access and Extract, Transform and Load (ETL), mechanisms to the various and mission-critical existing data repositories. This paper presents the desired objectives and properties resulting from the analysis of CERN’s data analytics requirements; the main challenges: technological, collaborative and educational and; potential solutions.',
-        gravatar: '2e7854c294602808422223306eff0e33',
-        peerReviews: []
-      }
-    ];
+  constructor(private http: HttpClient) {
   }
 
   // *************************
   // Profile
   // *************************
 
-  updateProfile(profile: Profile): Observable<Profile> {
-    let tempProfile = this.profile.getValue();
-    tempProfile = {
-      ...tempProfile,
-      ...profile
-    };
-    console.log(tempProfile);
-    this.profile.next(tempProfile);
-    return of(tempProfile);
+  updateProfile(profile: Partial<Profile>): Observable<Profile> {
+    return this.http.patch<Profile>(`${environment.apiEndpoint}/users/profile`, profile).pipe(
+      tap(profileUpdated => {
+        this.profile.next(profileUpdated);
+      })
+    );
   }
 
-  getProfile(): Observable<Profile> {
+  sendConfirmationEmail(): Observable<unknown> {
+    return this.http.post(`${environment.apiEndpoint}/users/sendConfirmationEmail`, {});
+  }
+
+  isUserLoggedIn(): boolean {
+    if (this.profile) {
+      return true;
+    }
+    return false;
+  }
+
+  getProfile(): Observable<Profile | undefined> {
     return this.profile.asObservable();
   }
 
-  getProfileFromApi(): Observable<Profile> {
-    const profile: Profile = {
-      userId: 'myuserid',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'example@orvium.io',
-      isReviewer: true,
-      isOnboarded: true,
-      emailConfirmed: true,
-      userType: 'student',
-      starredDeposits: [],
-      gravatar: '2e7854c294602808422223306eff0e33'
-    };
-
-    this.profile.next(profile);
-
-    return of(profile);
+  getProfileFromApi(inviteToken?: string): Observable<Profile> {
+    let params = new HttpParams();
+    return this.http.get<Profile>(`${environment.apiEndpoint}/users/profile`, { params }).pipe(
+      tap(profile => {
+        console.log('Profile from API returned');
+        this.profile.next(profile);
+      })
+    );
   }
 
-  initNetworks() {
-    this.getAllNetworkConfigs().subscribe(networks => this.networks = networks);
+  confirmEmail(token: string): Observable<{message: string}> {
+    const params = new HttpParams().set('token', encodeURIComponent(token));
+    return this.http.get<{message: string}>(`${environment.apiEndpoint}/users/confirmEmail`, { params });
   }
+
+  sendInvite(emails: string[]): Observable<unknown> {
+    return this.http.post(`${environment.apiEndpoint}/users/sendInvitations`, { emails });
+  }
+
+
+  // *************************
+  // Deposits
+  // *************************
 
   getDeposit(id: string): Observable<Deposit> {
-    let deposit = this.deposits.find(deposit => deposit._id.$oid == id);
-    return of(deposit);
+    return this.http.get<Deposit>(`${environment.apiEndpoint}/deposits/${id}`);
   }
 
-  getDeposits(query = '', page = 1, size = 10,
-              drafts = 'no', starred = 'no', inReview = 'no'): Observable<DepositsQuery> {
+  getDepositVersions(id: string): Observable<Deposit[]> {
+    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/${id}/versions`);
+  }
 
-    let filteredDeposits = this.deposits;
+  getDeposits(query = '', page = 1): Observable<DepositsQuery> {
+    let params = new HttpParams()
+      .set('page', page.toString());
     if (query) {
-      filteredDeposits = this.deposits.filter(deposit => JSON.stringify(deposit).includes(query));
+      params = params.set('query', query);
     }
-
-
-    const depositsQuery: DepositsQuery = {
-      deposits: filteredDeposits,
-      count: filteredDeposits.length
-    };
-    return of(depositsQuery);
+    return this.http.get<DepositsQuery>(`${environment.apiEndpoint}/deposits`, { params });
   }
 
-  createDeposit(payload: Deposit): Observable<Deposit> {
-    payload = {
-      ...payload,
-      _id: { $oid: Math.random().toString(12) },
-      owner: this.profile.getValue().userId,
-      status: DEPOSIT_STATUS.draft,
-      peerReviews: [],
-      gravatar: this.profile.getValue().gravatar,
-      disciplines: [],
-      keywords: [],
-      authors: []
-    };
-    this.deposits.push(payload);
-    return of(payload);
+  getMyDeposits(): Observable<Deposit[]> {
+    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/myDeposits`);
+  }
+
+  getPreprintDeposits(): Observable<Deposit[]> {
+    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/preprintDeposits`);
+  }
+
+  getPendingApprovalDeposits(): Observable<Deposit[]> {
+    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/pendingApprovalDeposits`);
   }
 
 
-  updateDeposit(deposit: Deposit) {
-    return of(deposit);
+  getMyStarredDeposits(): Observable<Deposit[]> {
+    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/myStarredDeposits`);
   }
 
-  deleteDeposit(id: string) {
-    this.deposits.forEach((item, index) => {
-      if (item._id.$oid === id) {
-        this.deposits.splice(index, 1);
-      }
-    });
-    return of(this.deposits);
+  createDeposit(payload: Partial<Deposit>): Observable<Deposit> {
+    return this.http.post<Deposit>(`${environment.apiEndpoint}/deposits`, payload);
   }
 
-
-  getPeerReviews(id: string): Observable<PeerReview[]> {
-    let deposit = this.deposits.find(deposit => deposit._id.$oid == id);
-    return of(deposit.peerReviews);
+  createDepositRevision(id: string): Observable<Deposit> {
+    return this.http.post<Deposit>(`${environment.apiEndpoint}/deposits/${id}/createRevision`, {});
   }
+
+  updateDeposit(id: string, payload: Partial<Deposit>): Observable<Deposit> {
+    return this.http.patch<Deposit>(`${environment.apiEndpoint}/deposits/${id}`, payload);
+  }
+
+  deleteDeposit(id: string): Observable<string> {
+    return this.http.delete<string>(`${environment.apiEndpoint}/deposits/${id}`);
+  }
+
+  getCitation(id: string): Observable<Citation> {
+    return this.http.get<Citation>(`${environment.apiEndpoint}/deposits/${id}/citation`);
+  }
+
 
   // **************************
   // Deposit files
   // **************************
 
-  deleteDepositFiles(depositId: string, fileId: string) {
-    let deposit = this.deposits.find(deposit => deposit._id.$oid == depositId);
-
-    return of(deposit);
+  deleteDepositFiles(depositId: string, fileId: string): Observable<Deposit> {
+    return this.http.delete<Deposit>(`${environment.apiEndpoint}/deposits/${depositId}/files/${fileId}`);
   }
 
-  getAllNetworkConfigs(): Observable<Network[]> {
-    return of([]);
-  }
-
-  getNetworkByName(networkName: string): Network {
-    for (const network of this.networks) {
-      if (network.name === networkName) {
-        return network;
-      }
-    }
-  }
-
-  getNetworkConfig(networkId: number): Network {
-    for (const network of this.networks) {
-      if (network.networkId === networkId) {
-        return network;
-      }
-    }
-  }
-
-  toggleDepositStar(id: string): Observable<Profile> {
-    const profile = this.profile.getValue();
-    if (profile.starredDeposits.includes(id)) {
-      let index = profile.starredDeposits.indexOf(id);
-      profile.starredDeposits.splice(index, 1);
-    } else {
-      profile.starredDeposits.push(id);
-    }
-    this.profile.next(profile);
-
-    return of(profile);
-  }
 
   // **************************
   // Peer Reviews
   // **************************
-  extractReviews() {
-    let reviews: PeerReview[] = [];
-    for (const deposit of this.deposits) {
-      reviews = reviews.concat(deposit.peerReviews);
-    }
-
-    return reviews;
+  getMyReviews(): Observable<PeerReview[]> {
+    return this.http.get<PeerReview[]>(`${environment.apiEndpoint}/reviews/myReviews`);
   }
 
-  getReviews(): Observable<PeerReview[]> {
-    return of(this.extractReviews());
+  getPeerReviews(id: string): Observable<PeerReview[]> {
+    return this.http.get<PeerReview[]>(`${environment.apiEndpoint}/reviews?depositId=${id}`);
   }
 
-  getPeerReview(depositId: string, reviewId: string): Observable<PeerReview> {
-    let deposit = this.deposits.find(deposit => deposit._id.$oid == depositId);
-    let review = deposit.peerReviews.find(review => review._id.$oid == reviewId);
-    return of(review);
+  getPeerReview(reviewId: string): Observable<PeerReview> {
+    return this.http.get<PeerReview>(`${environment.apiEndpoint}/reviews/${reviewId}`);
   }
 
-  createReview(depositId: string, payload: PeerReview): Observable<PeerReview> {
-    let deposit = this.deposits.find(deposit => deposit._id.$oid == depositId);
-    payload = {
-      ...payload,
-      _id: { $oid: Math.random().toString(12) },
-      owner: this.profile.getValue().userId,
-      deposit: { $oid: deposit._id.$oid },
-      status: REVIEW_STATUS.draft
-    };
-    deposit.peerReviews.push(payload);
-    return of(payload);
+  createReview(payload: Partial<PeerReview>): Observable<PeerReview> {
+    return this.http.post<PeerReview>(`${environment.apiEndpoint}/reviews`, payload);
   }
 
-  updatePeerReview(depositId: string, peerReview: PeerReview) {
-    let deposit = this.deposits.find(deposit => deposit._id.$oid == depositId);
-    let review = deposit.peerReviews.find(review => review._id.$oid == peerReview._id.$oid);
-    review = peerReview;
-    return of(review);
+  updatePeerReview(id: string, peerReview: Partial<PeerReview>): Observable<PeerReview> {
+    return this.http.patch<PeerReview>(`${environment.apiEndpoint}/reviews/${id}`, peerReview);
   }
 
-  deleteReview(depositId: string, reviewId: string) {
-    let deposit = this.deposits.find(deposit => deposit._id.$oid == depositId);
-    let index = deposit.peerReviews.findIndex(review => review._id.$oid == reviewId);
-    deposit.peerReviews.splice(index, 1);
-
-    return of(deposit);
+  deleteReview(reviewId: string): Observable<string> {
+    return this.http.delete<string>(`${environment.apiEndpoint}/reviews/${reviewId}`);
   }
 
 
@@ -234,35 +172,88 @@ export class OrviumService {
   // Institutions
   // *************************
 
+  getInstitutions(name: string): Observable<Institution[]> {
+    if (name.length > 2) {
+      const params = new HttpParams().set('name', name);
+      return this.http.get<Institution[]>(`${environment.apiEndpoint}/institutions`, { params });
+    } else {
+      return new Observable<Institution[]>();
+    }
+  }
+
   getInstitutionByDomain(domain: string): Observable<Institution> {
-    const institution: Institution = {
-      domain: domain,
-      city: 'Vitoria',
-      country: 'Spain',
-      name: 'Orvium',
-      synonym: 'Orvium'
-    };
-    return of(institution);
+    const params = new HttpParams().set('domain', domain);
+    return this.http.get<Institution>(`${environment.apiEndpoint}/institutions`, { params });
   }
 
   // *************************
-  // Notifications
+  // Domains
   // *************************
-  getNotifications(): Observable<AppNotification[]> {
-    return of(this.notifications);
+
+  getDomains(): Observable<Domain[]> {
+    return this.http.get<Domain[]>(`${environment.apiEndpoint}/domains`);
   }
 
-  readNotification(notificationId: string) {
-    let notification = this.notifications.find(notification => notification._id.$oid === notificationId);
-    return of(notification);
+  getDomain(domain: string): Observable<Domain> {
+    return this.http.get<Domain>(`${environment.apiEndpoint}/domains/${domain}`);
+  }
+
+  // **************************
+  // Community
+  // **************************
+
+  getCommunities(): Observable<Community[]> {
+    return this.http.get<Community[]>(`${environment.apiEndpoint}/communities`);
+  }
+
+  getMyCommunities(): Observable<Community[]> {
+    return this.http.get<Community[]>(`${environment.apiEndpoint}/users/myCommunities`);
+  }
+
+  getCommunity(communityId: string): Observable<Community> {
+    return this.http.get<Community>(`${environment.apiEndpoint}/communities/${communityId}`);
+  }
+
+  joinCommunity(communityId: string): Observable<Community> {
+    return this.http.post<Community>(`${environment.apiEndpoint}/communities/${communityId}/join`, null);
+  }
+
+  getCommunityDeposits(communityId: string): Observable<Deposit[]> {
+    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/communities/${communityId}/deposits`);
+  }
+
+  getModeratorDeposits(communityId: string): Observable<Deposit[]> {
+    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/communities/${communityId}/moderate/deposits`);
+  }
+
+  // *************************
+  // Invitations
+  // *************************
+
+  createInvitation(payload: Partial<Invite>): Observable<Invite> {
+    return this.http.post<Invite>(`${environment.apiEndpoint}/invites`, payload);
+  }
+
+  getDepositInvitations(depositId: string): Observable<Invite[]> {
+    const params = new HttpParams().set('depositId', depositId);
+    return this.http.get<Invite[]>(`${environment.apiEndpoint}/invites`, { params });
+  }
+
+  getMyInvitations(): Observable<Invite[]> {
+    return this.http.get<Invite[]>(`${environment.apiEndpoint}/invites/myInvites`);
+  }
+
+  updateInvite(id: string, payload: Partial<Invite>): Observable<Invite> {
+    return this.http.patch<Invite>(`${environment.apiEndpoint}/invites/${id}`, payload);
   }
 
   login() {
-    this.getProfileFromApi();
+    this.getProfileFromApi().subscribe();
   }
 
   logout() {
-    this.profile.next(null);
-    this.router.navigate(['']);
+    this.profile.next(undefined);
+    console.log('User logged out');
+    window.location.reload();
   }
 }

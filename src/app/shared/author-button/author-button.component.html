@@ -1,0 +1,35 @@
+<button mat-button
+        *ngIf="!showMenu">
+  {{author.name}} {{author.surname}}
+</button>
+<button mat-button
+        *ngIf="showMenu"
+        [matMenuTriggerFor]="authorMenu">
+  {{author.name}} {{author.surname}}
+  <a *ngIf="author.orcid" href="{{author.orcid}}" target="_blank">
+    <fa-icon [icon]="['fab', 'orcid']" size="lg" [style]="{color: '#A6CE39'}"></fa-icon>
+  </a>
+</button>
+<mat-menu #authorMenu="matMenu" [overlapTrigger]="false" xPosition="before">
+  <a *ngIf="author.credit && author.credit.length>0" class="credit">
+    <a mat-icon-button
+       matTooltip="CRediT roles"
+       href="https://casrai.org/credit/"
+       target="_blank">
+      <mat-icon>person</mat-icon>
+    </a>
+    {{author.credit | separator:','}}
+  </a>
+  <a *ngIf="author.orcid">
+    <a mat-icon-button href="{{author.orcid}}" target="_blank">
+      <fa-icon [icon]="['fab', 'orcid']" size="lg" [style]="{color: '#A6CE39'}"></fa-icon>
+    </a>
+    {{author.orcid | slice:-19}}
+  </a>
+  <a *ngIf="author.email">
+    <a mat-icon-button [href]="'mailto:' + author.email">
+      <mat-icon>email</mat-icon>
+    </a>
+    {{author.email}}
+  </a>
+</mat-menu>

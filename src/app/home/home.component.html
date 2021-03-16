@@ -1,5 +1,47 @@
-<div class="recent">
-  <app-deposits-list [pagination]="false"></app-deposits-list>
-  <a mat-raised-button color="primary" aria-label="Show more publications"
-     [routerLink]="['search']" [queryParams]="{query: '', page: 1, size: 10}">More Publications</a>
+<div>
+  <div class="hero">
+    <h1 class="mat-display-3 primary"><strong>Discover</strong> about <br> what matters to you</h1>
+    <mat-chip-list class="popular-disciplines">
+      <mat-chip class="chip-aquamarine">Data Science</mat-chip>
+      <mat-chip class="chip-yellow">Artificial Intelligence</mat-chip>
+      <mat-chip class="chip-pink">Bioengineering</mat-chip>
+      <mat-chip class="chip-aquamarine">Cloud Computing</mat-chip>
+      <mat-chip class="chip-yellow">Blockchain</mat-chip>
+      <mat-chip class="chip-pink">COVID-19</mat-chip>
+      <mat-chip class="chip-blue">Pollution</mat-chip>
+      <mat-chip class="chip-pink">Chemistry</mat-chip>
+      <mat-chip class="chip-yellow">Statistics</mat-chip>
+      <mat-chip class="chip-blue">Medicine</mat-chip>
+      <mat-chip class="chip-aquamarine">Bioinformatics</mat-chip>
+      <mat-chip class="chip-pink">Archaeology</mat-chip>
+    </mat-chip-list>
+    <h1 class="mat-subheading-1 grey">POPULAR ON THE PLATFORM</h1>
+  </div>
+  <div class="container">
+    <div class="recent">
+      <h1 class="mat-h1 primary text-align-center">Recent Publications</h1>
+      <app-deposits-list
+        [deposits]="deposits">
+      </app-deposits-list>
+      <div class="text-align-center">
+        <a mat-raised-button color="primary" aria-label="Show more publications"
+           [routerLink]="['search']" [queryParams]="{query: '', page: 1, size: 10}">More Publications</a>
+      </div>
+    </div>
+    <div class="side">
+      <mat-card class="orv-side-card">
+        <mat-card-header>
+          <mat-card-title class="primary">Invite your colleages</mat-card-title>
+          <mat-card-subtitle>
+            Orvium is an open platform in which everyone is invited to collaborate.
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-actions>
+          <div class="text-align-center">
+            <button mat-stroked-button color="primary" (click)="openInviteDialog()">Invite to Orvium</button>
+          </div>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
 </div>

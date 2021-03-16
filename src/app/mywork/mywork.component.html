@@ -1,3 +1,5 @@
-<div class="container">
-  <app-deposits-list></app-deposits-list>
+<app-empty-state-publications *ngIf="initialized && deposits.length == 0"></app-empty-state-publications>
+<div class="container" *ngIf="deposits.length > 0">
+  <h1 class="mat-h1 primary text-align-center">My publications</h1>
+  <app-deposits-list [deposits]="deposits"></app-deposits-list>
 </div>

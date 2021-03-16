@@ -1,8 +1,9 @@
 .container {
-  min-height: 100%;
+  height: 100vh;
+  width: 100vw;
   display: grid;
+  grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
-  grid-template-columns: 100%;
 }
 
 .toolbar {
@@ -14,14 +15,19 @@
   place-self: end stretch;
 }
 
-:host {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
+.sidenav {
+  overflow: hidden;
 }
 
-.sidenav {
-  position: relative;
+.content {
+  padding: 3em;
+  overflow: scroll;
+  box-sizing: border-box;
+}
+
+// Mobile
+@media (max-width: 768px) {
+  .content {
+    padding: 1em;
+  }
 }

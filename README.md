@@ -2,16 +2,9 @@
 
 This is the frontend application for Orvium project.
 
-This is a first approach to release the Orvium components in open source so they can be reusable by other teams and projects.
-We should consider this as a base draft and some areas have been mocked for the first deliverable.
-This means that the data changes are lost if you reload the application but you can easily change this behaviour in the code (using localstorage for example).
+This version corresponds to the LEDGER deliverable Prototype #2. In this version, the application uses the Orvium backend to interact and persist data.
 
-Thanks to this deliverable we have identified multiple areas where we need to adopt a more flexible and modular approach. We will work on making modular interfaces of the following areas:
-- User Login
-- File upload (could be released as independent component)
-- Data services and API connection (right now it is mocked)
-- Feedback component (could be released as independent component)
-
+If you want to use the application without the backend dependency, it is always possible to reimplement the application services (files `.service.ts`) and mockup data interaction.
 
 ## Install dependencies
 
@@ -35,6 +28,9 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
+## Test
+
+Run `ng test` to run tests.
 
 ## Further help
 

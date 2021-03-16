@@ -1,0 +1,43 @@
+<div>
+  <div class="paper" *ngIf="deposits">
+    <mat-card *ngFor="let deposit of deposits">
+      <mat-chip-list>
+        <mat-chip class="chip-{{deposit.status.replace(' ', '-')}}">{{deposit.status | titlecase}}</mat-chip>
+        <mat-chip *ngIf="deposit.community" class="chip-blue">{{deposit.community.name}}</mat-chip>
+        <mat-chip class="chip-blue">{{deposit.publicationType | titlecase}}</mat-chip>
+        <mat-chip class="chip-blue">{{deposit.accessRight | uppercase}}</mat-chip>
+        <mat-chip class="chip-blue"
+                  [matBadgeHidden]="deposit.peerReviews.length === 0"
+                  matBadge="{{ deposit.peerReviews.length }}"
+                  matBadgePosition="after"
+                  matBadgeColor="primary">
+          {{deposit.reviewType | titlecase}}
+        </mat-chip>
+      </mat-chip-list>
+      <mat-card-header>
+        <img mat-card-avatar ngxGravatar
+             [md5Hash]="deposit.gravatar || '2e7854c294602808422223306eff0e33'"/>
+        <mat-card-title>
+          <a [routerLink]="['/deposits', deposit._id, 'view']">
+            {{ deposit.title }}
+          </a>
+        </mat-card-title>
+        <mat-card-subtitle id="hiddenAuthors"
+                           *ngIf="deposit.status==DEPOSIT_STATUS.inReview && deposit.authors.length==0">Hidden authors
+        </mat-card-subtitle>
+
+      </mat-card-header>
+      <mat-card-subtitle id="authors" class="authors">
+        {{deposit.publicationDate | date:'dd MMMM yyyy'}} | By
+        <app-author-button *ngFor="let author of deposit.authors"
+                           [author]="author">
+        </app-author-button>
+      </mat-card-subtitle>
+      <mat-card-content>
+        <app-show-more *ngIf="deposit.abstract"
+                       [text]="deposit.abstract"
+                       [id]="deposit._id"></app-show-more>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

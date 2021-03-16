@@ -1,0 +1,13 @@
+::ng-deep .mat-menu-content {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+
+  > a {
+    width: 100%;
+  }
+}
+
+.credit {
+  white-space: nowrap;
+}

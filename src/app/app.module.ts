@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
 // Angular imports
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -28,73 +28,65 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTabsModule } from '@angular/material/tabs';
 // Application imports
 import { AppComponent } from './app.component';
-import { ShowMoreComponent } from './show-more/show-more.component';
 import { HomeComponent } from './home/home.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-import { DepositDetailsComponent } from './deposits/deposit-details/deposit-details.component';
-import { DepositViewComponent } from './deposits/deposit-view/deposit-view.component';
-import { DepositsListComponent } from './deposits/deposits-list/deposits-list.component';
-import { ProfileComponent } from './profile/profile.component';
 import { RoutingModule } from './routing.module';
-import { DatePipe } from '@angular/common';
-import { ReviewsCreateComponent } from './review/reviews-create/reviews-create.component';
+import { CommonModule } from '@angular/common';
 import { FooterComponent } from './footer/footer.component';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { SearchComponent } from './search/search.component';
 import { MyworkComponent } from './mywork/mywork.component';
-import { PagingComponent } from './shared/paging/paging.component';
 import { ENTER } from '@angular/cdk/keycodes';
 import { LoggerModule } from 'ngx-logger';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgxSmartModalModule } from 'ngx-smart-modal';
 
 import { environment } from 'src/environments/environment';
-import { FirstLoginComponent } from './first-login/first-login.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { StarredDepositsComponent } from './starred-deposits/starred-deposits.component';
 
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { SideNavComponent } from './side-nav/side-nav.component';
-import { ShareModule } from '@ngx-share/core';
+import { ShareModule } from 'ngx-sharebuttons';
 import { InviteComponent } from './invite/invite.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { GravatarModule } from 'ngx-gravatar';
-import { MyreviewsComponent } from './review/myreviews/myreviews.component';
-import { ReviewViewComponent } from './review/review-view/review-view.component';
-import { FileuploadComponent } from './shared/fileupload/fileupload.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { DisciplinesService } from './services/disciplines.service';
+import { SharedModule } from './shared/shared.module';
 import { NgCircleProgressModule } from 'ng-circle-progress';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserModule } from '@angular/platform-browser';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
+
+export function initApp(disciplinesService: DisciplinesService): () => Promise<void> {
+  return (): Promise<void> => {
+    return disciplinesService.init();
+  };
+}
 
 @NgModule({
   declarations: [
     AppComponent,
-    ShowMoreComponent,
     HomeComponent,
     PageNotFoundComponent,
-    DepositDetailsComponent,
-    DepositsListComponent,
-    DepositViewComponent,
-    ProfileComponent,
-    ReviewsCreateComponent,
     FooterComponent,
     ToolbarComponent,
     SearchComponent,
     MyworkComponent,
-    PagingComponent,
-    FirstLoginComponent,
     StarredDepositsComponent,
+    DashboardComponent,
     SideNavComponent,
-    InviteComponent,
-    MyreviewsComponent,
-    ReviewViewComponent,
-    FileuploadComponent
+    InviteComponent
   ],
   imports: [
+    CommonModule,
     RoutingModule,
+    SharedModule,
     FormsModule,
     MatCardModule,
     MatExpansionModule,
@@ -124,8 +116,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
       disableConsoleLogging: false,
       enableSourceMaps: true
     }),
-    NgCircleProgressModule.forRoot({}),
-    FontAwesomeModule,
     MatButtonToggleModule,
     MatCheckboxModule,
     MatDividerModule,
@@ -136,11 +126,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ShareModule,
     GravatarModule.forRoot({ fallback: 'identicon' }),
     NgxSmartModalModule.forRoot(),
+    NgCircleProgressModule.forRoot(),
     MatProgressBarModule,
-    BrowserAnimationsModule
+    ClipboardModule,
+    FontAwesomeModule,
+    MatPaginatorModule
   ],
   providers: [
-    DatePipe,
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 3000 } },
     { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: { showDelay: 100 } },
     {
@@ -150,12 +142,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
       }
     },
     { provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false, showError: true } },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initApp,
+      multi: true,
+      deps: [DisciplinesService]
+    },
   ],
-  bootstrap: [AppComponent]
 })
-
 export class AppModule {
   constructor() {
-
   }
 }

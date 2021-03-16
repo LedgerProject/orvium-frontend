@@ -1,0 +1,51 @@
+.chip-pink {
+  background-color: #e8ddff !important;
+  color: #8c54ff !important;
+}
+
+.chip-aquamarine {
+  background-color: #b2ecf2 !important;
+  color: #00c1d4 !important;
+}
+
+.chip-yellow {
+  background-color: #fcf3d2 !important;
+  color: #fead37 !important;
+}
+
+.chip-blue {
+  background-color: #d3e1fc !important;
+  color: #4283fe !important;
+}
+
+.chip-transparent {
+  background-color: transparent !important;
+  color: #2e384d !important;
+}
+
+.chip-red {
+  background-color: rgba(233, 115, 103, 0.2) !important;
+  color: #e97367 !important;
+}
+
+// Publications status chips
+.chip-published {
+  $color: mediumseagreen;
+
+  background-color: lighten($color, 40%) !important;
+  color: $color !important;
+}
+
+.chip-preprint {
+  $color: #fead37;
+
+  background-color: lighten($color, 30%) !important;
+  color: $color !important;
+}
+
+.chip-in-review {
+  $color: #e97367;
+
+  background-color: lighten($color, 30%) !important;
+  color: $color !important;
+}

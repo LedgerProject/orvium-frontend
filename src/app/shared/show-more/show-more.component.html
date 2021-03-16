@@ -1,0 +1,13 @@
+<p class="mat-body" [@openClose]="state" [innerHTML]='displayText'></p>
+<button mat-button
+        class="button-show-more"
+        color="primary"
+        (click)='readMore(true)'
+        *ngIf='(state === "closed") && showButtons'>Show More
+</button>
+<button mat-button
+        class="button-show-more"
+        color="primary"
+        (click)='readMore(false)'
+        *ngIf='(state ==="open") && showButtons'>Show Less
+</button>
