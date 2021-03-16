@@ -1,0 +1,31 @@
+//
+// Global flex classes
+//
+
+.flex {
+  display: flex !important;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-direction-column {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-basis-0 {
+  flex-basis: 0;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+.right {
+  flex: 1 1 auto;
+}

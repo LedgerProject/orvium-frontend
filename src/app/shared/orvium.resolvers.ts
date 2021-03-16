@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { Deposit, DepositsQuery, PeerReview, Profile } from '../model/orvium';
+import { Community, Deposit, DepositsQuery, PeerReview, Profile } from '../model/orvium';
 import { OrviumService } from '../services/orvium.service';
+import { Observable } from 'rxjs';
 
 
 @Injectable()
@@ -9,8 +10,8 @@ export class DepositResolver implements Resolve<Deposit> {
   constructor(private orviumService: OrviumService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot) {
-    return this.orviumService.getDeposit(route.paramMap.get('depositId'));
+  resolve(route: ActivatedRouteSnapshot): Observable<Deposit> {
+    return this.orviumService.getDeposit(route.paramMap.get('depositId') || '');
   }
 }
 
@@ -20,15 +21,11 @@ export class DepositListResolver implements Resolve<DepositsQuery> {
   constructor(private orviumService: OrviumService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot) {
+  resolve(route: ActivatedRouteSnapshot): Observable<DepositsQuery> {
     const query = route.queryParamMap.get('query') || '';
     const page = parseInt(route.queryParamMap.get('page') || '1', 10);
-    const pageSize = parseInt(route.queryParamMap.get('pageSize') || '10', 10);
-    const drafts = route.queryParamMap.get('drafts') || 'no';
-    const starred = route.queryParamMap.get('starred') || 'no';
-    const inReview = route.queryParamMap.get('inReview') || 'no';
 
-    return this.orviumService.getDeposits(query, page, pageSize, drafts, starred, inReview);
+    return this.orviumService.getDeposits(query, page);
   }
 }
 
@@ -38,7 +35,7 @@ export class ProfileResolver implements Resolve<Profile> {
   constructor(private orviumService: OrviumService) {
   }
 
-  resolve() {
+  resolve(): Observable<Profile> {
     return this.orviumService.getProfileFromApi();
   }
 }
@@ -48,8 +45,18 @@ export class PeerReviewResolver implements Resolve<PeerReview> {
   constructor(private orviumService: OrviumService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot) {
-    return this.orviumService.getPeerReview(route.paramMap.get('depositId'), route.paramMap.get('reviewId'));
+  resolve(route: ActivatedRouteSnapshot): Observable<PeerReview> {
+    return this.orviumService.getPeerReview(route.paramMap.get('reviewId') || '');
+  }
+}
+
+@Injectable()
+export class CommunityResolver implements Resolve<Community> {
+  constructor(private orviumService: OrviumService) {
+  }
+
+  resolve(route: ActivatedRouteSnapshot): Observable<Community> {
+    return this.orviumService.getCommunity(route.paramMap.get('communityId') || '');
   }
 }
 

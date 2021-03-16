@@ -1,0 +1,77 @@
+<table mat-table class="table" [dataSource]="reviews">
+  <ng-container matColumnDef="author">
+    <th mat-header-cell *matHeaderCellDef>Reviewer</th>
+    <td mat-cell *matCellDef="let element">
+      <div class="avatar" [ngClass]="{'pointer': element.status==REVIEW_STATUS.published || element.owner == profile?.userId}"
+           [routerLink]="element.status==REVIEW_STATUS.published || element.owner == profile?.userId ? ['/reviews', element._id, 'view'] : undefined">
+        <img mat-card-avatar ngxGravatar [md5Hash]="element.gravatar || '2e7854c294602808422223306eff0e33'"/>
+        <a class="primary">{{element.author}}</a>
+      </div>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="creationDate">
+    <th mat-header-cell *matHeaderCellDef>Created</th>
+    <td mat-cell *matCellDef="let element">{{ element.creationDate | date: 'dd/MM/yyyy' }}</td>
+  </ng-container>
+  <ng-container matColumnDef="publicationDate">
+    <th mat-header-cell *matHeaderCellDef>Published</th>
+    <td mat-cell *matCellDef="let element">{{ element.publicationDate | date: 'dd/MM/yyyy' }}</td>
+  </ng-container>
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef>Status</th>
+    <td mat-cell *matCellDef="let element">
+      <mat-chip *ngIf="element.status==REVIEW_STATUS.draft" color="accent" selected>In progress...</mat-chip>
+      <mat-chip *ngIf="element.status==REVIEW_STATUS.published" color="primary" selected>Available</mat-chip>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="decision">
+    <th mat-header-cell *matHeaderCellDef>Decision</th>
+    <td mat-cell *matCellDef="let element">
+      <div *ngIf="element.status==REVIEW_STATUS.published">
+        <mat-chip *ngIf="element.decision==REVIEW_DECISION.accepted" color="primary" selected matTooltip="Accepted">
+          <mat-icon>play_arrow</mat-icon>
+        </mat-chip>
+        <mat-chip *ngIf="element.decision==REVIEW_DECISION.mayorRevision"
+                  color="warn" selected matTooltip="Mayor revision">
+          <mat-icon>stop</mat-icon>
+        </mat-chip>
+        <mat-chip *ngIf="element.decision==REVIEW_DECISION.minorRevision"
+                  color="accent" selected matTooltip="Minor revision">
+          <mat-icon>pause</mat-icon>
+        </mat-chip>
+      </div>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="file">
+    <th mat-header-cell *matHeaderCellDef>Report</th>
+    <td mat-cell *matCellDef="let element">
+      <a *ngIf="(element.file | json) != '{}'"
+         href="{{ environment.apiEndpoint + '/reviews/' + element._id + '/file' }}"
+         target="blank">
+        <mat-icon>attach_file</mat-icon>
+      </a>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let element">
+      <button *ngIf="element.status==='published'" mat-stroked-button color="primary"
+              [routerLink]="['/reviews', element._id, 'view']">
+        <mat-icon>visibility</mat-icon>
+        View
+      </button>
+      <button *ngIf="profile && element.status==='draft'
+      && this.profile?.userId===element.owner" mat-stroked-button color="primary"
+              [routerLink]="['/reviews', element._id, 'edit']">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
+    </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="basic ? reviewColumnsToDisplayBasic : reviewColumnsToDisplay"></tr>
+  <tr mat-row
+      [ngClass]="{'hand-pointer': element.status == REVIEW_STATUS.published || element.owner == profile?.userId,
+      'disabled-pointer': element.status != REVIEW_STATUS.published && element.owner != profile?.userId}"
+      [routerLink]="element.status==REVIEW_STATUS.published || element.owner == profile?.userId ? ['/reviews', element._id, 'view'] : undefined"
+      *matRowDef="let element; columns: (basic ? reviewColumnsToDisplayBasic : reviewColumnsToDisplay);"></tr>
+</table>

@@ -1,54 +1,23 @@
 .container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 0.5em;
+  display: grid;
+  grid-template-columns: 70% 30%;
+  grid-column-gap: 1em;
 }
 
-mat-card {
-  margin: 0.5em;
-  text-align: left;
-}
-
-mat-card-actions {
-  text-align: center;
-}
-
-mat-card-content {
-  margin: 0.5em;
-}
-
-table {
+.mat-form-field {
   width: 100%;
 }
 
-.avatar {
-  margin: 5px;
-  display: inline-flex;
-  align-items: center;
+.main-section {
+  margin-bottom: 2em;
 }
 
-button {
-  margin: 10px;
-}
+.publication-buttons {
+  text-align: center;
 
-.table-button {
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-
-.space-between {
-  justify-content: space-between;
-}
-
-
-.pointer {
-  cursor: pointer;
-}
-
-p {
-  margin: 0;
+  .mat-raised-button {
+    margin: 10px;
+  }
 }
 
 .mat-chip.mat-standard-chip.mat-chip-disabled {
@@ -65,32 +34,21 @@ p {
   }
 }
 
-.spacer {
-  flex: 1 1 auto;
+.additional-selection {
+  opacity: 0.75;
+  font-size: 0.75em;
 }
 
-mat-tab-group {
-  width: 90%;
+.table-fileicon {
+  flex: 0 0 5%;
 }
 
-fa-icon {
-  color: white;
+.table-filename {
+  flex: 0 0 40%;
 }
 
-mat-horizontal-stepper {
-  background-color: transparent;
-}
-
-::ng-deep .mat-horizontal-stepper-header {
-  pointer-events: none !important; // disable stepper navigation
-}
-
-.social {
-  text-align: center;
-  padding-top: 15px;
-  min-width: 200px;
-}
-
-.widerField {
-  width: 49%;
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
 }

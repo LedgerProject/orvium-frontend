@@ -1,56 +1,73 @@
-<mat-sidenav-container class="sidenav-container backgroundColor">
-  <mat-sidenav #sidenav [mode]="mobileQuery.matches ? 'over' : 'side'" [fixedInViewport]="mobileQuery.matches" fixedTopGap="56">
-    <mat-nav-list *ngIf="profile">
-      <section>
-        <button matSubheader mat-menu-item routerLinkActive="active-link">
-          <mat-icon>speed</mat-icon>
-          <span>Dashboard</span>
-          <span class="badge badge-success">Soon</span>
-        </button>
-        <button matSubheader mat-menu-item routerLinkActive="active-link" class="sidenav-mypublications" (click)="closeSidenav()"
-                [routerLink]="['publications']" [queryParams]="{ query: '', page: 1, size: 10, drafts: 'yes' }">
-          <mat-icon>file_copy</mat-icon>
-          Publications
-        </button>
-        <button matSubheader mat-menu-item routerLinkActive="active-link" (click)="closeSidenav()" [routerLink]="['starred']">
-          <mat-icon>star_border</mat-icon>
-          Starred publications
-        </button>
-        <button *ngIf="!profile?.isReviewer" (click)="isReviewer()" matSubheader mat-menu-item class="sidenav-reviews">
-          <mat-icon>thumbs_up_down</mat-icon>
-          Reviews
-        </button>
-        <mat-expansion-panel [ngClass]="{'active-link' : router.url.startsWith('/reviews') || router.url.startsWith('/myreviews')}"
-                             *ngIf="profile?.isReviewer"
-                             [class.mat-elevation-z0]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-description>
-              <mat-icon>thumbs_up_down</mat-icon>
-              Reviews
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-          <mat-nav-list dense>
-            <button matSubheader mat-menu-item (click)="closeSidenav()" [routerLink]="['reviews']"
-                    [queryParams]="{ query: '', page: 1, size: 10, inReview: 'yes' }" routerLinkActive="active-sub-link">
-              Papers to Review
-            </button>
-            <button matSubheader mat-menu-item (click)="closeSidenav()" [routerLink]="['myreviews']" routerLinkActive="active-sub-link">
-              My Reviews
-            </button>
-          </mat-nav-list>
-        </mat-expansion-panel>
-        <mat-divider></mat-divider>
-        <button matSubheader mat-menu-item routerLinkActive="active-link" (click)="closeSidenav()">
-          <mat-icon>settings</mat-icon>
-          Configuration
-          <span class="badge badge-success">Soon</span>
-        </button>
-      </section>
-    </mat-nav-list>
+<mat-sidenav-container class="backgroundColor">
+  <mat-sidenav
+    #sidenav [mode]="smallScreen ? 'over' : 'side'"
+    [fixedInViewport]="smallScreen"
+    fixedTopGap="56">
+    <div class="left-sidenav" *ngIf="profile">
+      <mat-nav-list>
+        <section>
+          <button matSubheader mat-menu-item [routerLink]="['dashboard']" routerLinkActive="active-link">
+            <mat-icon>speed</mat-icon>
+            <span>Dashboard</span>
+            <span class="badge badge-success">Soon</span>
+          </button>
+          <button matSubheader mat-menu-item routerLinkActive="active-link" class="sidenav-mypublications" (click)="closeSidenav()"
+                  [routerLink]="['publications']">
+            <mat-icon>file_copy</mat-icon>
+            My Publications
+          </button>
+          <button matSubheader mat-menu-item routerLinkActive="active-link" (click)="closeSidenav()" [routerLink]="['starred']">
+            <mat-icon>star_border</mat-icon>
+            Starred publications
+          </button>
+          <button *ngIf="!profile?.isReviewer" (click)="isReviewer()" matSubheader mat-menu-item class="sidenav-reviews">
+            <mat-icon>thumbs_up_down</mat-icon>
+            Reviews
+          </button>
+          <mat-expansion-panel [ngClass]="{'active-link' : router.url.startsWith('/reviews')}"
+                               *ngIf="profile?.isReviewer"
+                               [class.mat-elevation-z0]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-description>
+                <mat-icon>thumbs_up_down</mat-icon>
+                Reviews
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <mat-nav-list dense>
+              <button matSubheader mat-menu-item (click)="closeSidenav()" [routerLink]="['reviews/paperstoreview']"
+                      routerLinkActive="active-sub-link">
+                Papers to Review
+              </button>
+              <button matSubheader mat-menu-item (click)="closeSidenav()" [routerLink]="['reviews/myreviews']"
+                      routerLinkActive="active-sub-link">
+                My Reviews
+              </button>
+            </mat-nav-list>
+          </mat-expansion-panel>
+          <mat-divider></mat-divider>
+          <button matSubheader mat-menu-item routerLinkActive="active-link" (click)="closeSidenav()">
+            <mat-icon>settings</mat-icon>
+            Configuration
+            <span class="badge badge-success">Soon</span>
+          </button>
+          <button *ngIf="false"
+                  matSubheader mat-menu-item (click)="closeSidenav()"
+                  routerLinkActive="active-link"
+                  [routerLink]="['admin']">
+            <mat-icon>supervisor_account</mat-icon>
+            <span>Admin</span>
+          </button>
+        </section>
+      </mat-nav-list>
+      <button mat-stroked-button color="primary" class="button-invite"
+              (click)="openInviteDialog()">Invite to Orvium
+      </button>
+    </div>
   </mat-sidenav>
-  <mat-sidenav-content>
-    <ngx-spinner bdColor="rgba(51,51,51,0.5)" size="medium" color="#377dff" type="ball-clip-rotate" [fullScreen]="true">
+  <mat-sidenav-content id="sidenav-content">
+    <ngx-spinner bdColor="rgba(51,51,51,0.5)" size="medium" color="#377dff" type="ball-clip-rotate"
+                 [fullScreen]="true">
     </ngx-spinner>
-    <router-outlet class="backgroundColor"></router-outlet>
+    <router-outlet class="backgroundColor" (activate)="resetPosition()"></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

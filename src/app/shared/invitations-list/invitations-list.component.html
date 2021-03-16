@@ -1,0 +1,33 @@
+<mat-table [dataSource]="invites">
+  <ng-container matColumnDef="publication">
+    <mat-header-cell *matHeaderCellDef>Publication</mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <a routerLink="../../deposits/{{element.data.depositId}}/view">{{element.data.depositTitle}}</a>
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="author">
+    <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">Invited by</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="orv-mobile-hidden">{{element.sender.firstName}} {{element.sender.lastName}}</mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="deadline">
+    <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">Deadline</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="orv-mobile-hidden">{{element.deadline | date: 'dd/MM/yyyy'}}</mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="action">
+    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <div *ngIf="element.status == 'pending'">
+        <button mat-icon-button (click)="acceptInvite(element)">
+          <mat-icon class="green">check</mat-icon>
+        </button>
+        <button mat-icon-button (click)="rejectInvite(element)">
+          <mat-icon color="warn">close</mat-icon>
+        </button>
+      </div>
+      <p *ngIf="element.status == 'accepted'" class="green"><strong>{{element.status | titlecase}}</strong></p>
+      <p *ngIf="element.status == 'rejected'" class="warn"><strong>{{element.status | titlecase}}</strong></p>
+    </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let element; columns: displayedColumns;"></mat-row>
+</mat-table>

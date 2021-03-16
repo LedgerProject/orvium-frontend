@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { OrviumService } from 'src/app/services/orvium.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { PeerReview, REVIEW_STATUS } from '../../model/orvium';
+import { PeerReview } from '../../model/orvium';
 
 @Component({
   selector: 'app-myreviews',
@@ -12,8 +11,8 @@ import { PeerReview, REVIEW_STATUS } from '../../model/orvium';
 })
 export class MyreviewsComponent implements OnInit {
 
-  reviews: PeerReview[] = [];
-  REVIEW_STATUS = REVIEW_STATUS;
+  displayedColumns = ['publication', 'comments', 'decision', 'action'];
+  @Input() reviews: PeerReview[];
 
   constructor(private orviumService: OrviumService,
               private route: ActivatedRoute,
@@ -22,19 +21,6 @@ export class MyreviewsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.route.queryParamMap.subscribe(params => {
-        this.spinnerService.show();
-        this.orviumService.getReviews()
-          .pipe(
-            finalize(() => {
-              this.spinnerService.hide();
-            })
-          )
-          .subscribe(result => {
-            this.reviews = result;
-          });
-      });
-    });
+
   }
 }

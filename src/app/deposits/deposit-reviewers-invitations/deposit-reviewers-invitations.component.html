@@ -1,0 +1,67 @@
+<app-access-denied *ngIf="!canInviteReviewers"></app-access-denied>
+
+<div class="container" *ngIf="canInviteReviewers">
+  <h1 class="mat-h1 primary">Manage Invitations</h1>
+  <h2 class="mat-h2">Publication: {{ deposit.title }}</h2>
+  <p class="mat-body primary">
+    <mat-icon>visibility</mat-icon>
+    Open review
+  </p>
+  <div class="orv-metrics">
+    <mat-card class="orv-box-metrics">
+      <mat-card-header class="primary">
+        <mat-icon inline>account_circle</mat-icon>
+        <mat-card-title>
+          <h1 class="mat-h1">
+            {{ invites.length }}
+          </h1>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-subtitle>
+        Invitations Sent
+      </mat-card-subtitle>
+    </mat-card>
+  </div>
+  <div class="table">
+    <table mat-table [dataSource]="invites">
+      <ng-container matColumnDef="reviewer">
+        <th mat-header-cell *matHeaderCellDef> REVIEWER</th>
+        <td mat-cell *matCellDef="let element" [ngClass]="{resolved: element.status === 'accepted'}"> {{element.addressee}} </td>
+      </ng-container>
+      <ng-container matColumnDef="request_date">
+        <th mat-header-cell *matHeaderCellDef> REQUEST DATE</th>
+        <td mat-cell *matCellDef="let element"
+            [ngClass]="{resolved: element.status === 'accepted'}"> {{element.createdOn | date: 'dd/MM/yyyy'}} </td>
+      </ng-container>
+      <ng-container matColumnDef="deadline">
+        <th mat-header-cell *matHeaderCellDef> DEADLINE</th>
+        <td mat-cell *matCellDef="let element"
+            [ngClass]="{resolved: element.status === 'accepted'}"> {{element.deadline | date: 'dd/MM/yyyy'}} </td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>STATUS</th>
+        <td mat-cell *matCellDef="let element" [ngClass]="{resolved: element.status === 'accepted'}">
+          <mat-chip-list>
+            <mat-chip [ngClass]="{'chip-red': element.status === 'rejected',
+              'chip-pink': element.status === 'pending',
+              'chip-transparent': element.status === 'accepted'}">
+              <strong>{{ element.status | titlecase}}</strong>
+            </mat-chip>
+          </mat-chip-list>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let element; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+  <div class="text-align-center orv-action-buttons">
+    <button mat-button color="primary" (click)="refresh()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+    <button mat-raised-button color="primary" [routerLink]="['..','invite']">
+      <mat-icon>email</mat-icon>
+      Invite reviewers
+    </button>
+  </div>
+</div>

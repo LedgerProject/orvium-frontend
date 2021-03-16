@@ -1,0 +1,21 @@
+<app-access-denied *ngIf="!isModerator"></app-access-denied>
+<div *ngIf="isModerator">
+  <h1 class="mat-h1 primary">Moderator panel</h1>
+  <h2 class="mat-h2">Manage {{community.name}} community publications.</h2>
+  <div class="orv-metrics">
+    <mat-card class="orv-box-metrics">
+      <mat-card-header class="primary">
+        <mat-icon inline>assignment</mat-icon>
+        <mat-card-title>
+          <h1 class="mat-h1">
+            {{deposits.length}}
+          </h1>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-subtitle>Papers pending approval</mat-card-subtitle>
+    </mat-card>
+  </div>
+  <h2 class="mat-h2">Publications pending approval</h2>
+  <p *ngIf="deposits.length===0">There are no publications pending for approval</p>
+  <app-deposits-list [deposits]="deposits"></app-deposits-list>
+</div>

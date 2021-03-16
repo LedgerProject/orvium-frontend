@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { OrviumService } from '../services/orvium.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-page-not-found',
@@ -7,10 +9,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PageNotFoundComponent implements OnInit {
 
-  constructor() {
+  constructor(
+    private orviumService: OrviumService,
+    private snackBar: MatSnackBar
+  ) {
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+  }
+
+  onSend(event: object): void {
   }
 
 }

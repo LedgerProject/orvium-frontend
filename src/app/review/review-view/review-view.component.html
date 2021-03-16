@@ -1,79 +1,144 @@
-<mat-card role="main" class="noshadow flex-basis-0 flex-grow-1 container">
-  <mat-card-header class="flex-wrap">
-    <img mat-card-avatar ngxGravatar class="avatar" [md5Hash]="peerReview.gravatar" />
-    <mat-card-title>
-      <a>Peer Review</a>
-    </mat-card-title>
-    <span *ngIf="!smallScreen" class="spacer"></span>
-    <button *ngIf="isOwner && peerReview.status==REVIEW_STATUS.draft" mat-icon-button
-      [routerLink]="['/deposits/', deposit._id.$oid, 'reviews', peerReview._id.$oid, 'edit']">
+<mat-card role="main" class="noshadow flex-basis-0 flex-grow-1">
+  <div class="flex">
+    <div class="mat-h1 primary">Open Peer Review Report
+    <button *ngIf="isOwner"
+            mat-icon-button
+            [routerLink]="['/reviews', peerReview._id, 'edit']">
       <mat-icon>edit</mat-icon>
     </button>
-  </mat-card-header>
-  <mat-card-content class="flex flex-direction-column">
-    <div class="publicationContent">
-      <div class="firstInformation">
-        <h2 class="mat-h2 primary">
-          <mat-icon>menu_book</mat-icon>
-          Publication
-        </h2>
-        <p>{{deposit.title}}</p>
-      </div>
-      <div class="information">
-        <h2 class="mat-h2 primary">
-          <mat-icon>people_alt</mat-icon>
-          Author
-        </h2>
-        <p>{{peerReview.author}}</p>
-      </div>
-      <div class="information">
-        <h2 class="mat-h2 primary">
-          <mat-icon>comment</mat-icon>
-          Comments
-        </h2>
-        <p mathjax>{{peerReview.comments}}</p>
-      </div>
-      <div class="information">
-        <h2 class="mat-h2 primary">
-          <mat-icon>attach_file</mat-icon>
-          Files
-        </h2>
-        <mat-table [dataSource]="files">
-          <ng-container matColumnDef="filename">
-            <mat-header-cell *matHeaderCellDef>Filename</mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              <a *ngIf="peerReview.file" [href]="filelink" target="_blank">
-                {{element.filename}}
-              </a>
-            </mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="contentType">
-            <mat-header-cell *matHeaderCellDef>Content Type</mat-header-cell>
-            <mat-cell *matCellDef="let element"> {{element.contentType}}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="length">
-            <mat-header-cell *matHeaderCellDef>Bytes</mat-header-cell>
-            <mat-cell *matCellDef="let element"> {{element.contentLength}}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="edit">
-            <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell mat-cell *matCellDef="let element">
-              <a class="table-button badge-info" mat-button *ngIf="canOpenOverleaf(element.filename)"
-                href="https://www.overleaf.com/docs?snip_uri=http://{{environment.backend}}/deposits/{{deposit._id?.$oid}}/files/{{element.filename}}"
-                target="_blank" aria-label="Open in overleaf" download>
-                <mat-icon>open_in_new</mat-icon>
-                Open in Overleaf
-              </a></mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
-          <mat-row *matRowDef="let row; columns: columnsToDisplay;"></mat-row>
-        </mat-table>
-      </div>
     </div>
+  </div>
+  <mat-card-content class="flex flex-direction-column">
+    <div class="section">
+      <h2 class="mat-h2 primary">
+        <mat-icon>people_alt</mat-icon>
+        Author
+      </h2>
+      <p>{{peerReview.author}}</p>
+    </div>
+    <div class="section">
+      <h2 class="mat-h2 primary">
+        <mat-icon>menu_book</mat-icon>
+        <span>Publication</span>
+      </h2>
+      <a [routerLink]="['/deposits', deposit._id, 'view']">{{deposit.title}}</a>
+    </div>
+    <div class="section">
+      <h2 class="mat-h2 primary">
+        <mat-icon>comment</mat-icon>
+        Comments
+      </h2>
+      <p mathjax>{{peerReview.comments}}</p>
+    </div>
+    <div class="section">
+      <div class="flex">
+        <h2 class="mat-h2 primary">
+          <mat-icon>gavel</mat-icon>
+          Decision
+          <a mat-icon-button href="https://help.orvium.io/reviews/reviewers-code/#decision-types" target="_blank">
+            <mat-icon>help_outline</mat-icon>
+          </a>
+        </h2>
+      </div>
+      <p *ngIf="decisionSelected" class="flex flex-1 align-center">
+        <mat-chip-list>
+          <mat-chip [color]=decisionSelected.color selected matTooltip={{decisionSelected.description}}>
+            <mat-icon>{{decisionSelected.icon}}</mat-icon>
+            {{decisionSelected?.viewValue}}
+          </mat-chip>
+        </mat-chip-list>
+      </p>
+    </div>
+    <div class="section">
+      <h2 class="mat-h2 primary">
+        <mat-icon>attach_file</mat-icon>
+        Files
+      </h2>
+      <mat-table [dataSource]="files">
+        <ng-container matColumnDef="icon">
+          <mat-header-cell *matHeaderCellDef class="table-fileicon"></mat-header-cell>
+          <mat-cell *matCellDef="let file" class="table-fileicon">
+            <div [matTooltip]="file.filename">
+              <fa-icon class="primary" [icon]="file.contentType.includes('word') ? 'file-word' :
+                                       file.contentType.includes('pdf') ? 'file-pdf' :
+                                       file.contentType.includes('csv') ? 'file-csv' :
+                                       file.contentType.includes('image') ? 'file-image' :
+                                       file.contentType.includes('x-tex') ? 'file-code' :
+                                       file.contentType.includes('text') ? 'file-alt' :
+                                       file.contentType.includes('rtf') ? 'file-alt' : 'file'" size="lg">
+              </fa-icon>
+            </div>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="filename">
+          <mat-header-cell *matHeaderCellDef class="table-filename">Filename</mat-header-cell>
+          <mat-cell *matCellDef="let element" class="table-filename">
+            <a *ngIf="peerReview.file" [href]="filelink" target="_blank">
+              {{element.filename}}
+            </a>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="length">
+          <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">MB</mat-header-cell>
+          <mat-cell *matCellDef="let element" class="orv-mobile-hidden"> {{element.contentLength}}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="edit">
+          <mat-header-cell *matHeaderCellDef></mat-header-cell>
+          <mat-cell mat-cell *matCellDef="let element">
+            <a class="table-button" mat-button *ngIf="canOpenOverleaf(element.filename)"
+               href="https://www.overleaf.com/docs?snip_uri={{environment.apiEndpoint}}/reviews/{{peerReview._id}}/file"
+               target="_blank" aria-label="Open in overleaf" matTooltip="Open in Overleaf" download>
+              <fa-icon icon="leaf" size="lg"></fa-icon>
+            </a>
+          </mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: columnsToDisplay;"></mat-row>
+      </mat-table>
+    </div>
+    <mat-card-subtitle *ngIf="peerReview.wasInvited == true">
+      <mat-icon>mark_email_read</mat-icon>
+      The reviewer was invited by the author
+    </mat-card-subtitle>
   </mat-card-content>
   <mat-card-actions>
-    <button mat-raised-button color="primary" [routerLink]="['/deposits/', deposit._id.$oid]">
-      Go to publication
-    </button>
+    <div *ngIf="ethereumService.isAvailable()">
+      Number of ORV tokens rewarded to this reviewer
+      <button mat-mini-fab matTooltip="Number of ORV tokens rewarded to this reviewer"
+              color="primary">{{ peerReview.reward || 0 }}
+      </button>
+      ORVs
+      <span *ngIf="deposit.owner===profile?.userId">
+      <button mat-raised-button color="accent" [disabled]="!peerReview.transactions"
+              (click)="showPayReviewer()"
+              aria-label="Reward reviewer">
+        <mat-icon>monetization_on</mat-icon>
+        Reward
+        <ngx-spinner name="spinnerPayReviewer" [fullScreen]="false"></ngx-spinner>
+      </button>
+    </span>
+    </div>
+    <div>
+      <button mat-raised-button color="primary" [routerLink]="['/deposits', deposit._id, 'view']">
+        Go to publication
+      </button>
+    </div>
   </mat-card-actions>
 </mat-card>
+
+<ngx-smart-modal #displayPayReviewer identifier="displayPayReviewer" class="modal light-theme">
+  <h2 class="mat-h2 primary">Reward peer reviewer</h2>
+  <p class="black">Please enter the number of ORV tokens that you want to give to the peer reviewer.</p>
+  <mat-form-field class="flex flex-direction-column">
+    <input matInput #numberPayReviewer required type="number" min="1" max="100"
+           [formControl]="numberPayReviewerControl" placeholder="Number of tokens">
+    <mat-error *ngIf="numberPayReviewerControl.invalid">Set value between 1 and 100</mat-error>
+  </mat-form-field>
+  <br>
+  <button mat-raised-button color="warn" class="dialogButton"
+          (click)="ngxSmartModalService.getModal('displayPayReviewer').close()">No
+  </button>
+  <button mat-raised-button color="primary" class="dialogButton"
+          (click)="!numberPayReviewerControl.invalid && payReviewer(numberPayReviewer.value)">Yes
+  </button>
+</ngx-smart-modal>

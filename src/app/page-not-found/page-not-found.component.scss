@@ -1,21 +1,16 @@
 .container {
   display: flex;
-  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.mat-icon {
-  height: 100%;
+.left {
+  width: 40%;
+  max-width: 600px;
 }
 
-.scientist {
-  flex-shrink: 0;
-  flex-basis: 50%;
-}
-
-.item {
-  flex-basis: 40%;
-}
-
-button {
-  margin: 40px;
+@media (max-width: 768px) {
+  .left {
+    display: none;
+  }
 }

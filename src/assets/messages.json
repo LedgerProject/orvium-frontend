@@ -10,6 +10,6 @@
     "invalidORCID": "Invalid ORCID",
     "invalidEmail": "Invalid email address",
     "invalidLinkedIn": "Invalid LinkedIn url",
-    "invalidDomain": "This email provider not permitted, you need an institution email"
+    "invalidDomain": "This email provider not permitted"
   }
 }

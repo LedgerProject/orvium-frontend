@@ -1,0 +1,50 @@
+mat-horizontal-stepper {
+  height: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.center-form {
+  text-align: center;
+  align-items: center;
+}
+
+button {
+  margin-top: 40px;
+}
+
+.mat-button-toggle-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mat-button-toggle {
+  padding: 10px;
+  border-left: none !important;
+  width: 22%;
+  white-space: pre-wrap; /* current browsers */
+}
+
+::ng-deep .mat-button-toggle-label-content {
+  line-height: normal !important;
+}
+
+iframe {
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .mat-button-toggle-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mat-button-toggle {
+    width: 100%;
+    white-space: pre-wrap; /* current browsers */
+  }
+}

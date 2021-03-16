@@ -1,66 +1,81 @@
 @import '~@angular/material/theming';
 @import 'light-theme.scss';
-
-// fonts
-@import url("https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700");
+@import 'light-red-theme.scss';
+@import 'dark-theme.scss';
 
 $dialog-position-top: 50%;
-@import "~ngx-smart-modal/ngx-smart-modal";
-// Define a custom typography config that overrides the font-family as well as the
-// `headlines` and `body-1` levels.
-$custom-typography: mat-typography-config(
-  $font-family: 'Poppins, Helvetica, Arial, sans-serif',
-  $headline: mat-typography-level(32px, 48px, 400),
-  $body-1: mat-typography-level(16px, 24px, 300),
-  $button: mat-typography-level(16px, 24px, 300)
-);
 
+@import "~ngx-smart-modal/ngx-smart-modal";
 
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
-@include mat-core($custom-typography);
 
-@include angular-material-theme($light-theme);
+@import 'styles/snackbar';
+@import 'styles/flex';
+@import 'styles/chips';
+@import 'styles/badges';
 
-.primary {
-  color: mat-color($light-theme-primary);
+.light-theme {
+  @include angular-material-theme($light-theme);
+
+  .primary {
+    color: mat-color($light-theme-primary);
+  }
+
+  .accent {
+    color: mat-color($light-red-theme-accent);
+  }
+
+  .warn {
+    color: mat-color($light-theme-warn);
+  }
+
+  .pink {
+    color: #e8ddff;
+  }
+
+  .textThemeColor {
+    color: black;
+  }
+
+  .backgroundColor {
+    background-color: white;
+  }
+
+  a {
+    text-decoration: none;
+    color: black;
+  }
 }
 
-.warn {
-  color: mat-color($light-theme-warn);
-}
+.dark-theme {
+  @include angular-material-theme($dark-theme);
 
-.textThemeColor {
-  color: black;
-}
+  .primary {
+    color: mat-color($dark-theme-primary);
+  }
 
-.backgroundColor {
-  background-color: white;
-}
+  .accent {
+    color: mat-color($dark-theme-accent);
+  }
 
-//
-// Snackbar styles
-//
+  .warn {
+    color: mat-color($dark-theme-warn);
+  }
 
-.error-snackbar {
-  background-color: #febabb;
-  color: #a74544;
-}
+  .textThemeColor {
+    color: white;
+  }
 
-.ok-snackbar {
-  background-color: #dfefd9;
-  color: #3e754f;
-}
+  .backgroundColor {
+    background-color: #424242;
+  }
 
-.warning-snackbar {
-  background-color: #fcf8e4;
-  color: #896d3f;
-}
-
-.info-snackbar {
-  background-color: #d9edf6;
-  color: #34718e;
+  a {
+    text-decoration: none;
+    color: white;
+  }
 }
 
 //
@@ -68,20 +83,28 @@ $custom-typography: mat-typography-config(
 //
 
 body {
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
   margin: 0;
-  background-color: whitesmoke;
 }
 
-.right {
-  flex: 1 1 auto;
+table {
+  width: 100%;
+}
+
+ul, ol {
+  padding-inline-start: 2rem;
+  margin-block-start: 0.5rem;
+  margin-block-end: 0.5rem;
 }
 
 .green {
-  color: #28B463;
+  color: #28b463;
 }
 
 .red {
-  color: #E3645B;
+  color: #e3645b;
 }
 
 .black {
@@ -93,36 +116,12 @@ body {
 }
 
 .dialogButton {
-  margin: 0px 10px 0px 10px;
+  margin: 10px !important;
   float: right;
 }
 
-//
-// Global flex classes
-//
-
-.flex {
-  display: flex !important;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-.flex-direction-column {
-  flex-direction: column;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
-.flex-basis-0 {
-  flex-basis: 0;
-}
-
-.flex-grow-1 {
-  flex-grow: 1;
+.pointer {
+  cursor: pointer;
 }
 
 .justify-content-center {
@@ -130,76 +129,213 @@ body {
 }
 
 .noshadow {
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow: none !important;
   box-shadow: none !important;
 }
 
-.badge-info {
-  padding: 0em .8em;
-  font-size: 75%;
-  font-weight: 300;
-  line-height: 2;
+.whitespace-pre-line {
+  white-space: pre-line;
+}
+
+//
+// Muak UI
+//
+.grey {
+  color: #8798ad;
+}
+
+.success {
+  color: white !important;
+  background-color: #28b463 !important;
+}
+
+.text-align-center {
   text-align: center;
-  white-space: nowrap;
-  border-radius: 0.25em;
-  margin-right: 1.5em;
 }
 
-//
-// Global badge classes
-//
-
-.badge-secondary {
-  background-color: #E2E4EA;
-  color: #909AA1;
+.orv-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 2em;
+  margin: 3em;
 }
 
-.badge-primary {
-  background-color: #EBF2FF;
-  color: #4284FF;
+.orv-box-metrics {
+  grid-column-start: 2;
+  text-align: center;
+
+  mat-card-header {
+    justify-content: center;
+  }
+
+  mat-icon {
+    font-size: 70px !important;
+  }
 }
 
-.badge-accent {
-  background-color: #F7E9EB;
-  color: #E3645B;
+@mixin side-nav-color($config-or-theme) {
+  // Extract the color configuration in case a theme has been passed.
+  // This allows consumers to either pass a theme object or a color configuration.
+  $config: mat-get-color-config($config-or-theme);
+  // Extract the palettes you need from the theme definition.
+  $primary: map-get($config, primary);
+  $accent: map-get($config, accent);
+
+  // Define any styles affected by the theme.
+  .active-link {
+    @extend .active-sub-link;
+
+    border-left: 3px solid mat-color($primary) !important;
+
+    mat-panel-description {
+      color: mat-color($primary) !important;
+    }
+  }
+
+  .active-sub-link {
+    color: mat-color($primary) !important;
+
+    mat-icon {
+      color: mat-color($primary) !important;
+    }
+  }
 }
 
-.badge-impact {
-  background-color: #D5F5E3;
-  color: #28B463;
+@mixin side-nav-theme($theme) {
+  // Extracts the color and typography configurations from the theme.
+  $color: mat-get-color-config($theme);
+  $typography: mat-get-typography-config($theme);
+
+  // Do not generate styles if configurations for individual theming
+  // systems have been explicitly set to `null`.
+
+  @if $color != null {
+    @include side-nav-color($color);
+  }
 }
 
-//
-// Smart modal style settings
-//
+@include side-nav-theme($light-theme);
 
-.modal ::ng-deep .mat-focused .mat-form-field-label {
-  /*change color of label*/
-  color: black !important;
+// Define a custom typography config that overrides the font-family as well as the
+// `headlines` and `body-1` levels.
+$custom-typography: mat-typography-config(
+  $font-family: 'Source Sans Pro, Arial, sans-serif',
+  $display-3: mat-typography-level(3rem, 3.5rem, 500),
+  $headline: mat-typography-level(2rem, 2.5rem, 500),
+  $body-1: mat-typography-level(16px, 24px, 300),
+  $button: mat-typography-level(16px, 24px, 300)
+);
+
+@include mat-core($custom-typography);
+
+* {
+  font-family: Source Sans Pro, Arial, sans-serif;
 }
 
-.modal ::ng-deep .mat-form-field-underline {
-  /*change color of underline*/
-  background-color: black !important;
+.mat-h2 {
+  margin-bottom: 0.4rem;
 }
 
-.modal .mat-form-field-ripple {
-  /*change color of underline when focused*/
-  background-color: black !important;
+.mat-display-1 {
+  margin-bottom: 0.8rem;
 }
 
-.modal .mat-focused .mat-form-field-label {
-  /*change color of label*/
-  color: black !important;
+.mat-display-3 {
+  margin-bottom: 0.8rem;
 }
 
-.modal .mat-form-field-underline {
-  /*change color of underline*/
-  background-color: black !important;
+// Mat Cards
+.mat-card-title {
+  font-size: 1.2rem;
+  margin-top: 1rem;
 }
 
-.modal .mat-form-field-ripple {
-  /*change color of underline when focused*/
-  background-color: black !important;
+.mat-card-subtitle {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem !important;
+}
+
+.mat-card-header {
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+mat-card-actions {
+  text-align: center;
+}
+
+// Social
+.social {
+  text-align: center;
+  //padding-top: 15px;
+  //min-width: 200px;
+
+  button, a {
+    margin: 1rem;
+  }
+
+  fa-icon {
+    color: white;
+  }
+}
+
+.orv-side-card {
+  margin-bottom: 1rem;
+}
+
+.orv-community-logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1em;
+  width: auto;
+  height: 25vh;
+}
+
+.orv-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  button, a {
+    width: 180px; //TODO this fixed width might cause problems, check it
+    margin: 10px;
+  }
+}
+
+// Mobile
+@media (max-width: 768px) {
+  .mat-display-3 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+  }
+
+  .mat-display-1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+  }
+
+  .mat-h1 {
+    font-size: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .orv-mobile-table-collum {
+    width: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .orv-mobile-hidden {
+    display: none !important;
+  }
+
+  .orv-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .orv-box-metrics {
+    grid-column-start: 1;
+  }
 }

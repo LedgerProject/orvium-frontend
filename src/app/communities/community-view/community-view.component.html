@@ -1,0 +1,130 @@
+<div class="container">
+  <section class="community-header">
+    <div class="column-left">
+      <h1 class="mat-display-1">{{community.name}}</h1>
+      <h1 class="mat-subheading-1 grey">
+        <mat-icon>location_on</mat-icon>
+        {{community.country}}
+      </h1>
+      <h1 class="mat-subheading-2">{{community.description}}</h1>
+      <div class="community-button-panel">
+        <button mat-raised-button
+                *ngIf="!isContributor"
+                color="primary"
+                class="center"
+                (click)="joinCommunity()">
+          <mat-icon>person_add</mat-icon>
+          Join Community
+        </button>
+        <button mat-raised-button
+                color="primary"
+                class="center"
+                *ngIf="isContributor"
+                (click)="uploadDeposit()">Submit publication
+        </button>
+        <a *ngIf="isModerator"
+           mat-raised-button
+           color="primary"
+           class="center"
+           [routerLink]="['..', 'moderate']">Moderate
+        </a>
+      </div>
+    </div>
+    <div class="column-right">
+      <img src="{{community.logoURL}}" alt="Community Logo" class="orv-community-logo">
+      <div class="community-metrics">
+        <span mat-button class="mat-subheading-1 grey">
+          <mat-icon>group</mat-icon>
+          {{community.users.length}} People joined
+        </span>
+        <span mat-button class="mat-subheading-1 grey">
+          <mat-icon>menu_book</mat-icon>
+          {{deposits?.length}} Publications
+        </span>
+      </div>
+    </div>
+  </section>
+  <div class="content">
+    <div class="recent">
+      <h1 class="mat-h1 primary text-align-center">Community Publications</h1>
+      <app-deposits-list
+        [deposits]="deposits">
+      </app-deposits-list>
+    </div>
+    <div class="side">
+      <mat-card class="orv-side-card">
+        <mat-card-header>
+          <mat-card-title class="primary">Benefits</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ul>
+            <li>Publish open access and get exposure, increase your impact!</li>
+            <li>Join the conversation of your peers and get recognized as an expert and guardian of quality!</li>
+            <li>Watch over a growing scholar community and get rewarded for building up a healthy academic publishing environment!</li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="orv-side-card">
+        <mat-card-header>
+          <mat-card-title class="primary">Community Guidelines</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ol>
+            <li>The work has not been previously published, nor been submitted to another publisher.</li>
+            <li>If the work has been published on a preprint or repository server, reference is made in the current submission.</li>
+            <li>There available, URLs for the references have been provided.</li>
+            <li>The submitting author has received permission from the co-authors to submit their work to {{community.name}}.</li>
+            <li>You have obtained permission from the original owners to reuse their photographs, illustrations or drawings.</li>
+            <li>You agree to follow the code of conduct set by Orvium and TU Delft.</li>
+            <li>You agree to publish your work Open Access under CreativeCommon compatible license (CC0, CC-BY, CC BY-ND) and to
+              have your work undergoing an Open Peer-Review process.
+            </li>
+          </ol>
+          To know more click <a href="{{community.guidelinesURL}}" target="_blank" class="primary">here</a>.
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="orv-side-card">
+        <mat-card-header>
+          <mat-card-title class="primary">Want your publication to appear in this community?</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ul>
+            <li>Click the button above to join {{community.name}} community.</li>
+            <li>Now you can submit your publication to the community.</li>
+            <li>Community moderators will accept or reject your contribution.</li>
+            <li>If it is accepted, your publication will appear in the community.</li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+      <div class="social">
+        <a mat-fab [style.backgroundColor]="share.prop.facebook?.color || 'blue'"
+           href="{{community.facebookURL}}" target="_blank">
+          <fa-icon [icon]="['fab', 'facebook-f']" size="lg"></fa-icon>
+        </a>
+        <a mat-fab [style.backgroundColor]="share.prop.twitter?.color || 'blue'"
+           href="{{community.twitterURL}}" target="_blank">
+          <fa-icon [icon]="['fab', 'twitter']" size="lg"></fa-icon>
+        </a>
+        <a mat-fab [style.backgroundColor]="share.prop.linkedin?.color || 'blue'"
+           href="{{community.websiteURL}}" target="_blank">
+          <mat-icon class="white">account_balance</mat-icon>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ngx-smart-modal #uploadDepositModal identifier="uploadDepositModal" class="modal light-theme"
+                 [formGroup]="newPublicationForm">
+  <h2 class="mat-h2 primary">Please, enter below a title for your publication:</h2>
+  <mat-form-field class="flex flex-direction-column">
+    <mat-label>Publication title</mat-label>
+    <input matInput formControlName="title" (keydown.enter)="createDeposit()">
+  </mat-form-field>
+  <br>
+  <button mat-raised-button class="dialogButton" color="primary" (click)="createDeposit()">
+    Create
+  </button>
+</ngx-smart-modal>
+
+

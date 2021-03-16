@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { faFacebookF, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
-import { ShareService } from '@ngx-share/core';
+import { ShareService } from 'ngx-sharebuttons';
 import { MatDialogRef } from '@angular/material/dialog';
 import { CustomValidators } from '../shared/CustomValidators';
+import { OrviumService } from '../services/orvium.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-invite',
@@ -20,12 +21,13 @@ export class InviteComponent implements OnInit {
   readonly separatorKeysCodes: number[] = [ENTER, COMMA];
   emails: string[] = [];
   sendEmailFormGroup: FormGroup;
-  faTwitter = faTwitter;
-  faFacebookF = faFacebookF;
-  faLinkedin = faLinkedin;
+  public inviteLink: string;
+  description = 'Orvium connect researchers and publishers with trusted reviewers to accelerate publishing ' +
+    'along with incentivized peer review.';
 
   constructor(private formBuilder: FormBuilder,
               public share: ShareService,
+              private orviumService: OrviumService,
               public dialogRef: MatDialogRef<InviteComponent>) {
   }
 
@@ -34,6 +36,8 @@ export class InviteComponent implements OnInit {
       emails: [this.emails, [CustomValidators.validateRequired, CustomValidators.validateEmails]],
     });
     this.sendEmailFormGroup.controls.emails.setValue(this.emails);
+    const inviteToken = this.orviumService.profile.getValue()?.inviteToken;
+    this.inviteLink = `${environment.publicUrl}/profile?inviteToken=${inviteToken}`;
   }
 
   add(event: MatChipInputEvent): void {
@@ -68,7 +72,8 @@ export class InviteComponent implements OnInit {
   }
 
   send(): void {
-    console.log(this.emails[0]);
+    this.orviumService.sendInvite(this.emails).subscribe();
+    this.dialogRef.close();
   }
 
   onNoClick(): void {

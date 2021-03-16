@@ -1,0 +1,134 @@
+<div class="container">
+  <div class="section">
+    <h1 class="mat-display-3 primary">Publications</h1>
+    <h1 class="mat-title grey"><strong>Upload now your first paper</strong></h1>
+    <h1 class="mat-subheading-2 grey">Publish your publication and start collaborating with your community.</h1>
+    <button mat-raised-button color="primary" (click)="create()">Upload Now</button>
+  </div>
+  <div class="stepper">
+    <!-- completed -->
+    <div class="step completed">
+      <div class="v-stepper">
+        <div class="circle"></div>
+        <div class="line"></div>
+      </div>
+      <div class="content">
+        <h1 class="mat-headline primary">Draft</h1>
+        <h1 class="mat-subheading-2 grey">Upload your paper, add disciplines, keywords, authors and citations. <strong>Preview</strong> your
+          work and
+          validate it before sending it to review.</h1>
+      </div>
+    </div>
+    <!-- active -->
+    <div class="step active">
+      <div class="v-stepper">
+        <div class="circle"></div>
+        <div class="line"></div>
+      </div>
+      <div class="content">
+        <h1 class="mat-headline primary">Review</h1>
+        <h1 class="mat-subheading-2 grey">Send your document to review, <strong>contact</strong> reviewers and get insights from the review
+          reports.</h1>
+      </div>
+    </div>
+    <div class="step active">
+      <div class="v-stepper">
+        <div class="circle"></div>
+        <div class="line"></div>
+      </div>
+      <div class="content">
+        <h1 class="mat-headline primary">Published</h1>
+        <h1 class="mat-subheading-2 grey">Publish your article, <strong>share</strong> it within your network and recommend reviewers.</h1>
+      </div>
+    </div>
+    <div class="step active">
+      <div class="v-stepper">
+        <div class="circle"></div>
+      </div>
+      <div class="content">
+        <h1 class="mat-headline primary">Analitycs</h1>
+        <h1 class="mat-subheading-2 grey">Instant insights on your article performance, <strong>measure</strong> your progress, etc</h1>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="powerful-publication">
+  <div class="hero">
+    <h1 class="mat-display-2 primary hero-title"><strong>Powerful publishing</strong></h1>
+    <h1 class="mat-title grey">Manage your publishing workflow without technical knowledge and give your <br> journal editors and readers
+      a superior user experience.
+    </h1>
+  </div>
+  <div class="container">
+    <div>
+      <mat-card>
+        <mat-card-content>
+          <mat-icon class="image" color="primary">people_alt</mat-icon>
+          <h1 class="mat-title"><strong>Community</strong></h1>
+          <h1 class="mat-subheading-2 grey">Orvium is a <strong>global community of researchers</strong> like you, waiting to meet you. From
+            PhD students to
+            professional researchers. From medical to legal research. Join the conversation now.</h1>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-icon class="image" color="primary">share</mat-icon>
+        <mat-card-content>
+          <h1 class="mat-title"><strong>Engage with your audience</strong></h1>
+          <h1 class="mat-subheading-2 grey">Manage your publishing workflow <strong>without technical knowledge</strong> and give your
+            colleagues and
+            readers a better user experience. Orvium is the easiest way to share your work with them.
+          </h1>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div>
+      <mat-card>
+        <mat-icon class="image" color="primary">lock_open</mat-icon>
+        <mat-card-content>
+          <h1 class="mat-title"><strong>Open Access</strong></h1>
+          <h1 class="mat-subheading-2 grey">Open Access refers to free, unrestricted online access to research outputs such as journal
+            articles and books. All Orvium content is <strong>open to everyone</strong>, with no access fees.</h1>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-icon class="image" color="primary">insights</mat-icon>
+        <mat-card-content>
+          <h1 class="mat-title"><strong>Track your impact</strong></h1>
+          <h1 class="mat-subheading-2 grey">Orvium provides instant analytics to track your publication perfomance. Benefit from
+            features that help you improve your work quality, <strong>connect with your readers</strong>, and more.</h1>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div>
+      <mat-card>
+        <mat-icon class="image" color="primary">article</mat-icon>
+        <mat-card-content>
+          <h1 class="mat-title"><strong>Publish and review</strong></h1>
+          <h1 class="mat-subheading-2 grey">Get your paper ready for publication. Improve your manuscript and <strong>increase your
+            publishing
+            opportunities</strong> with constructive peer reviews made by experts in your field.</h1>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-icon class="image" color="primary">device_hub</mat-icon>
+        <mat-card-content>
+          <h1 class="mat-title"><strong>Blockchain benefits</strong></h1>
+          <h1 class="mat-subheading-2 grey">Use the blockchain to access extra features such as storing the Ownership of your publication
+            <strong>saving your authorship</strong> in the blockchain.</h1>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<ngx-smart-modal #createDeposit identifier="createDeposit" class="modal light-theme" [formGroup]="newPublicationForm">
+  <h2 class="mat-h2 primary">Please, enter below a title for your publication:</h2>
+  <mat-form-field class="flex flex-direction-column">
+    <mat-label>Publication title</mat-label>
+    <input matInput formControlName="title" (keydown.enter)="save()">
+  </mat-form-field>
+  <br>
+  <button mat-raised-button class="dialogButton" color="primary" (click)="save()" [disabled]="!newPublicationForm.valid">
+    Create
+  </button>
+</ngx-smart-modal>

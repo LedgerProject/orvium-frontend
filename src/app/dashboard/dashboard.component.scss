@@ -1,0 +1,17 @@
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+mat-icon.mat-card-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 40px;
+  color: #377dff;
+}
+
+mat-card-content {
+  text-align: center;
+}
