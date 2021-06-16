@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { Feedback } from '../shared/feedback/entity/feedback';
 import { OrviumService } from '../services/orvium.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -7,7 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   templateUrl: './page-not-found.component.html',
   styleUrls: ['./page-not-found.component.scss']
 })
-export class PageNotFoundComponent implements OnInit {
+export class PageNotFoundComponent {
 
   constructor(
     private orviumService: OrviumService,
@@ -15,10 +16,11 @@ export class PageNotFoundComponent implements OnInit {
   ) {
   }
 
-  ngOnInit(): void {
-  }
-
   onSend(event: object): void {
+    const feedback = event as Feedback;
+    this.orviumService.createFeedback(feedback).subscribe(data => {
+      this.snackBar.open('Thank you for your feedback!', 'Dismiss', { panelClass: ['ok-snackbar'] });
+    });
   }
 
 }

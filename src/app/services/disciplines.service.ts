@@ -1,22 +1,26 @@
 import { Injectable } from '@angular/core';
-import { Discipline } from '../model/orvium';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { DisciplineDTO } from '../model/api';
+import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DisciplinesService {
-  private disciplines: Discipline[];
+  private disciplines?: Observable<DisciplineDTO[]>;
 
   constructor(private httpClient: HttpClient) {
   }
 
-  async init(): Promise<void> {
-    this.disciplines = await this.httpClient.get<Discipline[]>(`${environment.apiEndpoint}/disciplines`).toPromise();
-  }
+  getDisciplines(): Observable<DisciplineDTO[]> {
+    if (!this.disciplines) {
+      this.disciplines = this.httpClient.get<DisciplineDTO[]>(`${environment.apiEndpoint}/disciplines`).pipe(
+        shareReplay(1)
+      );
+    }
 
-  getDisciplines(): Discipline[] {
     return this.disciplines;
   }
 }

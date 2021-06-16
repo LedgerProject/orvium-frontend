@@ -11,6 +11,11 @@ mat-form-field {
   align-items: center;
 }
 
+.checkbox {
+  margin-top: 1em;
+  align-self: start;
+}
+
 button {
   margin-top: 40px;
 }
@@ -31,10 +36,6 @@ button {
 
 ::ng-deep .mat-button-toggle-label-content {
   line-height: normal !important;
-}
-
-iframe {
-  max-width: 100%;
 }
 
 @media (max-width: 768px) {

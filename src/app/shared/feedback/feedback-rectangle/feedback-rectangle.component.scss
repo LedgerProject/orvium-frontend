@@ -1,0 +1,16 @@
+.rect {
+  position: fixed;
+  background: none;
+  z-index: 3;
+}
+
+.hide {
+  background-color: black;
+}
+
+.close {
+  position: absolute;
+  right: -12px;
+  top: -12px;
+  user-select: none;
+}

@@ -1,21 +1,21 @@
-<app-access-denied *ngIf="!isOwner"></app-access-denied>
+<orv-access-denied *ngIf="!isOwner"></orv-access-denied>
 
 <div *ngIf="isOwner">
   <h1 class="mat-display-1 primary">Edit Review</h1>
   <h3 class="mat-body-1">Edit, manage and share your "{{ deposit?.title }}" review.</h3>
   <mat-divider></mat-divider>
-  <div class="container" [formGroup]="reviewForm">
+  <div [formGroup]="reviewForm" class="container">
     <div>
       <div class="main-section">
         <h2 class="mat-h2">Review Details</h2>
         <div class="sub-section">
           <mat-form-field appearance="outline">
             <mat-label>Author</mat-label>
-            <input matInput formControlName="author" required>
+            <input formControlName="author" matInput required type="text">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>General Comments</mat-label>
-            <textarea formControlName="comments" matInput cdkTextareaAutosize></textarea>
+            <textarea cdkTextareaAutosize formControlName="comments" matInput></textarea>
           </mat-form-field>
         </div>
       </div>
@@ -23,76 +23,31 @@
         <h2 class="mat-h2">Review Files</h2>
       </div>
       <div class="sub-section">
-        <div>
-          <app-fileupload name="file"
-                          url="{{environment.apiEndpoint}}/reviews/{{peerReview._id}}/file"
-                          (fileUpload)="filesUploaded($event)"
-                          (click)="onSelectFiles($event)"
-                          [showUploadButton]="reviewForm.pristine"
-                          (fileSelect)="onSelectFiles($event)"
-                          [auto]="true"
-                          chooseLabel="Upload here your review file (max. 5Mb)"
-                          [maxFileSize]="5000000"
-                          accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg,.png,.gif,.md,.csv,.tex">
-          </app-fileupload>
-        </div>
-        <mat-table [dataSource]="files">
-          <ng-container matColumnDef="icon">
-            <mat-header-cell *matHeaderCellDef class="table-fileicon"></mat-header-cell>
-            <mat-cell *matCellDef="let file" class="table-fileicon">
-              <div [matTooltip]="file.filename">
-                <fa-icon class="primary" [icon]="file.contentType.includes('word') ? 'file-word' :
-                                       file.contentType.includes('pdf') ? 'file-pdf' :
-                                       file.contentType.includes('csv') ? 'file-csv' :
-                                       file.contentType.includes('image') ? 'file-image' :
-                                       file.contentType.includes('x-tex') ? 'file-code' :
-                                       file.contentType.includes('text') ? 'file-alt' :
-                                       file.contentType.includes('rtf') ? 'file-alt' : 'file'" size="lg">
-                </fa-icon>
-              </div>
-            </mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="filename">
-            <mat-header-cell *matHeaderCellDef class="table-filename">Filename</mat-header-cell>
-            <mat-cell *matCellDef="let file" class="orv-mobile-table-collum table-filename">
-              <a class="table-button" mat-button [matTooltip]="file.filename"
-                 href="{{environment.apiEndpoint}}/reviews/{{peerReview._id}}/file"
-                 target="_blank">
-                {{ file.filename }}
-              </a>
-            </mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="length">
-            <mat-header-cell mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">MB</mat-header-cell>
-            <mat-cell mat-cell *matCellDef="let file" class="orv-mobile-hidden"> {{file.contentLength / 1024 / 1024 | number}}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="edit">
-            <mat-header-cell  mat-header-cell *matHeaderCellDef>Actions</mat-header-cell >
-            <mat-cell mat-cell *matCellDef="let file">
-              <a class="table-button" mat-button *ngIf="canOpenOverleaf(file.filename)"
-                 href="https://www.overleaf.com/docs?snip_uri={{environment.apiEndpoint}}/reviews/{{peerReview._id}}/file"
-                 target="_blank" aria-label="Open in overleaf" matTooltip="Open in Overleaf" download>
-                <fa-icon icon="leaf" size="lg"></fa-icon>
-              </a>
-            </mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
-          <mat-row *matRowDef="let row; columns: columnsToDisplay;"></mat-row>
-        </mat-table>
+        <app-fileupload (click)="beforeUpload($event)"
+                        (fileUpload)="filesUploaded($event)"
+                        [maxFileSize]="20000000"
+                        accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg,.png,.gif,.md,.csv,.tex"
+                        chooseLabel="Upload review (max. 20Mb)"
+                        name="file"
+                        url="{{environment.apiEndpoint}}/reviews/{{peerReview._id}}/file">
+        </app-fileupload>
+        <app-file-list [baseHref]="environment.apiEndpoint+'/reviews/'+peerReview._id+'/file'"
+                       [files]="files">
+        </app-file-list>
       </div>
       <div class="social publication-buttons">
-        <button mat-button color="primary"
-                [disabled]="reviewForm.pristine || peerReview.status == REVIEW_STATUS.published || !reviewForm.valid"
-                (click)="save()">
+        <button (click)="save()" [disabled]="reviewForm.pristine || peerReview.status == REVIEW_STATUS.published || !reviewForm.valid"
+                color="primary"
+                mat-button>
           <mat-icon>save</mat-icon>
           Save
         </button>
-        <button mat-button color="primary" [disabled]="peerReview.status == REVIEW_STATUS.published" (click)="delete()">
+        <button (click)="delete()" [disabled]="peerReview.status == REVIEW_STATUS.published" color="primary" mat-button>
           <mat-icon>delete</mat-icon>
           Delete
         </button>
-        <button mat-raised-button color="primary" [disabled]="peerReview.status == REVIEW_STATUS.published"
-                color="primary" (click)="publish()">
+        <button (click)="publish()" [disabled]="peerReview.status == REVIEW_STATUS.published" color="primary"
+                color="primary" mat-raised-button>
           <mat-icon>publish</mat-icon>
           Publish
         </button>
@@ -108,7 +63,7 @@
         <mat-card-content class="side-card-content">
           <mat-form-field appearance="outline" class="flex-grow-1">
             <mat-label>Decision</mat-label>
-            <mat-select id="reviewDecisionInput" formControlName="decision">
+            <mat-select formControlName="decision" id="reviewDecisionInput">
               <mat-select-trigger>{{reviewForm.get('decision')?.value | titlecase}}</mat-select-trigger>
               <mat-option *ngFor="let decision of reviewDecisionLov" [value]="decision.value">
                 <div matTooltip="{{decision.description}}">
@@ -120,7 +75,7 @@
           </mat-form-field>
         </mat-card-content>
       </mat-card>
-      <mat-card *ngIf="ethereumService.isAvailable()" class="side-card noshadow">
+      <mat-card *ngIf="ethereumService.isAvailable | async" class="side-card noshadow">
         <mat-card-title class="primary">Blockchain</mat-card-title>
         <mat-card-subtitle>Use the blockchain to access extra features such as proving of the ownership of your work and get rewards for
           the peer reviews you make.
@@ -130,23 +85,23 @@
             - Save the Ownership of your review storing your authorship in the blockchain:
           </h3>
           <a *ngFor="let transaction of (peerReview.transactions || []) | keyvalue"
-             mat-button
              class="green"
-             href="{{ this.blockchainService.getNetworkByName(transaction.key.toString())?.explorerUrl + $any(transaction.value).hash }}"
+             href="{{ this.blockchainService.getNetworkByName(transaction.key.toString())?.explorerUrl + $any(transaction.value).transactionHash }}"
+             mat-button
              target="_blank">
             <mat-icon aria-hidden="false" aria-label="Published icon">verified_user</mat-icon>
             Proof of Ownership in {{ this.blockchainService.getNetworkByName(transaction.key.toString())?.displayName }}</a>
           <button
+            (click)="proofOwnership()"
             [disabled]="!peerReview.file?.filename ||
             (!!peerReview.transactions &&
             this.ethereumService.currentNetwork && this.ethereumService.currentNetwork.value &&
             !!peerReview.transactions[this.ethereumService.currentNetwork.value.name])"
-            mat-raised-button
             color="accent"
-            (click)="proofOwnership()">
+            mat-raised-button>
             <mat-icon>verified_user</mat-icon>
             Save Ownership
-            <ngx-spinner name="spinnerProof" [fullScreen]="false"></ngx-spinner>
+            <orv-spinner name="spinnerProof" [fullScreen]="false"></orv-spinner>
           </button>
         </mat-card-content>
       </mat-card>

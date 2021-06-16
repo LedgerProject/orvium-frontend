@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Deposit } from '../model/orvium';
 import { OrviumService } from '../services/orvium.service';
+import { DepositDTO } from '../model/api';
 
 @Component({
   selector: 'app-starred-deposits',
@@ -10,7 +10,7 @@ import { OrviumService } from '../services/orvium.service';
 })
 export class StarredDepositsComponent implements OnInit {
   displayedColumns: string[] = ['title', 'publicationType', 'status'];
-  starredDeposits: MatTableDataSource<Deposit>;
+  starredDeposits: MatTableDataSource<DepositDTO> = new MatTableDataSource<DepositDTO>();
 
   constructor(private orviumService: OrviumService) {
   }

@@ -13,19 +13,29 @@
     <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">Deadline</mat-header-cell>
     <mat-cell *matCellDef="let element" class="orv-mobile-hidden">{{element.deadline | date: 'dd/MM/yyyy'}}</mat-cell>
   </ng-container>
-  <ng-container matColumnDef="action">
+  <ng-container matColumnDef="status">
     <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
     <mat-cell *matCellDef="let element">
+      <mat-chip *ngIf="element.status == 'accepted'" class="chip-published"><strong>{{element.status | titlecase}}</strong></mat-chip>
+      <mat-chip *ngIf="element.status == 'pending'" class="chip-pink"><strong>{{element.status | titlecase}}</strong></mat-chip>
+      <mat-chip *ngIf="element.status == 'rejected'" class="chip-red"><strong>{{element.status | titlecase}}</strong></mat-chip>
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="action">
+    <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+    <mat-cell *matCellDef="let element">
       <div *ngIf="element.status == 'pending'">
-        <button mat-icon-button (click)="acceptInvite(element)">
-          <mat-icon class="green">check</mat-icon>
+        <button mat-raised-button color="primary" (click)="acceptInvite(element)">
+          Create Review
         </button>
-        <button mat-icon-button (click)="rejectInvite(element)">
-          <mat-icon color="warn">close</mat-icon>
+        <button mat-button (click)="rejectInvite(element)">
+          Reject invite
         </button>
       </div>
-      <p *ngIf="element.status == 'accepted'" class="green"><strong>{{element.status | titlecase}}</strong></p>
-      <p *ngIf="element.status == 'rejected'" class="warn"><strong>{{element.status | titlecase}}</strong></p>
+      <div *ngIf="element.status == 'accepted'">
+        <a mat-flat-button routerLink="../../reviews/{{element.data.reviewId}}/view"
+           class="primary"><strong>View</strong></a>
+      </div>
     </mat-cell>
   </ng-container>
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

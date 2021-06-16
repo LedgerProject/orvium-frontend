@@ -1,8 +1,9 @@
-<app-access-denied *ngIf="!canInviteReviewers"></app-access-denied>
+<orv-access-denied *ngIf="!canInviteReviewers"></orv-access-denied>
 
 <div class="container" *ngIf="canInviteReviewers">
   <h1 class="mat-h1 primary">Manage Invitations</h1>
-  <h2 class="mat-h2">Publication: {{ deposit.title }}</h2>
+  <h3 class="mat-body-1">Invite colleages to review "{{ deposit.title }}" publication. Know more
+    <a href="https://help.orvium.io/publication/invite-reviewers/" target="_blank">here</a>.</h3>
   <p class="mat-body primary">
     <mat-icon>visibility</mat-icon>
     Open review
@@ -26,25 +27,23 @@
     <table mat-table [dataSource]="invites">
       <ng-container matColumnDef="reviewer">
         <th mat-header-cell *matHeaderCellDef> REVIEWER</th>
-        <td mat-cell *matCellDef="let element" [ngClass]="{resolved: element.status === 'accepted'}"> {{element.addressee}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.addressee}} </td>
       </ng-container>
       <ng-container matColumnDef="request_date">
         <th mat-header-cell *matHeaderCellDef> REQUEST DATE</th>
-        <td mat-cell *matCellDef="let element"
-            [ngClass]="{resolved: element.status === 'accepted'}"> {{element.createdOn | date: 'dd/MM/yyyy'}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.createdOn | date: 'dd/MM/yyyy'}} </td>
       </ng-container>
       <ng-container matColumnDef="deadline">
         <th mat-header-cell *matHeaderCellDef> DEADLINE</th>
-        <td mat-cell *matCellDef="let element"
-            [ngClass]="{resolved: element.status === 'accepted'}"> {{element.deadline | date: 'dd/MM/yyyy'}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.deadline | date: 'dd/MM/yyyy'}} </td>
       </ng-container>
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>STATUS</th>
-        <td mat-cell *matCellDef="let element" [ngClass]="{resolved: element.status === 'accepted'}">
+        <td mat-cell *matCellDef="let element">
           <mat-chip-list>
             <mat-chip [ngClass]="{'chip-red': element.status === 'rejected',
               'chip-pink': element.status === 'pending',
-              'chip-transparent': element.status === 'accepted'}">
+              'chip-published': element.status === 'accepted'}">
               <strong>{{ element.status | titlecase}}</strong>
             </mat-chip>
           </mat-chip-list>
@@ -59,9 +58,14 @@
       <mat-icon>refresh</mat-icon>
       Refresh
     </button>
-    <button mat-raised-button color="primary" [routerLink]="['..','invite']">
+    <button mat-raised-button color="primary" (click)="openInviteReviewerModal()">
       <mat-icon>email</mat-icon>
       Invite reviewers
     </button>
   </div>
 </div>
+
+<ngx-smart-modal #inviteReviewerModal identifier="inviteReviewerModal" class="modal light-theme">
+  <app-invite-reviewers></app-invite-reviewers>
+</ngx-smart-modal>
+

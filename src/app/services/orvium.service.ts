@@ -1,125 +1,108 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import {
-  AppNotification,
-  Citation,
-  Community,
-  Deposit,
-  DepositsQuery,
-  Domain,
-  Institution,
-  Invite,
-  PeerReview,
-  Profile
-} from '../model/orvium';
+import { Observable } from 'rxjs';
+import { Citation, DepositsQuery, TopDisciplinesQuery, } from '../model/orvium';
 import { environment } from '../../environments/environment';
-import { tap } from 'rxjs/operators';
+import { Feedback } from '../shared/feedback/entity/feedback';
+import { map } from 'rxjs/operators';
+import {
+  CommentDTO,
+  CommunityDTO,
+  CommunityPrivateDTO,
+  CreateDepositDTO,
+  CreateInstitutionDTO,
+  CreateReviewDTO,
+  DepositDTO,
+  DomainDTO,
+  InstitutionDTO,
+  InviteDTO,
+  ReviewDTO
+} from '../model/api';
 
 
 @Injectable({ providedIn: 'root' })
 export class OrviumService {
 
-  public profile = new BehaviorSubject<Profile | undefined>(undefined);
-
   constructor(private http: HttpClient) {
   }
-
-  // *************************
-  // Profile
-  // *************************
-
-  updateProfile(profile: Partial<Profile>): Observable<Profile> {
-    return this.http.patch<Profile>(`${environment.apiEndpoint}/users/profile`, profile).pipe(
-      tap(profileUpdated => {
-        this.profile.next(profileUpdated);
-      })
-    );
-  }
-
-  sendConfirmationEmail(): Observable<unknown> {
-    return this.http.post(`${environment.apiEndpoint}/users/sendConfirmationEmail`, {});
-  }
-
-  isUserLoggedIn(): boolean {
-    if (this.profile) {
-      return true;
-    }
-    return false;
-  }
-
-  getProfile(): Observable<Profile | undefined> {
-    return this.profile.asObservable();
-  }
-
-  getProfileFromApi(inviteToken?: string): Observable<Profile> {
-    let params = new HttpParams();
-    return this.http.get<Profile>(`${environment.apiEndpoint}/users/profile`, { params }).pipe(
-      tap(profile => {
-        console.log('Profile from API returned');
-        this.profile.next(profile);
-      })
-    );
-  }
-
-  confirmEmail(token: string): Observable<{message: string}> {
-    const params = new HttpParams().set('token', encodeURIComponent(token));
-    return this.http.get<{message: string}>(`${environment.apiEndpoint}/users/confirmEmail`, { params });
-  }
-
-  sendInvite(emails: string[]): Observable<unknown> {
-    return this.http.post(`${environment.apiEndpoint}/users/sendInvitations`, { emails });
-  }
-
 
   // *************************
   // Deposits
   // *************************
 
-  getDeposit(id: string): Observable<Deposit> {
-    return this.http.get<Deposit>(`${environment.apiEndpoint}/deposits/${id}`);
+  getDeposit(id: string): Observable<DepositDTO> {
+    return this.http.get<DepositDTO>(`${environment.apiEndpoint}/deposits/${id}`);
   }
 
-  getDepositVersions(id: string): Observable<Deposit[]> {
-    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/${id}/versions`);
+  getDepositVersions(id: string): Observable<DepositDTO[]> {
+    return this.http.get<DepositDTO[]>(`${environment.apiEndpoint}/deposits/${id}/versions`);
   }
 
-  getDeposits(query = '', page = 1): Observable<DepositsQuery> {
+  getDeposits(query = '', doi = '', orcid = '', discipline = '', from = '', until = '', status = '', page = 1): Observable<DepositsQuery> {
     let params = new HttpParams()
       .set('page', page.toString());
     if (query) {
       params = params.set('query', query);
     }
+    if (doi) {
+      params = params.set('doi', doi);
+    }
+    if (orcid) {
+      params = params.set('orcid', orcid);
+    }
+    if (discipline) {
+      params = params.set('discipline', discipline);
+    }
+    if (from) {
+      params = params.set('from', from);
+    }
+    if (until) {
+      params = params.set('until', until);
+    }
+    if (status) {
+      params = params.set('status', status);
+    }
     return this.http.get<DepositsQuery>(`${environment.apiEndpoint}/deposits`, { params });
   }
 
-  getMyDeposits(): Observable<Deposit[]> {
-    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/myDeposits`);
+  getMyDeposits(): Observable<DepositDTO[]> {
+    return this.http.get<DepositDTO[]>(`${environment.apiEndpoint}/deposits/myDeposits`);
   }
 
-  getPreprintDeposits(): Observable<Deposit[]> {
-    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/preprintDeposits`);
+  getProfileDeposits(userId: string): Observable<DepositDTO[]> {
+    let params = new HttpParams().set('userId', userId);
+    let depositsQueryObservable = this.http.get<DepositsQuery>(`${environment.apiEndpoint}/deposits`, { params });
+    return depositsQueryObservable.pipe(
+      map(query => query.deposits)
+    );
   }
 
-  getPendingApprovalDeposits(): Observable<Deposit[]> {
-    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/pendingApprovalDeposits`);
+  getPapersToReview(): Observable<DepositDTO[]> {
+    return this.http.get<DepositDTO[]>(`${environment.apiEndpoint}/deposits/papersToReview`);
   }
 
-
-  getMyStarredDeposits(): Observable<Deposit[]> {
-    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/deposits/myStarredDeposits`);
+  getPendingApprovalDeposits(): Observable<DepositDTO[]> {
+    return this.http.get<DepositDTO[]>(`${environment.apiEndpoint}/deposits/pendingApprovalDeposits`);
   }
 
-  createDeposit(payload: Partial<Deposit>): Observable<Deposit> {
-    return this.http.post<Deposit>(`${environment.apiEndpoint}/deposits`, payload);
+  getMyStarredDeposits(): Observable<DepositDTO[]> {
+    return this.http.get<DepositDTO[]>(`${environment.apiEndpoint}/deposits/myStarredDeposits`);
   }
 
-  createDepositRevision(id: string): Observable<Deposit> {
-    return this.http.post<Deposit>(`${environment.apiEndpoint}/deposits/${id}/createRevision`, {});
+  createDeposit(payload: CreateDepositDTO): Observable<DepositDTO> {
+    return this.http.post<DepositDTO>(`${environment.apiEndpoint}/deposits`, payload);
   }
 
-  updateDeposit(id: string, payload: Partial<Deposit>): Observable<Deposit> {
-    return this.http.patch<Deposit>(`${environment.apiEndpoint}/deposits/${id}`, payload);
+  createDepositWithDOI(payload: Partial<DepositDTO>): Observable<DepositDTO> {
+    return this.http.post<DepositDTO>(`${environment.apiEndpoint}/deposits/createWithDOI`, payload);
+  }
+
+  createDepositRevision(id: string): Observable<DepositDTO> {
+    return this.http.post<DepositDTO>(`${environment.apiEndpoint}/deposits/${id}/createRevision`, {});
+  }
+
+  updateDeposit(id: string, payload: Partial<DepositDTO>): Observable<DepositDTO> {
+    return this.http.patch<DepositDTO>(`${environment.apiEndpoint}/deposits/${id}`, payload);
   }
 
   deleteDeposit(id: string): Observable<string> {
@@ -130,130 +113,172 @@ export class OrviumService {
     return this.http.get<Citation>(`${environment.apiEndpoint}/deposits/${id}/citation`);
   }
 
+  addComment(id: string, payload: Partial<CommentDTO>): Observable<DepositDTO> {
+    return this.http.post<DepositDTO>(`${environment.apiEndpoint}/deposits/${id}/comments`, payload);
+  }
+
+  deleteComment(id: string, commentId: string): Observable<DepositDTO> {
+    return this.http.delete<DepositDTO>(`${environment.apiEndpoint}/deposits/${id}/comments/${commentId}`);
+  }
+
+  getTopDisciplines(): Observable<TopDisciplinesQuery[]> {
+    return this.http.get<TopDisciplinesQuery[]>(`${environment.apiEndpoint}/deposits/topDisciplines`);
+  }
 
   // **************************
   // Deposit files
   // **************************
 
-  deleteDepositFiles(depositId: string, fileId: string): Observable<Deposit> {
-    return this.http.delete<Deposit>(`${environment.apiEndpoint}/deposits/${depositId}/files/${fileId}`);
+  /*eslint-disable */
+  getPresignedURL(depositId: string, filename: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiEndpoint}/deposits/${depositId}/files/${filename}/presigned`);
+  }
+
+  /*eslint-disable */
+
+  deleteDepositFiles(depositId: string, fileId: string): Observable<DepositDTO> {
+    return this.http.delete<DepositDTO>(`${environment.apiEndpoint}/deposits/${depositId}/files/${fileId}`);
   }
 
 
   // **************************
   // Peer Reviews
   // **************************
-  getMyReviews(): Observable<PeerReview[]> {
-    return this.http.get<PeerReview[]>(`${environment.apiEndpoint}/reviews/myReviews`);
+  getMyReviews(): Observable<ReviewDTO[]> {
+    return this.http.get<ReviewDTO[]>(`${environment.apiEndpoint}/reviews/myReviews`);
   }
 
-  getPeerReviews(id: string): Observable<PeerReview[]> {
-    return this.http.get<PeerReview[]>(`${environment.apiEndpoint}/reviews?depositId=${id}`);
+  getPeerReviews(id: string = '', owner: string = ''): Observable<ReviewDTO[]> {
+    let params = new HttpParams();
+    if (id) {
+      params = params.set('depositId', id);
+    }
+    if (owner) {
+      params = params.set('owner', owner);
+    }
+    return this.http.get<ReviewDTO[]>(`${environment.apiEndpoint}/reviews`, { params });
   }
 
-  getPeerReview(reviewId: string): Observable<PeerReview> {
-    return this.http.get<PeerReview>(`${environment.apiEndpoint}/reviews/${reviewId}`);
+  getPeerReview(reviewId: string): Observable<ReviewDTO> {
+    return this.http.get<ReviewDTO>(`${environment.apiEndpoint}/reviews/${reviewId}`);
   }
 
-  createReview(payload: Partial<PeerReview>): Observable<PeerReview> {
-    return this.http.post<PeerReview>(`${environment.apiEndpoint}/reviews`, payload);
+  createReview(payload: CreateReviewDTO): Observable<ReviewDTO> {
+    return this.http.post<ReviewDTO>(`${environment.apiEndpoint}/reviews`, payload);
   }
 
-  updatePeerReview(id: string, peerReview: Partial<PeerReview>): Observable<PeerReview> {
-    return this.http.patch<PeerReview>(`${environment.apiEndpoint}/reviews/${id}`, peerReview);
+  updatePeerReview(id: string, peerReview: Partial<ReviewDTO>): Observable<ReviewDTO> {
+    return this.http.patch<ReviewDTO>(`${environment.apiEndpoint}/reviews/${id}`, peerReview);
   }
 
   deleteReview(reviewId: string): Observable<string> {
     return this.http.delete<string>(`${environment.apiEndpoint}/reviews/${reviewId}`);
   }
 
+  // **************************
+  // Feedback
+  // **************************
+
+  createFeedback(feedback: Feedback): Observable<unknown> {
+    return this.http.post(`${environment.apiEndpoint}/feedback`, feedback);
+  }
 
   // *************************
   // Institutions
   // *************************
 
-  getInstitutions(name: string): Observable<Institution[]> {
+  getInstitutions(name: string): Observable<InstitutionDTO[]> {
     if (name.length > 2) {
       const params = new HttpParams().set('name', name);
-      return this.http.get<Institution[]>(`${environment.apiEndpoint}/institutions`, { params });
+      return this.http.get<InstitutionDTO[]>(`${environment.apiEndpoint}/institutions`, { params });
     } else {
-      return new Observable<Institution[]>();
+      return new Observable<InstitutionDTO[]>();
     }
   }
 
-  getInstitutionByDomain(domain: string): Observable<Institution> {
+  getInstitutionByDomain(domain: string): Observable<InstitutionDTO> {
     const params = new HttpParams().set('domain', domain);
-    return this.http.get<Institution>(`${environment.apiEndpoint}/institutions`, { params });
+    return this.http.get<InstitutionDTO>(`${environment.apiEndpoint}/institutions`, { params });
+  }
+
+  createInstitution(payload: CreateInstitutionDTO): Observable<InstitutionDTO> {
+    return this.http.post<InstitutionDTO>(`${environment.apiEndpoint}/institutions`, payload);
+  }
+
+  updateUsersInstitution(): Observable<void> {
+    return this.http.patch<void>(`${environment.apiEndpoint}/institutions`, null);
   }
 
   // *************************
   // Domains
   // *************************
 
-  getDomains(): Observable<Domain[]> {
-    return this.http.get<Domain[]>(`${environment.apiEndpoint}/domains`);
+  getDomains(): Observable<DomainDTO[]> {
+    return this.http.get<DomainDTO[]>(`${environment.apiEndpoint}/domains`);
   }
 
-  getDomain(domain: string): Observable<Domain> {
-    return this.http.get<Domain>(`${environment.apiEndpoint}/domains/${domain}`);
+  getDomain(domain: string): Observable<DomainDTO> {
+    return this.http.get<DomainDTO>(`${environment.apiEndpoint}/domains/${domain}`);
   }
 
   // **************************
   // Community
   // **************************
 
-  getCommunities(): Observable<Community[]> {
-    return this.http.get<Community[]>(`${environment.apiEndpoint}/communities`);
+  getCommunities(): Observable<CommunityDTO[]> {
+    return this.http.get<CommunityDTO[]>(`${environment.apiEndpoint}/communities`);
   }
 
-  getMyCommunities(): Observable<Community[]> {
-    return this.http.get<Community[]>(`${environment.apiEndpoint}/users/myCommunities`);
+  getCommunity(communityId: string): Observable<CommunityDTO | CommunityPrivateDTO> {
+    return this.http.get<CommunityDTO | CommunityPrivateDTO>(`${environment.apiEndpoint}/communities/${communityId}`);
   }
 
-  getCommunity(communityId: string): Observable<Community> {
-    return this.http.get<Community>(`${environment.apiEndpoint}/communities/${communityId}`);
+  joinCommunity(communityId: string): Observable<CommunityDTO> {
+    return this.http.post<CommunityDTO>(`${environment.apiEndpoint}/communities/${communityId}/join`, null);
   }
 
-  joinCommunity(communityId: string): Observable<Community> {
-    return this.http.post<Community>(`${environment.apiEndpoint}/communities/${communityId}/join`, null);
+  getCommunityDeposits(communityId: string): Observable<DepositDTO[]> {
+    return this.http.get<DepositDTO[]>(`${environment.apiEndpoint}/communities/${communityId}/deposits`);
   }
 
-  getCommunityDeposits(communityId: string): Observable<Deposit[]> {
-    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/communities/${communityId}/deposits`);
+  getModeratorDeposits(communityId: string): Observable<DepositDTO[]> {
+    return this.http.get<DepositDTO[]>(`${environment.apiEndpoint}/communities/${communityId}/moderate/deposits`);
   }
 
-  getModeratorDeposits(communityId: string): Observable<Deposit[]> {
-    return this.http.get<Deposit[]>(`${environment.apiEndpoint}/communities/${communityId}/moderate/deposits`);
+  updateCommunity(id: string, payload: Partial<CommunityPrivateDTO>): Observable<CommunityPrivateDTO> {
+    return this.http.patch<CommunityPrivateDTO>(`${environment.apiEndpoint}/communities/${id}`, payload);
   }
 
   // *************************
   // Invitations
   // *************************
 
-  createInvitation(payload: Partial<Invite>): Observable<Invite> {
-    return this.http.post<Invite>(`${environment.apiEndpoint}/invites`, payload);
+  createInvitation(payload: Partial<InviteDTO>): Observable<InviteDTO> {
+    return this.http.post<InviteDTO>(`${environment.apiEndpoint}/invites`, payload);
   }
 
-  getDepositInvitations(depositId: string): Observable<Invite[]> {
+  getDepositInvitations(depositId: string): Observable<InviteDTO[]> {
     const params = new HttpParams().set('depositId', depositId);
-    return this.http.get<Invite[]>(`${environment.apiEndpoint}/invites`, { params });
+    return this.http.get<InviteDTO[]>(`${environment.apiEndpoint}/invites`, { params });
   }
 
-  getMyInvitations(): Observable<Invite[]> {
-    return this.http.get<Invite[]>(`${environment.apiEndpoint}/invites/myInvites`);
+  getMyInvitations(): Observable<InviteDTO[]> {
+    return this.http.get<InviteDTO[]>(`${environment.apiEndpoint}/invites/myInvites`);
   }
 
-  updateInvite(id: string, payload: Partial<Invite>): Observable<Invite> {
-    return this.http.patch<Invite>(`${environment.apiEndpoint}/invites/${id}`, payload);
+  getMyInvitationForDeposit(depositId: string): Observable<boolean> {
+    const params = new HttpParams().set('id', depositId);
+    console.log(params);
+    return this.http.get<boolean>(`${environment.apiEndpoint}/invites/myInvitesForDeposit`, { params });
   }
 
-  login() {
-    this.getProfileFromApi().subscribe();
+  updateInvite(id: string, payload: Partial<InviteDTO>): Observable<InviteDTO> {
+    return this.http.patch<InviteDTO>(`${environment.apiEndpoint}/invites/${id}`, payload);
   }
 
-  logout() {
-    this.profile.next(undefined);
-    console.log('User logged out');
-    window.location.reload();
+  inviteReviewerToken(token: string): Observable<{ message: string }> {
+    let params = new HttpParams()
+      .set('inviteReviewerToken', encodeURIComponent(token));
+    return this.http.get<{ message: string }>(`${environment.apiEndpoint}/invites/inviteReviewerToken`, { params });
   }
 }

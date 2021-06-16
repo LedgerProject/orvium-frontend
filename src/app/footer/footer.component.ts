@@ -1,20 +1,24 @@
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Feedback } from '../shared/feedback/entity/feedback';
 import { OrviumService } from '../services/orvium.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { isPlatformBrowser } from '@angular/common';
+import { ProfileService } from '../profile/profile.service';
 
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.scss']
 })
-export class FooterComponent implements OnInit {
+export class FooterComponent {
   public showBanner = false;
   private bannerKey = 'banner-cookie-consent-accepted';
 
-  constructor(public orviumService: OrviumService,
-              private snackBar: MatSnackBar,
-              @Inject(PLATFORM_ID) private platformId: string) {
+  constructor(
+    private orviumService: OrviumService,
+    public profileService: ProfileService,
+    private snackBar: MatSnackBar,
+    @Inject(PLATFORM_ID) private platformId: string) {
 
     if (isPlatformBrowser(platformId)) {
       const accepted = localStorage.getItem(this.bannerKey) === 'accepted';
@@ -24,10 +28,12 @@ export class FooterComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-  }
-
   onSend(event: object): void {
+    const feedback = event as Feedback;
+    this.orviumService.createFeedback(feedback).subscribe(data => {
+      this.snackBar.open('Thank you for your feedback!', 'Dismiss',
+        { panelClass: ['ok-snackbar'] });
+    });
   }
 
   dismissBanner(): void {

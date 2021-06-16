@@ -2,22 +2,23 @@ import { OrviumService } from './orvium.service';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { of } from 'rxjs';
-import { Deposit, DepositsQuery, PeerReview } from '../model/orvium';
-
-import jsonDeposit from './deposit.json';
-import jsonReview from './review.json';
+import { DepositsQuery } from '../model/orvium';
 import { environment } from '../../environments/environment';
+import { depositDraft, reviewPublished } from '../shared/test-data';
+import { CreateDepositDTO, DepositDTO, ReviewDTO } from '../model/api';
 
 describe('OrviumService', () => {
-  let deposit: Deposit;
-  let review: PeerReview;
+  let deposit: DepositDTO;
+  let review: ReviewDTO;
+  let createDepositDTO: CreateDepositDTO;
   let orviumService: OrviumService;
   let httpClientSpy: jasmine.SpyObj<HttpClient>;
   const newBaseUrl = environment.apiEndpoint;
 
   beforeEach(() => {
-    deposit = JSON.parse(JSON.stringify(jsonDeposit));
-    review = JSON.parse(JSON.stringify(jsonReview));
+    deposit = depositDraft();
+    review = reviewPublished();
+    createDepositDTO = {title: 'the title'};
 
     const httpSpy = jasmine.createSpyObj('HttpClient', ['get', 'post', 'patch', 'delete']);
 
@@ -55,7 +56,7 @@ describe('OrviumService', () => {
     httpClientSpy.get.and.returnValue(of(depositsQuery));
 
     orviumService
-      .getDeposits(query, page)
+      .getDeposits(query)
       .subscribe(deposits => expect(deposits).toEqual(depositsQuery, 'expected deposits'), fail);
     // TODO check this call
     // expect(httpClientSpy.get).toHaveBeenCalledWith(baseUrl, {params: params});
@@ -64,7 +65,7 @@ describe('OrviumService', () => {
   it('should create a deposit', () => {
     httpClientSpy.post.and.returnValue(of(deposit));
 
-    orviumService.createDeposit(deposit).subscribe(result => expect(result).toEqual(deposit, 'created deposit'), fail);
+    orviumService.createDeposit(createDepositDTO).subscribe(result => expect(result).toEqual(deposit, 'created deposit'), fail);
     expect(httpClientSpy.post).toHaveBeenCalled();
   });
 
@@ -116,8 +117,14 @@ describe('OrviumService', () => {
     httpClientSpy.post.and.returnValue(of(review));
     const url = `${newBaseUrl}/reviews`;
 
-    orviumService.createReview(review).subscribe(result => expect(result).toEqual(review), fail);
-    expect(httpClientSpy.post).toHaveBeenCalledWith(url, review);
+    const createPayload = {
+      deposit: review.deposit._id,
+      revealReviewerIdentity: review.revealReviewerIdentity
+    };
+
+    orviumService.createReview(createPayload)
+      .subscribe(result => expect(result).toEqual(review), fail);
+    expect(httpClientSpy.post).toHaveBeenCalledWith(url, createPayload);
   });
 
   it('should update a review', () => {

@@ -1,15 +1,13 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { OrviumService } from '../../services/orvium.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Citation, Deposit, DEPOSIT_STATUS, DEPOSIT_STATUS_LOV, OrviumFile, Profile, REVIEW_STATUS } from 'src/app/model/orvium';
+import { Citation, DEPOSIT_STATUS_LOV } from 'src/app/model/orvium';
 import { EthereumService } from '../../blockchain/ethereum.service';
 import { environment } from '../../../environments/environment';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
 import { Meta, Title } from '@angular/platform-browser';
 import { formatDate, TitleCasePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { NGXLogger } from 'ngx-logger';
 import { ShareService } from 'ngx-sharebuttons';
 import { MatStepper } from '@angular/material/stepper';
@@ -17,6 +15,16 @@ import { NgxSmartModalService } from 'ngx-smart-modal';
 import { BlockchainService } from '../../blockchain/blockchain.service';
 import { DepositsService } from '../deposits.service';
 import { ReviewService } from '../../review/review.service';
+import { ProfileService } from '../../profile/profile.service';
+import { AppSnackBarService } from '../../services/app-snack-bar.service';
+import { ACCESS_RIGHT, CommentDTO, DEPOSIT_STATUS, DepositDTO, FileMetadata, REVIEW_STATUS, UserPrivateDTO } from 'src/app/model/api';
+import { OrvSpinnerService } from '@orvium/ux-components';
+
+export interface IAlbum {
+  src: string;
+  caption?: string;
+  thumb: string;
+}
 
 @Component({
   selector: 'app-deposit-view',
@@ -25,40 +33,42 @@ import { ReviewService } from '../../review/review.service';
 })
 export class DepositViewComponent implements OnInit, OnDestroy {
 
-  @ViewChild('stepper') stepper: MatStepper;
+  @ViewChild('stepper') stepper?: MatStepper;
 
-  deposit: Deposit;
-  files: OrviumFile[];
+  deposit: DepositDTO = new DepositDTO();
+  files: FileMetadata[] = [];
   environment = environment;
-  twitterDescription: string;
+  twitterDescription?: string;
 
   canManageDeposit = false;
   canModerateDeposit = false;
   canInviteReviewers = false;
   canCreateReview = false;
   canCreateVersion = false;
+  hasBeenInvitedToReview = false;
 
-  balanceTokens: string;
-  allowanceTokens: string;
+  balanceTokens = '0';
+  allowanceTokens = '0';
   isStarred = false;
-  profile: Profile;
-  private metaElements: HTMLMetaElement[];
-
-  private subscription: Subscription;
-
+  profile?: UserPrivateDTO;
   DEPOSIT_STATUS = DEPOSIT_STATUS;
   REVIEW_STATUS = REVIEW_STATUS;
-  depositVersions: Deposit[];
-  citation: Citation;
+  depositVersions: DepositDTO[] = [];
+  citation?: Citation;
+  ACCESS_RIGHT = ACCESS_RIGHT;
   DEPOSIT_STATUS_LOV = DEPOSIT_STATUS_LOV;
+  images: IAlbum[] = [];
+  private metaElements: HTMLMetaElement[] = [];
+  private subscription?: Subscription;
 
   constructor(private orviumService: OrviumService,
               public blockchainService: BlockchainService,
               private route: ActivatedRoute,
               private router: Router,
               public ethereumService: EthereumService,
-              private snackBar: MatSnackBar,
-              private spinnerService: NgxSpinnerService,
+              private profileService: ProfileService,
+              private snackBar: AppSnackBarService,
+              private spinnerService: OrvSpinnerService,
               private titleService: Title,
               private metaService: Meta,
               private logger: NGXLogger,
@@ -71,32 +81,39 @@ export class DepositViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-
-    this.route.data.pipe().subscribe(async data => {
+    this.route.data.subscribe(async data => {
       this.refreshDeposit(data.deposit);
     });
-
-    const profile = this.orviumService.profile.getValue();
+    this.titleService.setTitle(this.deposit.title + ' | Orvium');
+    const profile = this.profileService.profile.getValue();
     if (profile) {
       this.profile = profile;
       this.refreshDeposit(this.deposit);
-      this.titleService.setTitle(this.deposit.title + ' | Orvium');
+      this.orviumService.getMyInvitationForDeposit(this.deposit._id).subscribe(response => {
+        this.hasBeenInvitedToReview = response;
+      });
+    }
+    if (this.deposit.status === DEPOSIT_STATUS.preprint ||
+      this.deposit.status === DEPOSIT_STATUS.published) {
+      this.setSEOTags();
     }
   }
 
   updateStepper(): void {
     setTimeout(() => {
-      this.stepper.reset();
-      const stepperIndexMap = new Map<DEPOSIT_STATUS, number>([
-        [DEPOSIT_STATUS.draft, 0],
-        [DEPOSIT_STATUS.pendingApproval, 1],
-        [DEPOSIT_STATUS.inReview, 2],
-        [DEPOSIT_STATUS.preprint, 2],
-        [DEPOSIT_STATUS.published, 3],
-      ]);
-      const stepperIndex = stepperIndexMap.get(this.deposit.status) || 0;
-      for (let index = 0; index <= stepperIndex; index++) {
-        this.stepper.selectedIndex = index;
+      if (this.stepper) {
+        this.stepper.reset();
+        const stepperIndexMap = new Map<DEPOSIT_STATUS, number>([
+          [DEPOSIT_STATUS.draft, 0],
+          [DEPOSIT_STATUS.pendingApproval, 1],
+          [DEPOSIT_STATUS.inReview, 2],
+          [DEPOSIT_STATUS.preprint, 2],
+          [DEPOSIT_STATUS.published, 3],
+        ]);
+        const stepperIndex = stepperIndexMap.get(this.deposit.status) || 0;
+        for (let index = 0; index <= stepperIndex; index++) {
+          this.stepper.selectedIndex = index;
+        }
       }
     });
   }
@@ -115,9 +132,8 @@ export class DepositViewComponent implements OnInit, OnDestroy {
 
   createReview(): void {
     for (const x of this.deposit.peerReviews || []) {
-      if (x.owner === this.profile.userId) {
-        this.snackBar.open('You already created a review for this publication',
-          'Dismiss', { panelClass: ['info-snackbar'] });
+      if (x.owner === this.profile?.userId) {
+        this.snackBar.info('You already created a review for this publication');
         return;
       }
     }
@@ -137,7 +153,7 @@ export class DepositViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  refreshDeposit(deposit: Deposit): void {
+  refreshDeposit(deposit: DepositDTO): void {
     console.log('Refreshing deposit');
     this.deposit = deposit;
     this.canManageDeposit = this.depositService.canManageDeposit(this.profile, this.deposit);
@@ -153,7 +169,8 @@ export class DepositViewComponent implements OnInit, OnDestroy {
     });
 
     this.files = deposit.publicationFile ? [deposit.publicationFile].concat(deposit.files || []) : deposit.files || [];
-    if (this.deposit.status === DEPOSIT_STATUS.published) {
+    if (this.deposit.status === DEPOSIT_STATUS.preprint ||
+      this.deposit.status === DEPOSIT_STATUS.published) {
       this.setSEOTags();
     }
     if (this.ethereumService.isInitialized) {
@@ -165,6 +182,18 @@ export class DepositViewComponent implements OnInit, OnDestroy {
     if (this.profile) {
       this.isStarred = (this.getStarIndex(this.profile) > -1);
     }
+
+    //Set figures
+    if (deposit.images) {
+      this.images = [];
+      for (const src of deposit.images) {
+        const image = {
+          src: environment.apiEndpoint + '/deposits/' + this.deposit._id + '/media/' + src,
+          thumb: environment.apiEndpoint + '/deposits/' + this.deposit._id + '/media/' + src
+        };
+        this.images.push(image);
+      }
+    }
   }
 
   public setSEOTags(): void {
@@ -172,6 +201,8 @@ export class DepositViewComponent implements OnInit, OnDestroy {
     let citationPublicationDate;
     if (this.deposit.publicationDate) {
       citationPublicationDate = formatDate(this.deposit.publicationDate, 'y/M/d', 'en-US');
+    } else if (this.deposit.submissionDate) {
+      citationPublicationDate = formatDate(this.deposit.submissionDate, 'y/M/d', 'en-US');
     }
 
     this.metaElements = this.metaService.addTags([
@@ -225,7 +256,7 @@ export class DepositViewComponent implements OnInit, OnDestroy {
 
   star(): void {
     if (!this.profile) {
-      this.snackBar.open('You need to log in first to use this feature', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('You need to log in first to use this feature');
       return;
     }
 
@@ -235,13 +266,13 @@ export class DepositViewComponent implements OnInit, OnDestroy {
     } else {
       this.profile.starredDeposits?.push(this.deposit._id);
     }
-    this.orviumService.updateProfile({ starredDeposits: this.profile.starredDeposits })
+    this.profileService.updateProfile({ starredDeposits: this.profile.starredDeposits })
       .subscribe(profile => {
         this.refreshDeposit(this.deposit);
       });
   }
 
-  getStarIndex(profile: Profile): number {
+  getStarIndex(profile: UserPrivateDTO): number {
     if (profile.starredDeposits && profile.starredDeposits.indexOf(this.deposit._id) > -1) {
       return profile.starredDeposits.indexOf(this.deposit._id);
     }
@@ -261,15 +292,27 @@ export class DepositViewComponent implements OnInit, OnDestroy {
       status
     }).subscribe(response => {
       this.refreshDeposit(response);
-      this.snackBar.open('Status changed to ' + status, 'Dismiss',
-        { panelClass: ['ok-snackbar'] });
+      this.snackBar.info('Status changed to ' + status);
     });
   }
 
   createRevision(): void {
     this.orviumService.createDepositRevision(this.deposit._id).subscribe(response => {
-      this.snackBar.open('New version created', 'Dismiss', { panelClass: ['ok-snackbar'] });
+      this.snackBar.info('New version created');
       this.router.navigate(['deposits', response._id, 'edit']);
+    });
+  }
+
+  addComment(content: string): void {
+    const comment: Partial<CommentDTO> = { content };
+    this.orviumService.addComment(this.deposit._id, comment).subscribe(response => {
+      this.refreshDeposit(response);
+    });
+  }
+
+  deleteComment(commentId: string): void {
+    this.orviumService.deleteComment(this.deposit._id, commentId).subscribe(response => {
+      this.refreshDeposit(response);
     });
   }
 }

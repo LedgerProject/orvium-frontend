@@ -1,0 +1,36 @@
+<div class="right-sidenav">
+  <div class="mat-card-title push-none primary text-align-center">Notifications</div>
+  <mat-nav-list dense>
+    <mat-divider></mat-divider>
+    <mat-list-item *ngIf="notifications.length===0">
+      <mat-icon class="notification-icon" matListIcon>done_all</mat-icon>
+      <div matLine>
+        <h4 class="text-wrap primary">You're up to date!</h4>
+        <p class="text-wrap">Your notifications will appear here</p>
+      </div>
+    </mat-list-item>
+    <mat-list-item *ngFor="let notification of notifications; let index = index">
+      <mat-icon class="notification-icon" matListIcon>{{notification.icon}}</mat-icon>
+      <a *ngIf="notification.action?.includes('http')" matLine
+         href="{{notification.action}}"
+         target="_blank">
+        <h4 class="text-wrap primary">{{notification.title}}</h4>
+        <p matLine class="grey">{{notification.createdOn | date:'short'}}</p>
+        <p class="text-wrap">{{notification.body}}</p>
+      </a>
+      <a *ngIf="!notification.action?.includes('http')" matLine
+         [routerLink]="notification.action">
+        <h4 class="text-wrap primary">{{notification.title}}</h4>
+        <p matLine class="grey">{{notification.createdOn | date:'short'}}</p>
+        <p class="text-wrap">{{notification.body}}</p>
+      </a>
+
+      <mat-action-list>
+        <mat-icon class="notification-close-icon" (click)="deleteNotification(index, $event)">cancel</mat-icon>
+      </mat-action-list>
+      <mat-divider></mat-divider>
+    </mat-list-item>
+  </mat-nav-list>
+</div>
+
+

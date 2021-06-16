@@ -17,12 +17,27 @@ describe('ShowMoreComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ShowMoreComponent);
     component = fixture.componentInstance;
+    component.truncateLength = 2;
     component.text = 'Sample text here!';
     fixture.detectChanges();
   });
 
   afterEach(() => {
     fixture.destroy();
+  });
+
+  it('state to be closed', () => {
+    //component.text = 'Sample text here!';
+    component.ngOnInit();
+    expect(component.state).toContain('closed');
+    expect(component.showButtons).toBeTrue();
+  });
+
+  it('state to be open', () => {
+    component.text = 'Sample';
+    component.ngOnInit();
+    expect(component.state).toContain('open');
+    expect(component.showButtons).toBeFalse();
   });
 
   it('should create', () => {

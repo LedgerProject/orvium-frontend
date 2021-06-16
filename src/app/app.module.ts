@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 // Angular imports
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -34,7 +34,7 @@ import { RoutingModule } from './routing.module';
 import { CommonModule } from '@angular/common';
 import { FooterComponent } from './footer/footer.component';
 import { ToolbarComponent } from './toolbar/toolbar.component';
-import { SearchComponent } from './search/search.component';
+import { SearchComponent } from './searches/search/search.component';
 import { MyworkComponent } from './mywork/mywork.component';
 import { ENTER } from '@angular/cdk/keycodes';
 import { LoggerModule } from 'ngx-logger';
@@ -46,7 +46,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { StarredDepositsComponent } from './starred-deposits/starred-deposits.component';
 
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { SideNavComponent } from './side-nav/side-nav.component';
@@ -56,18 +55,12 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { GravatarModule } from 'ngx-gravatar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { DisciplinesService } from './services/disciplines.service';
+import { FeedbackModule } from './shared/feedback/feedback.module';
 import { SharedModule } from './shared/shared.module';
-import { NgCircleProgressModule } from 'ng-circle-progress';
-import { BrowserModule } from '@angular/platform-browser';
 import { MatPaginatorModule } from '@angular/material/paginator';
-
-
-export function initApp(disciplinesService: DisciplinesService): () => Promise<void> {
-  return (): Promise<void> => {
-    return disciplinesService.init();
-  };
-}
+import { NotificationsPanelComponent } from './notification/notifications-panel/notifications-panel.component';
+import { AdvancedSearchComponent } from './searches/advanced-search/advanced-search.component';
+import { OrviumUxLibModule } from '@orvium/ux-components';
 
 @NgModule({
   declarations: [
@@ -81,7 +74,9 @@ export function initApp(disciplinesService: DisciplinesService): () => Promise<v
     StarredDepositsComponent,
     DashboardComponent,
     SideNavComponent,
-    InviteComponent
+    InviteComponent,
+    NotificationsPanelComponent,
+    AdvancedSearchComponent
   ],
   imports: [
     CommonModule,
@@ -121,16 +116,16 @@ export function initApp(disciplinesService: DisciplinesService): () => Promise<v
     MatDividerModule,
     MatListModule,
     MatBadgeModule,
-    NgxSpinnerModule,
     MatTabsModule,
     ShareModule,
     GravatarModule.forRoot({ fallback: 'identicon' }),
     NgxSmartModalModule.forRoot(),
-    NgCircleProgressModule.forRoot(),
     MatProgressBarModule,
+    FeedbackModule,
     ClipboardModule,
     FontAwesomeModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    OrviumUxLibModule,
   ],
   providers: [
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 3000 } },
@@ -141,13 +136,7 @@ export function initApp(disciplinesService: DisciplinesService): () => Promise<v
         separatorKeyCodes: [ENTER]
       }
     },
-    { provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false, showError: true } },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initApp,
-      multi: true,
-      deps: [DisciplinesService]
-    },
+    { provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false, showError: true } }
   ],
 })
 export class AppModule {

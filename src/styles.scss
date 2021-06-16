@@ -1,6 +1,5 @@
 @import '~@angular/material/theming';
 @import 'light-theme.scss';
-@import 'light-red-theme.scss';
 @import 'dark-theme.scss';
 
 $dialog-position-top: 50%;
@@ -24,7 +23,7 @@ $dialog-position-top: 50%;
   }
 
   .accent {
-    color: mat-color($light-red-theme-accent);
+    color: mat-color($light-theme-accent);
   }
 
   .warn {
@@ -41,6 +40,10 @@ $dialog-position-top: 50%;
 
   .backgroundColor {
     background-color: white;
+  }
+
+  .advancedSearch {
+    background-color: #f6f9ff;
   }
 
   a {
@@ -122,6 +125,8 @@ ul, ol {
 
 .pointer {
   cursor: pointer;
+  outline: none;
+  box-shadow: none;
 }
 
 .justify-content-center {
@@ -130,10 +135,6 @@ ul, ol {
 
 .noshadow {
   box-shadow: none !important;
-}
-
-.whitespace-pre-line {
-  white-space: pre-line;
 }
 
 //
@@ -170,6 +171,14 @@ ul, ol {
   mat-icon {
     font-size: 70px !important;
   }
+}
+
+.orv-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 @mixin side-nav-color($config-or-theme) {
@@ -287,8 +296,7 @@ mat-card-actions {
   margin-left: auto;
   margin-right: auto;
   margin-top: 1em;
-  width: auto;
-  height: 25vh;
+  width: 100%;
 }
 
 .orv-button-group {

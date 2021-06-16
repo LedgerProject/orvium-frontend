@@ -1,0 +1,54 @@
+<mat-table [dataSource]="files">
+  <ng-container matColumnDef="icon">
+    <mat-header-cell *matHeaderCellDef class="table-fileicon"></mat-header-cell>
+    <mat-cell *matCellDef="let file" class="table-fileicon">
+      <fa-icon [icon]="file.contentType.includes('word') ? 'file-word' :
+                                       file.contentType.includes('pdf') ? 'file-pdf' :
+                                       file.contentType.includes('csv') ? 'file-csv' :
+                                       file.contentType.includes('image') ? 'file-image' :
+                                       file.contentType.includes('x-tex') ? 'file-code' :
+                                       file.contentType.includes('text') ? 'file-alt' :
+                                       file.contentType.includes('rtf') ? 'file-alt' : 'file'"
+               [matTooltip]="file.filename"
+               class="primary" size="lg">
+      </fa-icon>
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="filename">
+    <mat-header-cell *matHeaderCellDef class="table-filename">Filename</mat-header-cell>
+    <mat-cell *matCellDef="let file" class="orv-mobile-table-collum table-filename">
+      <a [matTooltip]="file.filename" href="{{file.presignedURL || baseHref+'/'+file.filename}}"
+         mat-button target="_blank">
+        {{ file.filename | shorten:30}}
+        <span *ngFor="let tag of file.tags"
+              class="badge badge-impact">{{tag}}</span>
+      </a>
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="length">
+    <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">MB</mat-header-cell>
+    <mat-cell *matCellDef="let file" class="orv-mobile-hidden"> {{file.contentLength / 1024 / 1024 | number}}</mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="actions">
+    <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+    <mat-cell *matCellDef="let file">
+      <button (click)="deleteFile(file.filename)" *ngIf="!readonly && !file.tags?.includes('Publication') "
+              aria-label="Delete file" class="pointer table-button" mat-button
+              matTooltip="Delete file">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <a aria-label="Download file" class="table-button"
+         download href="{{file.presignedURL || baseHref+'/'+file.filename}}"
+         mat-button matTooltip="Download file" target="_blank">
+        <mat-icon>save_alt</mat-icon>
+      </a>
+      <a *ngIf="canOpenOverleaf(file.filename)" aria-label="Open in overleaf" class="table-button"
+         download
+         href="https://www.overleaf.com/docs?snip_uri={{baseHref}}/{{file.filename}}" mat-button matTooltip="Open in Overleaf" target="_blank">
+        <fa-icon icon="leaf" size="lg"></fa-icon>
+      </a>
+    </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: columnsToDisplay;"></mat-row>
+</mat-table>

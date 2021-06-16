@@ -3,7 +3,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { DepositViewComponent } from './deposit-view.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ActivatedRoute } from '@angular/router';
-import { ACCESS_RIGHT, Deposit, DEPOSIT_STATUS, PUBLICATION_TYPE, REVIEW_TYPE } from '../../model/orvium';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgxSmartModalModule } from 'ngx-smart-modal';
 import { MatCardModule } from '@angular/material/card';
@@ -29,32 +28,18 @@ import { LoggerTestingModule } from 'ngx-logger/testing';
 import { FontAwesomeTestingModule } from '@fortawesome/angular-fontawesome/testing';
 import { SharedModule } from '../../shared/shared.module';
 import { DepositsModule } from '../deposits.module';
+import { CommentsComponent } from '../comments/comments.component';
+import { depositDraft } from '../../shared/test-data';
 
 describe('DepositViewComponent', () => {
   let component: DepositViewComponent;
   let fixture: ComponentFixture<DepositViewComponent>;
-  const deposit: Deposit = {
-    _id: '123412341234',
-    owner: 'theowner',
-    title: 'the title',
-    abstract: '',
-    authors: [],
-    references: [],
-    peerReviews: [],
-    publicationFile: { filename: 'file', contentType: 'pdf', contentLength: 1, keccak256: 'xxx' },
-    files: [{ filename: 'file', contentType: 'pdf', contentLength: 1, keccak256: 'xxx' }],
-    gravatar: '0a2aaae0ac1310d1f8e8e68df45fe7b8',
-    publicationType: PUBLICATION_TYPE.article,
-    accessRight: ACCESS_RIGHT.CCBY,
-    status: DEPOSIT_STATUS.draft,
-    reviewType: REVIEW_TYPE.openReview,
-    keywords: []
-  };
+  const deposit = depositDraft();
 
   const routeSnapshot = { data: of({ deposit }) };
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DepositViewComponent, ShowMoreComponent, DepositsReviewsTableComponent],
+      declarations: [DepositViewComponent, ShowMoreComponent, DepositsReviewsTableComponent, CommentsComponent],
       imports: [
         CommonModule,
         RouterTestingModule,

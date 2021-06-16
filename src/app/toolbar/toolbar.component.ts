@@ -3,17 +3,19 @@ import { EthereumService } from '../blockchain/ethereum.service';
 import { Router } from '@angular/router';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { OrviumService } from '../services/orvium.service';
-import { AppNotification, Profile } from '../model/orvium';
 import { SidenavService } from '../services/sidenav.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { NgxSmartModalService } from 'ngx-smart-modal';
 import { isPlatformBrowser } from '@angular/common';
-import { environment } from '../../environments/environment';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ThemeService } from '../theme/theme.service';
 import { NotificationService } from '../notification/notification.service';
+import { ProfileService } from '../profile/profile.service';
+import { AppSnackBarService } from '../services/app-snack-bar.service';
+import { finalize } from 'rxjs/operators';
+import { AppNotificationDTO, USER_TYPE, UserPrivateDTO } from '../model/api';
+import { OrvSpinnerService } from '@orvium/ux-components';
 
 @Component({
   selector: 'app-toolbar',
@@ -21,62 +23,62 @@ import { NotificationService } from '../notification/notification.service';
   styleUrls: ['./toolbar.component.scss']
 })
 export class ToolbarComponent implements OnInit {
-  networkName: string;
   searchInput = '';
   isReviewer = false;
-  ethereumIsAvailable: boolean;
   ethereumIsEnabled = false;
-  notifications: AppNotification[] = [];
-  profile: Profile;
+  notifications: AppNotificationDTO[] = [];
+  profile?: UserPrivateDTO;
   smallScreen = false;
-  clientId: string;
-  redirectUrl: string;
   newPublicationForm: FormGroup;
+  newPublicationWithDOIForm: FormGroup;
+  USER_TYPE = USER_TYPE;
+  isAdmin = false;
 
-  constructor(public ethereumService: EthereumService,
-              public router: Router,
-              public dialog: MatDialog,
-              public breakpointObserver: BreakpointObserver,
-              private sidenavService: SidenavService,
-              public orviumService: OrviumService,
-              private snackBar: MatSnackBar,
-              public ngxSmartModalService: NgxSmartModalService,
-              private themeService: ThemeService,
-              private notificationService: NotificationService,
-              @Inject(PLATFORM_ID) private platformId: string) {
+  constructor(
+    public ethereumService: EthereumService,
+    public router: Router,
+    public dialog: MatDialog,
+    public breakpointObserver: BreakpointObserver,
+    private sidenavService: SidenavService,
+    public orviumService: OrviumService,
+    private profileService: ProfileService,
+    private snackBar: AppSnackBarService,
+    public ngxSmartModalService: NgxSmartModalService,
+    private themeService: ThemeService,
+    private notificationService: NotificationService,
+    private formBuilder: FormBuilder,
+    private spinnerService: OrvSpinnerService,
+    @Inject(PLATFORM_ID) private platformId: string
+  ) {
+    this.newPublicationForm = this.formBuilder.group({
+      title: [null, [Validators.required, Validators.pattern(/.*\S.*/)]],
+    });
+
+    this.newPublicationWithDOIForm = this.formBuilder.group({
+      doi: [null, [Validators.required, Validators.pattern(/^10.\d{4,9}\/[-._;()/:A-Z0-9]+$/i)]],
+    });
   }
 
   ngOnInit(): void {
-
-    this.newPublicationForm = new FormGroup({
-      title: new FormControl(''),
-    });
-
     this.breakpointObserver.observe('(max-width: 768px)')
       .subscribe(result => {
         this.smallScreen = result.matches;
       });
 
     if (isPlatformBrowser(this.platformId)) {
-      this.orviumService.getProfile().subscribe(profile => {
-        if (profile) {
-          this.profile = profile;
+      this.profileService.getProfile().subscribe(profile => {
+        this.profile = profile;
+        if (this.profile) {
+          this.isAdmin = this.profile.roles.includes('admin');
         }
       });
 
-      this.ethereumIsAvailable = this.ethereumService.isAvailable();
     }
 
     this.notificationService.getNotifications()
       .subscribe(notifications => {
         const newNotifications = notifications.length > this.notifications.length;
         this.notifications = notifications;
-
-        if (newNotifications) {
-          this.snackBar.open('You have new notifications!',
-            'Dismiss',
-            { panelClass: ['ok-snackbar'] });
-        }
       });
   }
 
@@ -109,12 +111,22 @@ export class ToolbarComponent implements OnInit {
     this.sidenavService.toggle();
   }
 
+  toggleRightSidenav(): void {
+    this.sidenavService.toggleRight();
+  }
+
   create(): void {
-    if (!this.profile?.isOnboarded) {
-      this.snackBar.open('Complete your profile first to create publications', 'Dismiss', { panelClass: ['info-snackbar'] });
+    if (!this.profile?.isOnboarded || !this.profile?.emailConfirmed) {
+      this.snackBar.info('Complete your profile & confirm your email first');
     } else {
       this.ngxSmartModalService.open('createNewDeposit');
     }
+  }
+
+
+  createWithDOI(): void {
+    this.ngxSmartModalService.close('createNewDeposit');
+    this.ngxSmartModalService.open('createNewDepositWithDOI');
   }
 
   save(): void {
@@ -124,8 +136,29 @@ export class ToolbarComponent implements OnInit {
         this.router.navigate(['deposits', response._id, 'edit']);
       });
     } else {
-      this.snackBar.open('Please, enter a title for your publication', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Please, enter a title for your publication');
       this.newPublicationForm.reset();
+    }
+    this.close();
+  }
+
+
+  saveWithDOI(): void {
+    if (this.newPublicationWithDOIForm.get('doi')?.value !== '' && this.newPublicationWithDOIForm.get('doi')?.value !== null) {
+      this.spinnerService.show();
+      this.orviumService.createDepositWithDOI({
+        title: 'Publication title',
+        doi: this.newPublicationWithDOIForm.get('doi')?.value
+      }).pipe(finalize(() => {
+        this.spinnerService.hide();
+      })).subscribe(response => {
+        this.spinnerService.hide();
+        this.newPublicationWithDOIForm.reset();
+        this.router.navigate(['deposits', response._id, 'edit']);
+      });
+    } else {
+      this.snackBar.error('Please, enter a DOI');
+      this.newPublicationWithDOIForm.reset();
     }
     this.close();
   }
@@ -133,17 +166,18 @@ export class ToolbarComponent implements OnInit {
   close(): void {
     this.newPublicationForm.reset();
     this.ngxSmartModalService.close('createNewDeposit');
+    this.ngxSmartModalService.close('createNewDepositWithDOI');
   }
 
   changeTheme(): void {
     this.themeService.toggleTheme();
   }
 
-  login() {
-    this.orviumService.login();
+  login(): void {
+    this.profileService.login();
   }
 
-  logout() {
-    this.orviumService.logout();
+  logout(): void {
+    this.profileService.logout();
   }
 }

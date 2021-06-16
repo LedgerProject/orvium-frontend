@@ -3,24 +3,27 @@
     #sidenav [mode]="smallScreen ? 'over' : 'side'"
     [fixedInViewport]="smallScreen"
     fixedTopGap="56">
-    <div class="left-sidenav" *ngIf="profile">
-      <mat-nav-list>
+    <div class="left-sidenav">
+      <mat-nav-list *ngIf="profile">
         <section>
           <button matSubheader mat-menu-item [routerLink]="['dashboard']" routerLinkActive="active-link">
             <mat-icon>speed</mat-icon>
             <span>Dashboard</span>
             <span class="badge badge-success">Soon</span>
           </button>
-          <button matSubheader mat-menu-item routerLinkActive="active-link" class="sidenav-mypublications" (click)="closeSidenav()"
+          <button matSubheader mat-menu-item routerLinkActive="active-link" class="sidenav-mypublications"
+                  (click)="closeSidenav()"
                   [routerLink]="['publications']">
             <mat-icon>file_copy</mat-icon>
             My Publications
           </button>
-          <button matSubheader mat-menu-item routerLinkActive="active-link" (click)="closeSidenav()" [routerLink]="['starred']">
+          <button matSubheader mat-menu-item routerLinkActive="active-link" (click)="closeSidenav()"
+                  [routerLink]="['starred']">
             <mat-icon>star_border</mat-icon>
             Starred publications
           </button>
-          <button *ngIf="!profile?.isReviewer" (click)="isReviewer()" matSubheader mat-menu-item class="sidenav-reviews">
+          <button *ngIf="!profile?.isReviewer" (click)="isReviewer()" matSubheader mat-menu-item
+                  class="sidenav-reviews">
             <mat-icon>thumbs_up_down</mat-icon>
             Reviews
           </button>
@@ -64,10 +67,17 @@
       </button>
     </div>
   </mat-sidenav>
+
+  <mat-sidenav #rightSidenav position="end" mode="over">
+    <app-notifications-panel></app-notifications-panel>
+  </mat-sidenav>
+
   <mat-sidenav-content id="sidenav-content">
-    <ngx-spinner bdColor="rgba(51,51,51,0.5)" size="medium" color="#377dff" type="ball-clip-rotate"
+    <orv-spinner bdColor="rgba(51,51,51,0.5)" size="medium" color="#377dff" type="ball-clip-rotate"
                  [fullScreen]="true">
-    </ngx-spinner>
+    </orv-spinner>
     <router-outlet class="backgroundColor" (activate)="resetPosition()"></router-outlet>
   </mat-sidenav-content>
+
 </mat-sidenav-container>
+

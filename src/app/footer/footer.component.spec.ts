@@ -3,6 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './footer.component';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { FeedbackModule } from '../shared/feedback/feedback.module';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 describe('FooterComponent', () => {
@@ -14,6 +15,7 @@ describe('FooterComponent', () => {
       imports: [RouterTestingModule,
         HttpClientModule,
         MatSnackBarModule,
+        FeedbackModule,
         MatToolbarModule
       ],
       declarations: [FooterComponent],

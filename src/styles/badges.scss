@@ -32,3 +32,24 @@
   color: #fff;
   background-color: #4ef1cc;
 }
+
+//Reviewer
+.badge-reviewer {
+  margin-left: 10px;
+  color: #9663ff;
+  background-color: #e8ddff;
+}
+
+//Author
+.badge-author {
+  margin-left: 10px;
+  color: #fff;
+  background-color: mat-color($primary);
+}
+
+//Aming
+.badge-admin {
+  margin-left: 10px;
+  color: #fdc500;
+  background-color: #fcf0c9;
+}

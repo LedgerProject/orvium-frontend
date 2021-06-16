@@ -4,9 +4,9 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ShareService } from 'ngx-sharebuttons';
 import { MatDialogRef } from '@angular/material/dialog';
-import { CustomValidators } from '../shared/CustomValidators';
-import { OrviumService } from '../services/orvium.service';
+import { AppCustomValidators } from '../shared/AppCustomValidators';
 import { environment } from '../../environments/environment';
+import { ProfileService } from '../profile/profile.service';
 
 @Component({
   selector: 'app-invite',
@@ -21,23 +21,24 @@ export class InviteComponent implements OnInit {
   readonly separatorKeysCodes: number[] = [ENTER, COMMA];
   emails: string[] = [];
   sendEmailFormGroup: FormGroup;
-  public inviteLink: string;
+  public inviteLink?: string;
   description = 'Orvium connect researchers and publishers with trusted reviewers to accelerate publishing ' +
     'along with incentivized peer review.';
 
   constructor(private formBuilder: FormBuilder,
               public share: ShareService,
-              private orviumService: OrviumService,
+              private profileService: ProfileService,
               public dialogRef: MatDialogRef<InviteComponent>) {
+    this.sendEmailFormGroup = this.formBuilder.group({
+      emails: [this.emails, [AppCustomValidators.validateRequired, AppCustomValidators.validateEmails]],
+    });
   }
 
   ngOnInit(): void {
-    this.sendEmailFormGroup = this.formBuilder.group({
-      emails: [this.emails, [CustomValidators.validateRequired, CustomValidators.validateEmails]],
-    });
+
     this.sendEmailFormGroup.controls.emails.setValue(this.emails);
-    const inviteToken = this.orviumService.profile.getValue()?.inviteToken;
-    this.inviteLink = `${environment.publicUrl}/profile?inviteToken=${inviteToken}`;
+    const inviteToken = this.profileService.profile.getValue()?.inviteToken;
+    this.inviteLink = `${environment.publicUrl}/profile/invite?inviteToken=${inviteToken}`;
   }
 
   add(event: MatChipInputEvent): void {
@@ -72,7 +73,7 @@ export class InviteComponent implements OnInit {
   }
 
   send(): void {
-    this.orviumService.sendInvite(this.emails).subscribe();
+    this.profileService.sendInvite(this.emails).subscribe();
     this.dialogRef.close();
   }
 

@@ -1,5 +1,5 @@
-<app-access-denied *ngIf="!isModerator"></app-access-denied>
-<div *ngIf="isModerator">
+<orv-access-denied *ngIf="!isModerator"></orv-access-denied>
+<div *ngIf="community && isModerator">
   <h1 class="mat-h1 primary">Moderator panel</h1>
   <h2 class="mat-h2">Manage {{community.name}} community publications.</h2>
   <div class="orv-metrics">

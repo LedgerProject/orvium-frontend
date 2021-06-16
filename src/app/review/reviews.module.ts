@@ -20,7 +20,6 @@ import { PapersToReviewComponent } from './papers-to-review/papers-to-review.com
 import { SharedModule } from '../shared/shared.module';
 import { ReviewViewComponent } from './review-view/review-view.component';
 import { NgxSmartModalModule } from 'ngx-smart-modal';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReviewsCreateComponent } from './reviews-create/reviews-create.component';
@@ -29,6 +28,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatInputModule } from '@angular/material/input';
 import { InvitationsPanelComponent } from './invitations-panel/invitations-panel.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { OrviumUxLibModule } from '@orvium/ux-components';
 
 const routes: Routes = [
   {
@@ -96,9 +96,9 @@ const routes: Routes = [
     MatButtonModule,
     GravatarModule,
     NgxSmartModalModule.forChild(),
-    NgxSpinnerModule,
     FontAwesomeModule,
-    MatTabsModule
+    MatTabsModule,
+    OrviumUxLibModule
   ],
   exports: [RouterModule]
 })

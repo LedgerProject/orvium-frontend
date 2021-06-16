@@ -25,14 +25,16 @@
           </a>
           <p
             class="mat-body primary">{{ profileFormGroup.get('firstName')?.value }} {{ profileFormGroup.get('lastName')?.value }}</p>
-          <div class="mat-small primary">
+          <div *ngIf="profile.userType!==USER_TYPE.citizen" class="mat-small primary">
             <p>{{ profileFormGroup.get('role')?.value }}</p>
             <p>{{ profile?.institution }}</p>
-            <p *ngIf="profile?.isReviewer" class="green">
+          </div>
+          <div class="mat-small primary">
+            <p *ngIf="profile.isReviewer" class="green">
               <mat-icon class="align-icon-text">done</mat-icon>
               Reviewer
             </p>
-            <p *ngIf="!profile?.isReviewer" class="red" matTooltip="You need to complete your profile to create reviews">
+            <p *ngIf="!profile.isReviewer" class="red" matTooltip="You need to complete your profile to create reviews">
               <mat-icon class="align-icon-text">close</mat-icon>
               Reviewer
             </p>
@@ -57,16 +59,20 @@
           <p class="primary">Personal details</p>
           <mat-form-field appearance="outline">
             <mat-label>First name</mat-label>
-            <input required matInput id="firstNameInput" #firstName placeholder="John" formControlName="firstName" data-lpignore="true">
+            <input required matInput id="firstNameInput" #firstName placeholder="John" formControlName="firstName" data-lpignore="true"
+                   (focus)="focusFirstName = true" (focusout)="focusFirstName = false">
+            <mat-hint *ngIf="focusFirstName">Your profile URL may change</mat-hint>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Last name</mat-label>
-            <input required matInput id="lastNameInput" placeholder="Doe" formControlName="lastName" data-lpignore="true">
+            <input required matInput id="lastNameInput" placeholder="Doe" formControlName="lastName" data-lpignore="true"
+                   (focus)="focusLastName = true" (focusout)="focusLastName = false">
+            <mat-hint *ngIf="focusLastName">Your profile URL may change</mat-hint>
           </mat-form-field>
           <mat-form-field *ngIf="profile.emailConfirmed"
                           matTooltip="Use profile wizard to change your email" appearance="outline">
             <mat-label>Email</mat-label>
-            <input readonly matInput id="emailConfirmedInput" placeholder="Email" value="{{profile.email}}" required>
+            <input readonly matInput id="emailConfirmedInput" placeholder="Email" type="email" value="{{profile.email}}" required>
           </mat-form-field>
           <mat-form-field *ngIf="!profile.emailConfirmed"
 
@@ -84,7 +90,7 @@
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Personal site</mat-label>
-            <input matInput id="siteInput" placeholder="https://myblog.com" formControlName="blog" data-lpignore="true">
+            <input matInput id="siteInput" placeholder="https://myblog.com" formControlName="blog" data-lpignore="true" type="url">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>About me</mat-label>
@@ -110,16 +116,16 @@
             <input matInput id="orcidInput"
                    placeholder="https://orcid.org/0000-0000-0000-0000"
                    formControlName="orcid"
-                   data-lpignore="true">
-            <mat-error *ngFor="let error of (profileFormGroup.get('orcid')?.errors || []) | keyvalue">
+                   data-lpignore="true" type="url">
+            <mat-error *ngIf="profileFormGroup.controls.orcid?.invalid">
               Invalid ORCID
             </mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>LinkedIn url</mat-label>
             <input matInput id="linkedinInput" placeholder="https://www.linkedin.com/in/john-doe/" formControlName="linkedin"
-                   data-lpignore="true">
-            <mat-error *ngFor="let error of (profileFormGroup.get('linkedin')?.errors || []) | keyvalue">
+                   data-lpignore="true" type="url">
+            <mat-error *ngIf="profileFormGroup.controls.linkedin?.invalid">
               Invalid LinkedIn
             </mat-error>
           </mat-form-field>
@@ -146,7 +152,7 @@
     </mat-card-content>
     <mat-card-actions>
       <button id="save" [disabled]="!profileFormGroup.valid || profileFormGroup.pristine" mat-button color="primary"
-              (click)="save()">
+              (click)="save()" type="submit">
         <mat-icon>save</mat-icon>
         Save
       </button>

@@ -1,0 +1,204 @@
+<orv-access-denied *ngIf="!isModerator" xmlns="http://www.w3.org/1999/html"></orv-access-denied>
+<div *ngIf="isModerator">
+  <h1 class="mat-display-1 primary">Edit Community</h1>
+  <h3 class="mat-body-1">Edit and manage the information displayed about your community</h3>
+  <div class="container" [formGroup]="communityForm">
+    <div class="main">
+      <div class="main-section">
+        <h2 class="mat-h2">Community Details</h2>
+        <div class="sub-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput id="nameInput"
+                   type="text"
+                   placeholder="Name"
+                   formControlName="name" required>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Location</mat-label>
+            <input matInput id="locationInput"
+                   type="text"
+                   formControlName="country">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput id="descriptionInput"
+                      formControlName="description" cdkTextareaAutosize></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select ngDefaultControl
+                        formControlName="type">
+              <mat-option *ngFor="let option of communityTypeLOV" [value]="option.value">
+                {{option.viewValue}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Guidelines</mat-label>
+            <textarea matInput id="guidelinesInput" formControlName="acknowledgement"
+                      cdkTextareaAutosize></textarea>
+          </mat-form-field>
+          <mat-card class="orv-side-card noshadow">
+            <mat-card-subtitle>Guidelines preview</mat-card-subtitle>
+            <mat-card-content>
+              <div [innerHTML]="communityForm.controls.acknowledgement.value"></div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <div class="main-section">
+        <h2 class="mat-h2">Social</h2>
+        <div class="sub-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Twitter</mat-label>
+            <input matInput id="twitterInput"
+                   type="url"
+                   placeholder="Twitter" formControlName="twitterURL">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Facebook</mat-label>
+            <input matInput id="facebookInput" placeholder="Facebook" type="url"
+                   formControlName="facebookURL">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Website</mat-label>
+            <input matInput id="websiteInput" placeholder="Website" type="url"
+                   formControlName="websiteURL">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Guidelines URL</mat-label>
+            <input matInput id="guidelinesURLInput" type="url"
+                   placeholder="Guidelines URL" formControlName="guidelinesURL">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="main-section">
+        <h2 class="mat-h2">Datacite</h2>
+        <div class="sub-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Account ID</mat-label>
+            <input matInput id="dataciteAccountId" formControlName="dataciteAccountID">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput id="datacitePassword" type="password" formControlName="datacitePassword">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Prefix</mat-label>
+            <input matInput id="datacitePrefix" formControlName="datacitePrefix">
+          </mat-form-field>
+          <p *ngIf="!community.dataciteEnabled" class="mat-card-subtitle" style="margin-top: 1em;">Datacite is disabled, please complete all
+            the required information to start generating DOIs automatically.</p>
+          <p *ngIf="community.dataciteEnabled" class="mat-card-subtitle" style="margin-top: 1em;">Datacite is enabled, DOIs will be
+            generated automatically if Datacite credentials are correct.</p>
+        </div>
+      </div>
+
+      <div class="main-section">
+        <h2 class="mat-h2">Call for Papers</h2>
+        <div *ngIf="community.callForPapers" class="sub-section" [formGroup]="callForPapersForm">
+          <mat-form-field appearance="outline">
+            <mat-label>Title</mat-label>
+            <input matInput id="titleInput" type="text"
+                   placeholder="Title" formControlName="title" required>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="margin-input">
+            <mat-label>Deadline</mat-label>
+            <input matInput [matDatepicker]="picker1" formControlName="deadline">
+            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput
+                      id="cfpDescriptionInput"
+                      placeholder="Description"
+                      formControlName="description"
+                      cdkTextareaAutosize></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Scope</mat-label>
+            <textarea matInput id="scopeInput"
+                      placeholder="Scope"
+                      formControlName="scope"
+                      cdkTextareaAutosize></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Disciplines</mat-label>
+            <mat-chip-list #disciplinesChips ngDefaultControl formControlName="disciplines">
+              <mat-chip *ngFor="let keyword of callForPapersForm.get('disciplines')?.value" (removed)="removeKeyword(keyword)">
+                {{keyword}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+              <input matInput id="disciplinesInput" [matChipInputFor]="disciplinesChips"
+                     (matChipInputTokenEnd)="addKeyword($event)" matChipInputAddOnBlur="true">
+            </mat-chip-list>
+            <mat-hint>Press enter to separate disciplines</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Contact</mat-label>
+            <textarea matInput
+                      id="contactInput"
+                      placeholder="Contact"
+                      formControlName="contact"
+                      cdkTextareaAutosize></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Contact Email</mat-label>
+            <input matInput type="email"
+                   id="contactEmailInput"
+                   placeholder="Contact Email"
+                   formControlName="contactEmail">
+          </mat-form-field>
+          <mat-slide-toggle formControlName="visible" color="primary" style="margin-top: 1em;">
+            <h3 *ngIf="callForPapersForm.controls.visible.value" class="mat-body-1 item-title">Call for papers is visible</h3>
+            <h3 *ngIf="!callForPapersForm.controls.visible.value" class="mat-body-1 item-title">Call for papers is not visible</h3>
+          </mat-slide-toggle>
+        </div>
+        <div class="social">
+          <button *ngIf="!community.callForPapers" mat-raised-button color="primary" aria-label="Add author"
+                  (click)="createCallForPapers()">
+            <mat-icon>add</mat-icon>
+            Add Call for Papers
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="side">
+      <mat-card class="orv-side-card noshadow">
+        <mat-card-content>
+          <div class="main-section">
+            <img src="{{community.logoURL}}"
+                 alt="Community Logo"
+                 class="orv-community-logo pointer"/>
+          </div>
+          <div class="sub-section">
+            <mat-form-field appearance="outline">
+              <mat-label>Logo URL</mat-label>
+              <input matInput id="logoInput"
+                     type="url"
+                     placeholder="Logo URL" formControlName="logoURL">
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="publication-buttons">
+      <button mat-raised-button color="primary" (click)="save()"
+              [disabled]=" communityForm.pristine && callForPapersForm.pristine || !communityForm.valid ">
+
+
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+      <a mat-button color="primary"
+         [routerLink]="['..','view']" target="_blank">
+        <mat-icon>visibility</mat-icon>
+        Preview
+      </a>
+    </div>
+  </div>
+</div>

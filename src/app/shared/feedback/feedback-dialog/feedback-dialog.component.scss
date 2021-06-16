@@ -1,0 +1,65 @@
+.dialog {
+  z-index: 1000;
+  position: relative;
+  background-color: white;
+  width: 80vw;
+  max-width: 800px;
+  padding: 1em;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  position: relative;
+}
+
+.description {
+  flex-grow: 1;
+}
+
+.screenshot-content {
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  display: block;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  height: 192px;
+  width: 100%;
+  background: rgb(237, 237, 237) none;
+}
+
+.screenshot-content:hover svg {
+  color: #4285f4;
+  fill: currentColor;
+}
+
+::ng-deep .feedbackDialog .mat-dialog-container {
+  padding: 0;
+  overflow: visible;
+  background-color: rgba(255, 255, 255, 0);
+  box-shadow: initial;
+}
+
+.drawCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  margin: 0 auto;
+  cursor: crosshair;
+}
+
+.pointerCursor {
+  cursor: default !important;
+}
+
+.mat-dialog-title {
+  background-color: #377dff;
+  color: white;
+  height: 30px;
+  margin: 0;
+  text-align: center;
+}

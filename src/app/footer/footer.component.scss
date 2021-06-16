@@ -10,3 +10,10 @@
     text-decoration: underline;
   }
 }
+
+.feedback {
+  position: fixed;
+  left: 10px;
+  bottom: -7px;
+  z-index: 2;
+}

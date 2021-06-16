@@ -1,36 +1,6 @@
-<div class="container">
-  <section class="community-header">
-    <div class="column-left">
-      <h1 class="mat-display-1">{{community.name}}</h1>
-      <h1 class="mat-subheading-1 grey">
-        <mat-icon>location_on</mat-icon>
-        {{community.country}}
-      </h1>
-      <h1 class="mat-subheading-2">{{community.description}}</h1>
-      <div class="community-button-panel">
-        <button mat-raised-button
-                *ngIf="!isContributor"
-                color="primary"
-                class="center"
-                (click)="joinCommunity()">
-          <mat-icon>person_add</mat-icon>
-          Join Community
-        </button>
-        <button mat-raised-button
-                color="primary"
-                class="center"
-                *ngIf="isContributor"
-                (click)="uploadDeposit()">Submit publication
-        </button>
-        <a *ngIf="isModerator"
-           mat-raised-button
-           color="primary"
-           class="center"
-           [routerLink]="['..', 'moderate']">Moderate
-        </a>
-      </div>
-    </div>
-    <div class="column-right">
+<div class="container" *ngIf="community">
+  <div class="content">
+    <section class="logo">
       <img src="{{community.logoURL}}" alt="Community Logo" class="orv-community-logo">
       <div class="community-metrics">
         <span mat-button class="mat-subheading-1 grey">
@@ -42,40 +12,21 @@
           {{deposits?.length}} Publications
         </span>
       </div>
-    </div>
-  </section>
-  <div class="content">
-    <div class="recent">
-      <h1 class="mat-h1 primary text-align-center">Community Publications</h1>
-      <app-deposits-list
-        [deposits]="deposits">
-      </app-deposits-list>
-    </div>
-    <div class="side">
-      <mat-card class="orv-side-card">
-        <mat-card-header>
-          <mat-card-title class="primary">Benefits</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <ul>
-            <li>Publish open access and get exposure, increase your impact!</li>
-            <li>Join the conversation of your peers and get recognized as an expert and guardian of quality!</li>
-            <li>Watch over a growing scholar community and get rewarded for building up a healthy academic publishing environment!</li>
-          </ul>
-        </mat-card-content>
-      </mat-card>
+    </section>
+    <section class="information">
       <mat-card class="orv-side-card">
         <mat-card-header>
           <mat-card-title class="primary">Community Guidelines</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <ol>
+          <div *ngIf="community.acknowledgement" [innerHTML]="community.acknowledgement"></div>
+          <ol *ngIf="!community.acknowledgement">
             <li>The work has not been previously published, nor been submitted to another publisher.</li>
             <li>If the work has been published on a preprint or repository server, reference is made in the current submission.</li>
             <li>There available, URLs for the references have been provided.</li>
             <li>The submitting author has received permission from the co-authors to submit their work to {{community.name}}.</li>
             <li>You have obtained permission from the original owners to reuse their photographs, illustrations or drawings.</li>
-            <li>You agree to follow the code of conduct set by Orvium and TU Delft.</li>
+            <li>You agree to follow the code of conduct set by Orvium and {{community.name}}.</li>
             <li>You agree to publish your work Open Access under CreativeCommon compatible license (CC0, CC-BY, CC BY-ND) and to
               have your work undergoing an Open Peer-Review process.
             </li>
@@ -110,7 +61,81 @@
           <mat-icon class="white">account_balance</mat-icon>
         </a>
       </div>
-    </div>
+    </section>
+    <section *ngIf="moderators.length >0" class="moderators">
+      <mat-card class="orv-side-card">
+        <mat-card-header>
+          <mat-card-title class="primary">Moderators</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-list role="list">
+            <mat-list-item *ngFor="let moderator of moderators">
+              <img mat-card-avatar ngxGravatar class="pointer"
+                   [md5Hash]="moderator.gravatar || '2e7854c294602808422223306eff0e33'"
+                   [routerLink]="['/profile', moderator.nickname]"/>
+              <div>
+                <p>
+                  {{ moderator.firstName }} {{ moderator.lastName}}
+                </p>
+                <p class="mat-card-subtitle">
+                  {{ moderator.institution }}
+                </p>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </section>
+    <section class="recent">
+      <h1 class="mat-display-1">{{community.name}}</h1>
+      <h1 class="mat-subheading-1 grey">
+        <mat-icon>location_on</mat-icon>
+        {{community.country}}
+      </h1>
+      <h1 class="mat-subheading-2">{{community.description}}</h1>
+      <a *ngIf="community.callForPapers && community.callForPapers.visible" (click)="callForPapers()" class="pointer">
+        <h1 class="mat-subheading-1 primary">
+          <mat-icon class="primary">bookmarks</mat-icon>
+          New <strong>call for papers</strong> available!
+        </h1>
+      </a>
+      <div class="community-button-panel">
+        <button mat-raised-button
+                *ngIf="!isContributor"
+                color="primary"
+                class="center"
+                (click)="joinCommunity()">
+          <mat-icon>person_add</mat-icon>
+          Join Community
+        </button>
+        <button mat-raised-button
+                color="primary"
+                class="center"
+                *ngIf="isContributor"
+                (click)="uploadDeposit()">
+          Submit publication
+        </button>
+        <a *ngIf="isModerator"
+           mat-raised-button
+           color="primary"
+           class="center"
+           [routerLink]="['..', 'moderate']">Moderate
+        </a>
+        <a *ngIf="isModerator"
+           mat-raised-button
+           color="primary"
+           [routerLink]="['..', 'edit']">
+          Edit
+        </a>
+      </div>
+      <div>
+        <app-benefits [communityType]="community.type"></app-benefits>
+        <h1 class="mat-h1 primary text-align-center">Community Publications</h1>
+        <app-deposits-list
+          [deposits]="deposits">
+        </app-deposits-list>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -127,4 +152,7 @@
   </button>
 </ngx-smart-modal>
 
-
+<ngx-smart-modal #callForPapersModal identifier="callForPapersModal" class="modal light-theme">
+  <app-call-for-papers [callForPapers]="community.callForPapers">
+  </app-call-for-papers>
+</ngx-smart-modal>

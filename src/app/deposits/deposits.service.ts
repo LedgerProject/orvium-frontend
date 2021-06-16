@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Community, Deposit, DEPOSIT_STATUS, Profile } from '../model/orvium';
+import { DEPOSIT_STATUS, DepositDTO, UserPrivateDTO } from '../model/api';
 
 @Injectable({
   providedIn: 'root'
@@ -9,17 +9,26 @@ export class DepositsService {
   constructor() {
   }
 
-  canUpdateDeposit(profile: Profile | undefined, deposit: Deposit): boolean {
+  canUpdateDeposit(deposit: DepositDTO): boolean {
+    for (const action of deposit.actions) {
+      if (action === 'update') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  canManageDeposit(profile: UserPrivateDTO | undefined, deposit: DepositDTO): boolean {
     let hasRights = false;
 
     if (!profile) {
       return false;
     }
 
-    const community = deposit.community as unknown as Community;
+    const community = deposit.community;
 
     // If deposit is published then restrict the update
-    if (profile.userId === deposit.owner && deposit.status === DEPOSIT_STATUS.draft) {
+    if (profile.userId === deposit.owner && deposit.status == DEPOSIT_STATUS.draft) {
       hasRights = true;
     }
 
@@ -36,41 +45,14 @@ export class DepositsService {
     return hasRights;
   }
 
-  canManageDeposit(profile: Profile | undefined, deposit: Deposit): boolean {
+  canModerateDeposit(profile: UserPrivateDTO | undefined, deposit: DepositDTO): boolean {
     let hasRights = false;
 
     if (!profile) {
       return false;
     }
 
-    const community = deposit.community as unknown as Community;
-
-    // If deposit is published then restrict the update
-    if (profile.userId === deposit.owner) {
-      hasRights = true;
-    }
-
-    // Moderator can update
-    if (community && profile.roles.includes(`moderator:${community._id}`)) {
-      hasRights = true;
-    }
-
-    // Admin can update
-    if (profile.roles.includes('admin')) {
-      hasRights = true;
-    }
-
-    return hasRights;
-  }
-
-  canModerateDeposit(profile: Profile | undefined, deposit: Deposit): boolean {
-    let hasRights = false;
-
-    if (!profile) {
-      return false;
-    }
-
-    const community = deposit.community as unknown as Community;
+    const community = deposit.community;
 
     if (community && profile.roles.includes(`moderator:${community._id}`)) {
       hasRights = true;
@@ -82,7 +64,7 @@ export class DepositsService {
     return hasRights;
   }
 
-  canInviteReviewers(profile: Profile | undefined, deposit: Deposit): boolean {
+  canInviteReviewers(profile: UserPrivateDTO | undefined, deposit: DepositDTO): boolean {
     let hasRights = false;
 
     if (!profile) {
@@ -105,7 +87,7 @@ export class DepositsService {
     return hasRights;
   }
 
-  canCreateVersion(profile: Profile | undefined, deposit: Deposit): boolean {
+  canCreateVersion(profile: UserPrivateDTO | undefined, deposit: DepositDTO): boolean {
     let hasRights = false;
 
     // If deposit is not

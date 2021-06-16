@@ -18,7 +18,7 @@
           <p>Public or private institution</p>
           <p class="mat-small">R&D, product development, government or NGO roles.</p>
         </mat-button-toggle>
-        <mat-button-toggle [value]="USER_TYPE.citizen" (click)="userInstitutionFormGroup.reset()">
+        <mat-button-toggle [value]="USER_TYPE.citizen">
           <img src="https://assets.orvium.io/man.svg" alt="Citizen">
           <p>Citizen</p>
           <p class="mat-small">Individuals interested in science.</p>
@@ -45,33 +45,17 @@
       <mat-form-field appearance="outline">
         <mat-label>Email</mat-label>
         <input matInput id="emailInput" placeholder="Email" formControlName="email" type="email" required email="true" data-lpignore="true">
-        <mat-error *ngFor="let error of (userProfileFormGroup.get('email')?.errors || []) | keyvalue">
-          Invalid email
-        </mat-error>
+        <mat-error *ngIf="userProfileFormGroup.controls.email?.invalid">
+          {{getErrorMessage(userProfileFormGroup.controls.email.errors)}}</mat-error>
       </mat-form-field>
-      <div>
-        <button mat-button matStepperPrevious color="primary">Back</button>
-        <button mat-flat-button color="primary" matStepperNext [disabled]="!userProfileFormGroup.valid">Next</button>
+      <div *ngIf="!profile.acceptedTC" class="checkbox">
+        <mat-checkbox id="tcCheckbox" formControlName="acceptedTC" class="grey" color="primary" type="checkbox" required>
+          I have read and agree to the <a class="primary" href="https://help.orvium.io/privacy/" target="_blank">Privacy Policy</a>
+        </mat-checkbox>
       </div>
-    </form>
-  </mat-step>
-  <mat-step [stepControl]="userInstitutionFormGroup"
-            *ngIf="userTypeFormGroup.get('userType')?.value != USER_TYPE.citizen">
-    <form [formGroup]="userInstitutionFormGroup" class="flex flex-direction-column center-form">
-      <ng-template matStepLabel>Fill out your institutional data</ng-template>
-      <p>
-        {{institution?.name}} {{institution?.country ? ' (' + institution.country + ')' : null}}</p>
-      <ng-container *ngIf="institution == null">
-        <p>
-          It looks like you are the first user from your institution in our platform.
-          Please complete this form and we will include your institution shortly.</p>
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdqqBn0iVZ2tdfBKrce21FYX9uGpYakYleB-CNYuIwm_Cylsg/viewform?embedded=true"
-                width="640" height="900" frameborder="0" marginheight="0" marginwidth="0">Loading…
-        </iframe>
-      </ng-container>
       <div>
         <button mat-button matStepperPrevious color="primary">Back</button>
-        <button mat-flat-button color="primary" matStepperNext [disabled]="!userProfileFormGroup.get('email')?.valid">
+        <button mat-flat-button color="primary" matStepperNext [disabled]="!userProfileFormGroup.valid">
           Next
         </button>
       </div>

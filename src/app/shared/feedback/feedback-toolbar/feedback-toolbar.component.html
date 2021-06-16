@@ -1,0 +1,14 @@
+<div cdkDrag class="toolbar light-theme">
+  <div cdkDragHandle>
+    <button mat-icon-button aria-label="Drag toolbar button">
+      <mat-icon>drag_indicator</mat-icon>
+    </button>
+  </div>
+  <button mat-icon-button (click)="toggleHighlight()" matTooltip="Highlight issues">
+    <mat-icon>highlight_alt</mat-icon>
+  </button>
+  <button mat-icon-button (click)="toggleHide()" matTooltip="Hide sensitive info">
+    <mat-icon>highlight_off</mat-icon>
+  </button>
+  <button mat-button (click)="done()">Done</button>
+</div>

@@ -1,18 +1,14 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Deposit } from '../../model/orvium';
+import { Component, Input } from '@angular/core';
+import { DepositDTO } from '../../model/api';
 
 @Component({
   selector: 'app-deposit-versions',
   templateUrl: './deposit-versions.component.html',
   styleUrls: ['./deposit-versions.component.scss']
 })
-export class DepositVersionsComponent implements OnInit {
-  @Input() deposits: Deposit[];
+export class DepositVersionsComponent {
+  @Input() deposits: DepositDTO[] = [];
 
   constructor() {
   }
-
-  ngOnInit(): void {
-  }
-
 }

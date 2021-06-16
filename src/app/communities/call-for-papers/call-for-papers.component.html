@@ -1,0 +1,19 @@
+<h1 class="mat-h1 primary text-align-center">{{callForPapers?.title}}</h1>
+<mat-icon class="primary">calendar_today</mat-icon>
+<h1 class="mat-card-title primary">{{callForPapers?.deadline | date: 'mediumDate'}}</h1>
+<h1 class="mat-card-subtitle">Deadline</h1>
+<mat-chip-list>
+  <mat-chip *ngFor="let discipline of callForPapers?.disciplines" class="chip-blue">{{discipline | titlecase}}</mat-chip>
+</mat-chip-list>
+<p>{{callForPapers?.description}}</p>
+<div *ngIf="callForPapers?.guestEditors">
+  <h2 class="mat-title-2 primary">Guest Editors</h2>
+  <div [innerHTML]="callForPapers?.guestEditors"></div>
+</div>
+<div *ngIf="callForPapers?.scope">
+  <p class="scope"> {{callForPapers?.scope}}</p>
+</div>
+<div *ngIf="callForPapers?.contact">
+  <h2 class="mat-title-2 primary">Contact</h2>
+  <div [innerHTML]="callForPapers?.contact"></div>
+</div>

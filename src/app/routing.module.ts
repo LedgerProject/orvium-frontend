@@ -2,12 +2,20 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuardService } from './services/auth-guard.service';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { NgModule } from '@angular/core';
-import { SearchComponent } from './search/search.component';
+import { SearchComponent } from './searches/search/search.component';
 import { MyworkComponent } from './mywork/mywork.component';
 import { StarredDepositsComponent } from './starred-deposits/starred-deposits.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { CommunityResolver, DepositListResolver, DepositResolver, PeerReviewResolver, ProfileResolver } from './shared/orvium.resolvers';
+import {
+  CommunityResolver,
+  DepositListResolver,
+  DepositResolver,
+  PeerReviewResolver,
+  ProfileResolver,
+  PublicProfileResolver
+} from './shared/orvium.resolvers';
 import { HomeComponent } from './home/home.component';
+import { AdvancedSearchComponent } from './searches/advanced-search/advanced-search.component';
 
 const routes: Routes = [
   {
@@ -42,6 +50,10 @@ const routes: Routes = [
     resolve: { depositsQuery: DepositListResolver },
   },
   {
+    path: 'advanced-search',
+    component: AdvancedSearchComponent,
+  },
+  {
     path: 'publications',
     component: MyworkComponent,
     runGuardsAndResolvers: 'always',
@@ -59,17 +71,18 @@ const routes: Routes = [
   imports: [
     RouterModule.forRoot(routes,
       {
-    preloadingStrategy: PreloadAllModules,
-    onSameUrlNavigation: 'reload',
-    scrollPositionRestoration: 'enabled',
-    relativeLinkResolution: 'legacy'
-})
+        preloadingStrategy: PreloadAllModules,
+        onSameUrlNavigation: 'reload',
+        // initialNavigation: 'enabledBlocking',
+        scrollPositionRestoration: 'enabled',
+      })
   ],
   exports: [
     RouterModule
   ],
   providers: [
     ProfileResolver,
+    PublicProfileResolver,
     DepositResolver,
     DepositListResolver,
     PeerReviewResolver,

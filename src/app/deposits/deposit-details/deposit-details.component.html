@@ -1,43 +1,45 @@
-<app-access-denied *ngIf="!canManageDeposit"></app-access-denied>
-<div *ngIf="canManageDeposit">
+<orv-access-denied *ngIf="!canManageDeposit && !canUpdateDeposit"></orv-access-denied>
+<div *ngIf="canManageDeposit || canUpdateDeposit">
   <h1 class="mat-display-1 primary">Edit Publication</h1>
   <h3 class="mat-body-1">Edit, manage and share your publication to show it to users on Orvium.</h3>
-  <div class="container" [formGroup]="depositForm">
+  <div [formGroup]="depositForm" class="container">
     <div>
       <div class="main-section">
         <h2 class="mat-h2">Publication Details</h2>
         <div class="sub-section">
           <mat-form-field appearance="outline">
             <mat-label>Title</mat-label>
-            <input matInput id="titleInput" placeholder="Title" formControlName="title" required>
+            <input formControlName="title" id="titleInput" matInput placeholder="Title" required type="text">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Abstract</mat-label>
-            <textarea matInput id="abstractInput" formControlName="abstract" cdkTextareaAutosize></textarea>
+            <textarea cdkTextareaAutosize formControlName="abstract" id="abstractInput" matInput></textarea>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Publication keywords</mat-label>
-            <mat-chip-list #keywordChips ngDefaultControl formControlName="keywords">
-              <mat-chip *ngFor="let keyword of depositForm.get('keywords')?.value" (removed)="removeKeyword(keyword)">
+            <mat-chip-list #keywordChips formControlName="keywords" ngDefaultControl>
+              <mat-chip (removed)="removeKeyword(keyword)" *ngFor="let keyword of depositForm.get('keywords')?.value">
                 {{keyword}}
-                <mat-icon *ngIf="!readonly" matChipRemove>cancel</mat-icon>
+                <mat-icon *ngIf="canUpdateDeposit" matChipRemove>cancel</mat-icon>
               </mat-chip>
-              <input matInput id="keywordInput" [matChipInputFor]="keywordChips"
-                     (matChipInputTokenEnd)="addKeyword($event)" matChipInputAddOnBlur="true">
+              <input (matChipInputTokenEnd)="addKeyword($event)" [matChipInputFor]="keywordChips" id="keywordInput"
+                     matChipInputAddOnBlur="true" matInput>
             </mat-chip-list>
+            <mat-hint>Press enter to separate keywords</mat-hint>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Disciplines</mat-label>
-            <mat-chip-list #disciplineChips ngDefaultControl aria-label="Discipline selection"
-                           formControlName="disciplines">
-              <mat-chip *ngFor="let discipline of depositForm.get('disciplines')?.value"
-                        (removed)="removeDiscipline(discipline)">
+            <mat-chip-list #disciplineChips aria-label="Discipline selection" formControlName="disciplines"
+                           ngDefaultControl>
+              <mat-chip (removed)="removeDiscipline(discipline)"
+                        *ngFor="let discipline of depositForm.get('disciplines')?.value">
                 {{discipline}}
-                <mat-icon matChipRemove>cancel</mat-icon>
+                <mat-icon *ngIf="canUpdateDeposit" matChipRemove>cancel</mat-icon>
               </mat-chip>
-              <input matInput id="disciplineInput" #disciplineInput matChipInputAddOnBlur="true"
-                     [formControl]="disciplinesControl" [matAutocomplete]="autoCompleteDisciplines"
-                     [matChipInputFor]="disciplineChips" (matChipInputTokenEnd)="addDiscipline($event)" data-lpignore="true">
+              <input #disciplineInput (matChipInputTokenEnd)="addDiscipline($event)" [formControl]="disciplinesControl"
+                     [matAutocomplete]="autoCompleteDisciplines"
+                     [matChipInputFor]="disciplineChips" data-lpignore="true"
+                     id="disciplineInput" matChipInputAddOnBlur="true" matInput>
             </mat-chip-list>
             <mat-autocomplete #autoCompleteDisciplines="matAutocomplete" (optionSelected)="selected($event)">
               <mat-option *ngFor="let discipline of filteredDisciplines | async" [value]="discipline.name">
@@ -47,14 +49,14 @@
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>DOI</mat-label>
-            <input matInput id="doiInput" [hidden]="readonly && deposit.doi" formControlName="doi"
-                   placeholder="10.1016/j.cub.2016.10.008">
-            <a *ngIf="readonly && deposit.doi" target="_blank"
-               href="https://doi.org/{{deposit.doi}}">{{deposit.doi}}</a>
+            <input [hidden]="readonly && deposit.doi" formControlName="doi" id="doiInput" matInput
+                   placeholder="10.1016/j.cub.2016.10.008" type="url">
+            <a *ngIf="readonly && deposit.doi" href="https://doi.org/{{deposit.doi}}"
+               target="_blank">{{deposit.doi}}</a>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Publication type</mat-label>
-            <mat-select ngDefaultControl id="typeInput" formControlName="publicationType">
+            <mat-select formControlName="publicationType" id="typeInput" ngDefaultControl>
               <mat-option *ngFor="let option of publicationTypeLOV" [value]="option.value">
                 {{option.viewValue}}
               </mat-option>
@@ -64,23 +66,23 @@
       </div>
       <div class="main-section">
         <h2 class="mat-h2">Publication Authors</h2>
-        <div class="sub-section" [formGroup]="authorsForm">
+        <div [formGroup]="authorsForm" class="sub-section">
           <mat-form-field appearance="outline">
             <mat-label>First Name</mat-label>
-            <input matInput id="nameAuthorInput" placeholder="John" formControlName="name">
+            <input formControlName="name" id="nameAuthorInput" matInput placeholder="John" type="text">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Last Name</mat-label>
-            <input matInput id="surnameAuthorInput" placeholder="Doe" formControlName="surname">
+            <input formControlName="surname" id="surnameAuthorInput" matInput placeholder="Doe" type="text">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
-            <input matInput id="emailAuthorInput" placeholder="johndoe@email.com" formControlName="email">
+            <input formControlName="email" id="emailAuthorInput" matInput placeholder="johndoe@email.com" type="email">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>ORCID</mat-label>
-            <input matInput id="orcidAuthorInput" placeholder="https://orcid.org/0000-0000-0000-0000"
-                   formControlName="orcid">
+            <input formControlName="orcid" id="orcidAuthorInput" matInput
+                   placeholder="https://orcid.org/0000-0000-0000-0000" type="url">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>CRediT roles</mat-label>
@@ -97,42 +99,44 @@
           </mat-form-field>
         </div>
         <div class="social">
-          <button mat-raised-button color="primary" aria-label="Add author" (click)="addAuthor()"
-                  [disabled]="deposit.status!='draft'">
+          <button (click)="addAuthor()" [disabled]="!canUpdateDeposit" aria-label="Add author" color="primary"
+                  mat-raised-button>
             <mat-icon>person_add</mat-icon>
             Add author
           </button>
         </div>
-        <mat-chip-list *ngIf="deposit.authors && deposit.authors.length > 0">
-          <mat-chip *ngFor="let author of deposit.authors; let indexOfelement=index" color="primary" selected
+        <mat-chip-list *ngIf="deposit.authors && deposit.authors.length > 0" cdkDropList cdkDropListOrientation="horizontal"
+                       (cdkDropListDropped)="drop($event)">
+          <mat-chip *ngFor="let author of deposit.authors; let indexOfelement=index" cdkDrag color="primary" selected
                     [matTooltip]="(author.credit && author.credit.length > 0) ? (author.credit.join(', ') | titlecase ) : ''">
             <a mat-icon-button *ngIf="author.orcid" href="{{author.orcid}}" target="_blank">
               <fa-icon [icon]="['fab', 'orcid']" size="lg" [style]="{color: '#A6CE39'}"></fa-icon>
             </a>
             {{ indexOfelement + 1 }}. {{author.name}} {{author.surname}}
-            <mat-icon *ngIf="deposit.status==DEPOSIT_STATUS.draft" class="pointer"
-                      (click)="removeAuthor(author)">cancel
+            <mat-icon (click)="removeAuthor(author)" *ngIf="canUpdateDeposit"
+                      class="pointer">cancel
             </mat-icon>
           </mat-chip>
         </mat-chip-list>
       </div>
       <div class="main-section">
         <h2 class="mat-h2">Publication References</h2>
-        <div class="sub-section" [formGroup]="referencesForm">
+        <div [formGroup]="referencesForm" class="sub-section">
           <mat-form-field appearance="outline">
             <mat-label>Reference</mat-label>
-            <textarea matInput id="referenceInput"
-                      placeholder="Darwin, C. & Kebler, L. (1859) On the origin of species by means of natural selection."
-                      formControlName="reference" cdkTextareaAutosize></textarea>
+            <textarea cdkTextareaAutosize formControlName="reference"
+                      id="referenceInput"
+                      matInput
+                      placeholder="Darwin, C. & Kebler, L. (1859) On the origin of species by means of natural selection."></textarea>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Reference link</mat-label>
-            <input matInput id="referenceLinkInput" placeholder="https://publication.com" formControlName="url">
+            <input formControlName="url" id="referenceLinkInput" matInput placeholder="https://publication.com" type="url">
           </mat-form-field>
         </div>
         <div class="social">
-          <button mat-raised-button color="primary" aria-label="Add reference" (click)="addReference()"
-                  [disabled]="deposit.status!='draft'">
+          <button (click)="addReference()" [disabled]="!canUpdateDeposit" aria-label="Add reference" color="primary"
+                  mat-raised-button>
             <mat-icon>post_add</mat-icon>
             Add reference
           </button>
@@ -140,133 +144,97 @@
         <mat-chip-list *ngIf="deposit.references && deposit.references.length > 0">
           <mat-chip *ngFor="let reference of deposit.references; let indexOfelement=index;" color="primary" selected>
             {{ indexOfelement + 1 }}. {{reference.reference | shorten: 50}}
-            <a mat-icon-button *ngIf="reference.url" href="{{reference.url}}" target="_blank">
+            <a *ngIf="reference.url" href="{{reference.url}}" mat-icon-button target="_blank">
               <mat-icon>
                 open_in_new
               </mat-icon>
             </a>
-            <mat-icon class="pointer" *ngIf="deposit.status=='draft'" mat-icon-button
-                      (click)="removeReference(reference)">
+            <mat-icon (click)="removeReference(reference)" *ngIf="canUpdateDeposit" class="pointer"
+                      mat-icon-button>
               cancel
             </mat-icon>
           </mat-chip>
         </mat-chip-list>
       </div>
       <div class="main-section">
+        <h2 class="mat-h2">Allow peer reviews</h2>
+        <mat-slide-toggle [disabled]="deposit.status!=DEPOSIT_STATUS.draft" color="primary" formControlName="canBeReviewed"
+                          ngDefaultControl>
+          <h3 *ngIf="depositForm.controls.canBeReviewed.value" class="mat-body-1 item-title">This publication allows peer reviews</h3>
+          <h3 *ngIf="!depositForm.controls.canBeReviewed.value" class="mat-body-1 item-title">This publication doesn't allow peer
+            reviews</h3>
+        </mat-slide-toggle>
+      </div>
+      <div class="main-section">
         <h2 class="mat-h2">Publication Files</h2>
         <div class="sub-section">
-          <app-fileupload name="file"
-                          url="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/files?isMainFile=true"
-                          (fileUpload)="filesUploaded($event)"
-                          (click)="onSelectFiles($event)"
-                          [showUploadButton]="depositForm.pristine"
-                          (fileSelect)="onSelectFiles($event)"
-                          [auto]="true"
-                          chooseLabel="Upload your publication file ({{PUBLICATIONS_EXTENSIONS_ALLOWED}})"
-                          [maxFileSize]="5000000"
-                          [accept]="PUBLICATIONS_EXTENSIONS_ALLOWED">
-          </app-fileupload>
-          <h3 class="mat-body-1 item-title">Upload here any extra files ({{OTHER_FILE_EXTENSIONS_ALLOWED}}) (max. 5Mb
-            each)</h3>
-          <div class="item-input">
-            <app-fileupload name="file"
-                            url="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/files"
-                            (fileUpload)="filesUploaded($event)"
-                            (click)="onSelectFiles($event)"
-                            [showUploadButton]="depositForm.pristine"
-                            (fileSelect)="onSelectFiles($event)"
-                            [auto]="true"
-                            chooseLabel="Upload here any extra files"
-                            [maxFileSize]="5000000"
-                            [accept]="OTHER_FILE_EXTENSIONS_ALLOWED">
-            </app-fileupload>
+          <div *ngIf="canUpdateDeposit">
+            <h3 class="mat-body-1 item-title">Accepted files (max. 20MB each):
+              <ul>
+                <li>Publication: {{PUBLICATIONS_EXTENSIONS_ALLOWED}}</li>
+                <li>Extra files: {{OTHER_FILE_EXTENSIONS_ALLOWED}}</li>
+              </ul>
+            </h3>
+            <div class="social flex">
+              <app-fileupload (click)="beforeUpload($event)"
+                              (fileUpload)="filesUploaded($event)"
+                              [accept]="PUBLICATIONS_EXTENSIONS_ALLOWED"
+                              [maxFileSize]="20000000"
+                              chooseLabel="Add publication"
+                              name="file"
+                              url="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/files?isMainFile=true">
+              </app-fileupload>
+              <app-fileupload (click)="beforeUpload($event)"
+                              (fileUpload)="filesUploaded($event)"
+                              [accept]="OTHER_FILE_EXTENSIONS_ALLOWED"
+                              [uploadedFileCount]="deposit.files.length"
+                              [fileLimit]="10"
+                              [maxFileSize]="20000000"
+                              chooseLabel="Add extra files"
+                              name="file"
+                              url="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/files">
+              </app-fileupload>
+            </div>
+            <app-file-list (fileDeleted)="deleteFilesModal($event)"
+                           [baseHref]="environment.apiEndpoint+'/deposits/'+deposit._id+'/files'"
+                           [files]="files"
+                           [readonly]="readonly">
+            </app-file-list>
           </div>
-          <mat-table [dataSource]="files">
-            <ng-container matColumnDef="icon">
-              <mat-header-cell *matHeaderCellDef class="table-fileicon"></mat-header-cell>
-              <mat-cell *matCellDef="let file" class="table-fileicon">
-                <fa-icon class="primary" [matTooltip]="file.filename" [icon]="file.contentType.includes('word') ? 'file-word' :
-                                       file.contentType.includes('pdf') ? 'file-pdf' :
-                                       file.contentType.includes('csv') ? 'file-csv' :
-                                       file.contentType.includes('image') ? 'file-image' :
-                                       file.contentType.includes('x-tex') ? 'file-code' :
-                                       file.contentType.includes('text') ? 'file-alt' :
-                                       file.contentType.includes('rtf') ? 'file-alt' : 'file'" size="lg">
-                </fa-icon>
-              </mat-cell>
-            </ng-container>
-            <ng-container matColumnDef="filename">
-              <mat-header-cell *matHeaderCellDef class="table-filename">Filename</mat-header-cell>
-              <mat-cell *matCellDef="let file" class="orv-mobile-table-collum table-filename">
-                <a mat-button [matTooltip]="file.filename"
-                   href="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/files/{{file.filename}}" target="_blank">
-                  {{ file.filename }}
-                  <span *ngIf="file.filename==deposit.publicationFile?.filename"
-                        class="badge badge-impact">Publication</span>
-                </a>
-              </mat-cell>
-            </ng-container>
-            <ng-container matColumnDef="length">
-              <mat-header-cell *matHeaderCellDef class="orv-mobile-hidden">MB</mat-header-cell>
-              <mat-cell *matCellDef="let file" class="orv-mobile-hidden"> {{file.contentLength / 1024 / 1024 | number}}</mat-cell>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
-              <mat-cell *matCellDef="let file">
-                <button *ngIf="!readonly && file.filename!==deposit.publicationFile?.filename" mat-button
-                        class="pointer table-button" (click)="deleteFilesModal(file.filename)" matTooltip="Delete file"
-                        aria-label="Delete file">
-                  <mat-icon>delete</mat-icon>
-                </button>
-                <a class="table-button" mat-button
-                   href="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/files/{{file.filename}}" target="_blank"
-                   aria-label="Download file" matTooltip="Download file" download>
-                  <mat-icon>save_alt</mat-icon>
-                </a>
-                <a class="table-button" mat-button *ngIf="canOpenOverleaf(file.filename)"
-                   href="https://www.overleaf.com/docs?snip_uri={{environment.apiEndpoint}}/deposits/{{deposit._id}}/files/{{file.filename}}"
-                   target="_blank" aria-label="Open in overleaf" matTooltip="Open in Overleaf" download>
-                  <fa-icon icon="leaf" size="lg"></fa-icon>
-                </a>
-              </mat-cell>
-            </ng-container>
-            <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: columnsToDisplay;"></mat-row>
-          </mat-table>
+        </div>
+        <div class="publication-buttons">
+          <button (click)="save()" [disabled]="depositForm.pristine || !depositForm.valid" color="primary"
+                  mat-button>
+            <mat-icon>save</mat-icon>
+            Save
+          </button>
+          <a [disabled]="!depositForm.valid" [routerLink]="['..','view']"
+             color="primary" mat-button
+             target="_blank">
+            <mat-icon>visibility</mat-icon>
+            Preview
+          </a>
+          <button (click)="ngxSmartModalService.getModal('deleteModal').open()" [disabled]="deposit.status!='draft'" color="primary"
+                  mat-button>
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+          <button (click)="openAcknowledgementModal()" *ngIf="deposit.reviewType == REVIEW_TYPE.openReview"
+                  [disabled]="deposit.status != DEPOSIT_STATUS.draft"
+                  color="primary" mat-raised-button>
+            <mat-icon>publish</mat-icon>
+            Submit
+          </button>
         </div>
       </div>
-      <div class="publication-buttons">
-        <button mat-button color="primary" (click)="save()"
-                [disabled]="depositForm.pristine || !depositForm.valid">
-          <mat-icon>save</mat-icon>
-          Save
-        </button>
-        <a mat-button color="primary"
-           [routerLink]="['..','view']" target="_blank"
-           [disabled]="!depositForm.valid">
-          <mat-icon>visibility</mat-icon>
-          Preview
-        </a>
-        <button mat-button color="primary" [disabled]="deposit.status!='draft'"
-                (click)="ngxSmartModalService.getModal('deleteModal').open()">
-          <mat-icon>delete</mat-icon>
-          Delete
-        </button>
-        <button mat-raised-button color="primary" *ngIf="deposit.reviewType == REVIEW_TYPE.openReview"
-                (click)="openAcknowledgementModal()" [disabled]="deposit.status != DEPOSIT_STATUS.draft">
-          <mat-icon>publish</mat-icon>
-          Submit
-        </button>
-      </div>
     </div>
-
     <div class="side">
       <mat-card *ngIf="deposit.community" class="orv-side-card noshadow">
         <mat-card-content>
           <a [routerLink]="['/communities', deposit.community._id, 'view']">
-            <img src="{{deposit.community.logoURL}}"
-                 alt="Community Logo"
-                 class="orv-community-logo pointer"/>
+            <img alt="Community Logo"
+                 class="orv-community-logo pointer"
+                 src="{{deposit.community.logoURL}}"/>
           </a>
         </mat-card-content>
       </mat-card>
@@ -278,8 +246,8 @@
         <mat-card-content>
           <mat-form-field appearance="outline">
             <mat-label>Community</mat-label>
-            <mat-select ngDefaultControl
-                        formControlName="community">
+            <mat-select formControlName="community"
+                        ngDefaultControl>
               <mat-option *ngFor="let community of communities" [value]="community._id">
                 {{community.name}}
               </mat-option>
@@ -297,7 +265,7 @@
         <mat-card-content>
           <mat-form-field appearance="outline">
             <mat-label>Licence</mat-label>
-            <mat-select ngDefaultControl id="accessRightInput" formControlName="accessRight">
+            <mat-select formControlName="accessRight" id="accessRightInput" ngDefaultControl>
               <mat-option *ngFor="let option of accessRightLOV" [value]="option.value">
                 {{option.viewValue}}
               </mat-option>
@@ -305,7 +273,24 @@
           </mat-form-field>
         </mat-card-content>
       </mat-card>
-      <mat-card *ngIf="this.ethereumService.isAvailable()" class="orv-side-card noshadow">
+      <mat-card class="orv-side-card noshadow">
+        <mat-card-title class="primary">GitHub Repository</mat-card-title>
+        <mat-card-subtitle>
+          Turn a GitHub repo into a collection of interactive notebooks. Orvium uses <a href="https://mybinder.org/" target="_blank">Binder</a>
+          to open those notebooks in an executable environment, making your code immediately reproducible by anyone, anywhere.
+        </mat-card-subtitle>
+        <mat-card-content>
+          <mat-form-field appearance="outline">
+            <mat-label>GitHub repository URL</mat-label>
+            <input matInput id="gitRepository" placeholder="GitHub repository URL" formControlName="gitRepository" type="text">
+          </mat-form-field>
+        </mat-card-content>
+        <a mat-icon-button *ngIf="deposit.gitRepository" href="{{deposit.gitRepository}}" target="_blank">
+          <fa-icon [icon]="['fab', 'github']" size="lg"></fa-icon>
+          <a href="{{deposit.binderURL}}" target="_blank"> Open in Binder</a>
+        </a>
+      </mat-card>
+      <mat-card *ngIf="this.ethereumService.isAvailable | async" class="orv-side-card noshadow">
         <mat-card-title class="primary">Blockchain</mat-card-title>
         <mat-card-subtitle>Use the blockchain to access extra features such as proving of the ownership of your work
           and get rewards for
@@ -315,17 +300,20 @@
           <h3 class="mat-body-1 item-title">
             - Save the Ownership of your publication storing your authorship in the blockchain:
           </h3>
-          <button mat-raised-button color="accent" [disabled]="deposit.files?.length === 0  ||
+          <button (click)="proofOwnership()" [disabled]="!deposit.publicationFile ||
             (!!deposit.transactions &&
             this.ethereumService.currentNetwork && this.ethereumService.currentNetwork.value &&
-            !!deposit.transactions[this.ethereumService.currentNetwork.value.name]!)"
-                  (click)="proofOwnership()">
+            !!deposit.transactions[this.ethereumService.currentNetwork.value.name]!)" color="accent"
+                  mat-raised-button>
             <mat-icon>verified_user</mat-icon>
             Save Ownership
-            <ngx-spinner name="spinnerProof" [fullScreen]="false"></ngx-spinner>
+            <orv-spinner name="spinnerProof" [fullScreen]="false">
+            </orv-spinner>
           </button>
-          <a *ngFor="let transaction of (deposit.transactions || []) | keyvalue" mat-button class="green"
-             href="{{ this.blockchainService.getNetworkByName(transaction.key.toString())?.explorerUrl + $any(transaction.value).hash }}"
+          <a *ngFor="let transaction of (deposit.transactions || []) | keyvalue" class="green"
+             href="{{ this.blockchainService.getNetworkByName(transaction.key.toString())?.explorerUrl +
+             $any(transaction.value).transactionHash }}"
+             mat-button
              target="_blank">
             <mat-icon aria-hidden="false" aria-label="Published icon">verified_user</mat-icon>
             Proof of Ownership in {{ this.blockchainService.getNetworkByName(transaction.key.toString())?.displayName }}
@@ -334,26 +322,27 @@
             - Unlock and Deposit your ORVs so reviewers can see how much you're willing to reward:
           </h3>
           <p class="mat-body">
-            <button mat-raised-button color="accent" (click)="showApproveDepositTokens()">
+            <button (click)="showApproveDepositTokens()" color="accent" mat-raised-button>
               <mat-icon>lock_open</mat-icon>
               Unlock ORVs
-              <ngx-spinner name="spinnerApproveTokens" [fullScreen]="false"></ngx-spinner>
+              <orv-spinner name="spinnerApproveTokens" [fullScreen]="false"></orv-spinner>
             </button>
             You have
-            <button mat-mini-fab matTooltip="Number of ORV tokens you can transfer to ORV platform for peer reviews"
-                    color="primary">{{ allowanceTokens?.slice(0, -18) || 0 }}
+            <button color="primary" mat-mini-fab
+                    matTooltip="Number of ORV tokens you can transfer to ORV platform for peer reviews">
+              {{ allowanceTokens?.slice(0, -18) || 0 }}
             </button>
             ORVs unlocked and ready for deposit.
           </p>
           <p class="mat-body">
-            <button [disabled]="!((allowanceTokens)>'0')" mat-raised-button color="accent" (click)="showDepositTokens()">
+            <button (click)="showDepositTokens()" [disabled]="!((allowanceTokens)>'0')" color="accent" mat-raised-button>
               <mat-icon>move_to_inbox</mat-icon>
               Deposit ORVs
-              <ngx-spinner name="spinnerDepositTokens" [fullScreen]="false"></ngx-spinner>
+              <orv-spinner name="spinnerDepositTokens" [fullScreen]="false"></orv-spinner>
             </button>
             The author has deposited
-            <button mat-mini-fab matTooltip="Number of ORV tokens the author has stacked"
-                    color="primary">{{ balanceTokens?.slice(0, -18) || 0 }}
+            <button color="primary" mat-mini-fab
+                    matTooltip="Number of ORV tokens the author has stacked">{{ balanceTokens?.slice(0, -18) || 0 }}
             </button>
             ORV tokens for peer review rewards.
           </p>
@@ -362,72 +351,72 @@
     </div>
   </div>
 </div>
-<ngx-smart-modal #deleteFileModal identifier="deleteFileModal" class="modal light-theme">
+<ngx-smart-modal #deleteFileModal class="modal light-theme" identifier="deleteFileModal">
   <h2 class="mat-h2 primary">Delete file</h2>
   <p class="black">Do you want to delete this file?</p>
-  <button mat-raised-button color="primary" class="dialogButton" (click)="deleteFiles()">Delete</button>
-  <button mat-button color="primary" class="dialogButton"
-          (click)="ngxSmartModalService.getModal('deleteFileModal').close()">Cancel
+  <button (click)="deleteFiles()" class="dialogButton" color="primary" mat-raised-button>Delete</button>
+  <button (click)="ngxSmartModalService.getModal('deleteFileModal').close()" class="dialogButton" color="primary"
+          mat-button>Cancel
   </button>
 
 </ngx-smart-modal>
 
-<ngx-smart-modal #approveORVtokens identifier="approveORVtokens" class="modal light-theme">
+<ngx-smart-modal #approveORVtokens class="modal light-theme" identifier="approveORVtokens">
   <h2 class="mat-h2 primary">Approve ORV tokens</h2>
   <p class="black">Please enter the number of ORV tokens that you would like to approve in your wallet for the Orvium
-    platform.
-    If you are not sure about this action, you can read more details at
-    <a href=" https://eips.ethereum.org/EIPS/eip-20#approve">here</a>.
-  </p>
+    platform.</p>
   <mat-form-field class="flex flex-direction-column">
-    <input matInput #numberApproveTokens required type="number" min="1" max="100"
-           [formControl]="numberApproveTokensControl" placeholder="Number of tokens">
+    <input #numberApproveTokens [formControl]="numberApproveTokensControl" matInput max="100" min="1" placeholder="Number of tokens"
+           required type="number">
     <mat-error *ngIf="numberApproveTokensControl.invalid">Set value between 1 and 100</mat-error>
   </mat-form-field>
-  <br>
-  <button mat-raised-button color="warn" class="dialogButton"
-          (click)="ngxSmartModalService.getModal('approveORVtokens').close()">No
+  <p>If you are not sure about this action, you can read more details at
+    <a class="primary" href=" https://eips.ethereum.org/EIPS/eip-20#approve">here</a>.
+  </p>
+  <button (click)="!numberApproveTokensControl.invalid && approveDepositTokens(numberApproveTokens.value)" class="dialogButton"
+          color="primary"
+          mat-raised-button>Yes
   </button>
-  <button mat-raised-button color="primary" class="dialogButton"
-          (click)="!numberApproveTokensControl.invalid && approveDepositTokens(numberApproveTokens.value)">Yes
+  <button (click)="ngxSmartModalService.getModal('approveORVtokens').close()" class="dialogButton"
+          mat-button>No
   </button>
 </ngx-smart-modal>
-<ngx-smart-modal #depositORVtokens identifier="depositORVtokens" class="modal light-theme">
+<ngx-smart-modal #depositORVtokens class="modal light-theme" identifier="depositORVtokens">
   <h2 class="mat-h2 primary">Deposit ORV tokens</h2>
-  <p class="black">Please enter the number of ORV tokens that will be sent from your wallet to the Orvium platform.
-    When you confirm this transaction, the Orvium smart contract will take ORV from your wallet executing the ERC20
-    method
-    transferFrom". If you are not sure about this action, you can read more details at
-    <a href="https://eips.ethereum.org/EIPS/eip-20#transferfrom">here</a>.
-  </p>
+  <p class="black">Please enter the number of ORV tokens that will be sent from your wallet to the Orvium platform.</p>
+  <p>When you confirm this transaction, the Orvium smart contract will take ORV tokens from your wallet executing the ERC20
+    method "transferFrom".</p>
   <mat-form-field class="flex flex-direction-column">
-    <input matInput #numberDepositTokens required type="number" min="1" max="100"
-           [formControl]="numberDepositTokensControl" placeholder="Number of tokens">
+    <input #numberDepositTokens [formControl]="numberDepositTokensControl" matInput max="100" min="1" placeholder="Number of tokens"
+           required type="number">
     <mat-error *ngIf="numberDepositTokensControl.invalid">Set value between 1 and 100</mat-error>
   </mat-form-field>
-  <br>
-  <button mat-raised-button color="warn" class="dialogButton"
-          (click)="ngxSmartModalService.getModal('depositORVtokens').close()">No
+  <p>If you are not sure about this action, you can read more details at
+    <a class="primary" href="https://eips.ethereum.org/EIPS/eip-20#transferfrom">here</a>.
+  </p>
+  <button (click)="!numberDepositTokensControl.invalid && depositTokens(numberDepositTokens.value)" class="dialogButton" color="primary"
+          mat-raised-button>Yes
   </button>
-  <button mat-raised-button color="primary" class="dialogButton"
-          (click)="!numberDepositTokensControl.invalid && depositTokens(numberDepositTokens.value)">Yes
+  <button (click)="ngxSmartModalService.getModal('depositORVtokens').close()" class="dialogButton"
+          mat-button>No
   </button>
 </ngx-smart-modal>
 
-<ngx-smart-modal #deleteModal identifier="deleteModal" class="modal light-theme">
+<ngx-smart-modal #deleteModal class="modal light-theme" identifier="deleteModal">
   <h2 class="mat-h2 primary">Delete deposit</h2>
   <p class="black">Do you want to delete this deposit?</p>
-  <button mat-raised-button color="primary" class="dialogButton" (click)="delete()">Delete</button>
-  <button mat-button color="primary" class="dialogButton"
-          (click)="ngxSmartModalService.getModal('deleteModal').close()">Cancel
+  <button (click)="delete()" class="dialogButton" color="primary" mat-raised-button>Delete</button>
+  <button (click)="ngxSmartModalService.getModal('deleteModal').close()" class="dialogButton" color="primary"
+          mat-button>Cancel
   </button>
 </ngx-smart-modal>
 
-<ngx-smart-modal #acknowledgementModal identifier="acknowledgementModal" class="modal light-theme">
+<ngx-smart-modal #acknowledgementModal class="modal light-theme" identifier="acknowledgementModal">
   <h2 class="mat-h2 primary">Acknowledgement</h2>
   <p class="black">Please read and acknowledge the following requirements before submitting:</p>
-  <p class="whitespace-pre-line" *ngIf="deposit.community">{{deposit.community.acknowledgement}}</p>
-  <ol *ngIf="!deposit.community">
+  <div *ngIf="deposit.community && deposit.community.acknowledgement"
+       [innerHTML]="deposit.community.acknowledgement"></div>
+  <ol *ngIf="!deposit.community || !deposit.community.acknowledgement">
     <li>The work has not been previously published, nor been submitted to another publisher.</li>
     <li>If the work has been published on a preprint or repository server, reference is made in the current submission.</li>
     <li>Where available, URLs for the references have been provided.</li>
@@ -440,12 +429,12 @@
     <li>In case the work is uploaded to an Orvium community, you agree to format your work according to the community guidelines.</li>
   </ol>
   <div align="center">
-    <button mat-button
-            (click)="ngxSmartModalService.getModal('acknowledgementModal').close()">
+    <button (click)="ngxSmartModalService.getModal('acknowledgementModal').close()"
+            mat-button>
       Cancel
     </button>
-    <button mat-raised-button color="primary"
-            (click)="sendToPendingApproval()">
+    <button (click)="sendToPendingApproval()" color="primary"
+            mat-raised-button>
       <mat-icon>check</mat-icon>
       Accept
     </button>

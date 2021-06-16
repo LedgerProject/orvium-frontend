@@ -2,9 +2,6 @@ import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import PublicationManagement from 'src/contracts/PublicationManagement.json';
 import Escrow from 'src/contracts/Escrow.json';
 import Token from 'src/contracts/OrviumToken.json';
-
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Deposit, Network } from '../model/orvium';
 import { timeout } from 'rxjs/operators';
 import { BehaviorSubject, from, Observable } from 'rxjs';
 import { fromPromise } from 'rxjs/internal-compatibility';
@@ -13,6 +10,9 @@ import { isPlatformBrowser } from '@angular/common';
 import { BlockchainService } from './blockchain.service';
 import { TransactionResponse, Web3Provider } from '@ethersproject/providers';
 import { Contract, Signer } from 'ethers';
+import { AppSnackBarService } from '../services/app-snack-bar.service';
+import { keccak256 } from 'ethers/lib.esm/utils';
+import { BlockchainNetworkDTO, DepositDTO } from '../model/api';
 
 declare global {
   interface Window {
@@ -24,23 +24,28 @@ const tokenDecimals = '000000000000000000';
 
 @Injectable({ providedIn: 'root' })
 export class EthereumService {
-  public appContract: Contract;
-  public escrowContract: Contract;
-  public tokenContract: Contract;
-  public networkConfig: Network;
+  public appContract?: Contract;
+  public escrowContract?: Contract;
+  public tokenContract?: Contract;
+  public networkConfig?: BlockchainNetworkDTO;
   public isInitialized = false;
-  currentNetwork = new BehaviorSubject<Network | undefined>(undefined);
-  private provider: Web3Provider;
-  private signer: Signer;
+  currentNetwork = new BehaviorSubject<BlockchainNetworkDTO | undefined>(undefined);
+  public account?: string;
+  public isAvailable = new BehaviorSubject<boolean>(false);
+  private provider?: Web3Provider;
+  private signer?: Signer;
   private isPlatformBrowser = false;
-  public account: string;
 
-
-  constructor(private snackBar: MatSnackBar,
+  constructor(private snackBar: AppSnackBarService,
               private blockchainService: BlockchainService,
               private logger: NGXLogger,
               @Inject(PLATFORM_ID) private platformId: string) {
     this.isPlatformBrowser = isPlatformBrowser(platformId);
+    if (this.isPlatformBrowser) {
+      if (window.ethereum) {
+        this.isAvailable.next(true);
+      }
+    }
   }
 
   async init(): Promise<boolean> {
@@ -62,7 +67,7 @@ export class EthereumService {
       await promise;
     } catch (error) {
       console.warn(error);
-      this.snackBar.open('Ethereum: Provider cannot be enabled', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Ethereum: Provider cannot be enabled');
       return false;
     }
 
@@ -85,13 +90,11 @@ export class EthereumService {
     try {
       const network = await this.provider.getNetwork();
       const networkConfig = this.blockchainService.getNetworkConfig(network.chainId);
-      if (!networkConfig) {
-        this.snackBar.open('Ethereum: This network is not supported, please select another one',
-          'Dismiss',
-          { panelClass: ['error-snackbar'] });
+      this.networkConfig = networkConfig;
+      if (!this.networkConfig) {
+        this.snackBar.error('Ethereum: This network is not supported, please select another one');
         return false;
       }
-      this.networkConfig = networkConfig;
       this.logger.debug('Blockchain Network', this.networkConfig);
       this.currentNetwork.next(this.networkConfig);
       this.signer = this.provider.getSigner();
@@ -102,8 +105,7 @@ export class EthereumService {
 
     } catch (error) {
       console.warn(error);
-      this.snackBar.open('Ethereum: This network is not supported, please select another one', 'Dismiss',
-        { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Ethereum: This network is not supported, please select another one');
       return false;
     }
 
@@ -118,18 +120,18 @@ export class EthereumService {
     this.isInitialized = false;
   }
 
-  public isAvailable(): boolean {
-    return !!(this.provider);
-  }
-
   public isReady(): boolean {
     return this.isInitialized && window.ethereum._metamask.isUnlocked();
   }
 
 
-  async getTokenBalance(deposit: Deposit): Promise<string> {
+  async getTokenBalance(deposit: DepositDTO): Promise<string> {
     if (!this.isReady()) {
-      return '';
+      throw new Error('Ethereum service is not ready');
+    }
+
+    if (!this.escrowContract || !this.signer) {
+      throw new Error('Ethereum service not initialized correctly');
     }
 
     const tx = await this.escrowContract.balance(
@@ -139,6 +141,10 @@ export class EthereumService {
   }
 
   async getTokenAllowance(): Promise<number> {
+    if (!this.tokenContract || !this.signer || !this.networkConfig) {
+      throw new Error('Ethereum service not initialized correctly');
+    }
+
     const allowance = this.tokenContract.allowance(
       await this.signer.getAddress(),
       this.networkConfig.escrowAddress);
@@ -146,7 +152,11 @@ export class EthereumService {
     return allowance;
   }
 
-  depositTokens(value: string, deposit: Deposit): Observable<TransactionResponse> {
+  depositTokens(value: string, deposit: DepositDTO): Observable<TransactionResponse> {
+    if (!this.escrowContract) {
+      throw new Error('Ethereum service not initialized correctly');
+    }
+
     const orviumsEthFormat = value + tokenDecimals;
 
     return fromPromise(this.escrowContract.deposit(
@@ -155,6 +165,10 @@ export class EthereumService {
   }
 
   approveDepositTokens(value: string): Observable<TransactionResponse> {
+    if (!this.tokenContract || !this.networkConfig) {
+      throw new Error('Ethereum service not initialized correctly');
+    }
+
     const orviumsEthFormat = value + tokenDecimals;
 
     return fromPromise(this.tokenContract.approve(
@@ -164,7 +178,11 @@ export class EthereumService {
   }
 
 
-  payReviewer(value: string, deposit: Deposit, reviewerAddress: string): Observable<TransactionResponse> {
+  payReviewer(value: string, deposit: DepositDTO, reviewerAddress: string): Observable<TransactionResponse> {
+    if (!this.escrowContract) {
+      throw new Error('Ethereum service not initialized correctly');
+    }
+
     const orviumsEthFormat = value + tokenDecimals;
 
     return fromPromise(this.escrowContract.payment(
@@ -174,11 +192,19 @@ export class EthereumService {
   }
 
   publicationProofOwnership(keccak: string): Observable<TransactionResponse> {
-    return fromPromise(this.appContract.addPublication(keccak, keccak, { gasLimit: 750000 }));
+    if (!this.appContract) {
+      throw new Error('Ethereum service not initialized correctly');
+    }
+
+    return fromPromise(this.appContract.addPublication('0x' + keccak, '0x' + keccak, { gasLimit: 750000 }));
   }
 
 
-  getUserTokenBalance(wallet: string, deposit: Deposit): Observable<number> {
+  getUserTokenBalance(wallet: string, deposit: DepositDTO): Observable<number> {
+    if (!this.escrowContract) {
+      throw new Error('Ethereum service not initialized correctly');
+    }
+
     const balance = this.escrowContract.balance(
       wallet,
       '0x' + deposit._id);
@@ -186,9 +212,20 @@ export class EthereumService {
   }
 
   getUserTokenAllowance(wallet: string): Observable<number> {
-    const allowance = this.tokenContract.balanceOf(wallet);
+    if (!this.tokenContract) {
+      throw new Error('Ethereum service not initialized correctly');
+    }
 
+    const allowance = this.tokenContract.balanceOf(wallet);
     return fromPromise(allowance);
+  }
+
+  hashFile(body: ArrayBuffer, hexPrefix = false): string {
+    let hash = keccak256(new Uint8Array(body));
+    if (!hexPrefix) {
+      hash = hash.substring(2);
+    }
+    return hash;
   }
 
 }

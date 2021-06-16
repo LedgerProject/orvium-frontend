@@ -12,13 +12,13 @@ import { GravatarModule } from 'ngx-gravatar';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { LoggerTestingModule } from 'ngx-logger/testing';
-import { profileTest } from '../../shared/test-data';
+import { profilePrivateTest } from '../../shared/test-data';
 
 describe('OnboardingComponent', () => {
   let component: OnboardingComponent;
   let fixture: ComponentFixture<OnboardingComponent>;
   let httpTestingController: HttpTestingController;
-  const profile = profileTest;
+  const profile = profilePrivateTest();
 
 
   const routeSnapshot = { snapshot: { data: { profile } } };

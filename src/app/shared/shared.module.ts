@@ -19,14 +19,14 @@ import { GravatarModule } from 'ngx-gravatar';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { AccessDeniedComponent } from './access-denied/access-denied.component';
-import { AuthorButtonComponent } from './author-button/author-button.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { InvitationsListComponent } from './invitations-list/invitations-list.component';
 import { MatTableModule } from '@angular/material/table';
 import { CopyToClipboardDirective } from './copy-to-clipboard.directive';
+import { FileListComponent } from './file-list/file-list.component';
+import { OrviumUxLibModule } from '@orvium/ux-components';
 
 @NgModule({
   declarations: [
@@ -38,10 +38,9 @@ import { CopyToClipboardDirective } from './copy-to-clipboard.directive';
     EmptyStatePublicationsComponent,
     ShowMoreComponent,
     FileuploadComponent,
-    AccessDeniedComponent,
-    AuthorButtonComponent,
     InvitationsListComponent,
     CopyToClipboardDirective,
+    FileListComponent
   ],
   imports: [
     CommonModule,
@@ -62,7 +61,8 @@ import { CopyToClipboardDirective } from './copy-to-clipboard.directive';
     MatDividerModule,
     GravatarModule,
     NgxSmartModalModule.forChild(),
-    FontAwesomeModule
+    FontAwesomeModule,
+    OrviumUxLibModule
   ],
   exports: [
     // Pipes
@@ -73,10 +73,9 @@ import { CopyToClipboardDirective } from './copy-to-clipboard.directive';
     EmptyStatePublicationsComponent,
     ShowMoreComponent,
     FileuploadComponent,
-    AccessDeniedComponent,
-    AuthorButtonComponent,
     InvitationsListComponent,
     CopyToClipboardDirective,
+    FileListComponent
   ],
   providers: [
     TitleCasePipe,

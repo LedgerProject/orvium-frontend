@@ -9,17 +9,28 @@ module.exports = function (config) {
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
-      require('karma-coverage-istanbul-reporter'),
+      require('karma-coverage'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
       captureConsole: true
     },
-    coverageIstanbulReporter: {
+    coverageReporter: {
       dir: require('path').join(__dirname, './coverage'),
-      reports: ['html', 'lcovonly', 'text-summary'],
-      fixWebpackSourcePaths: true
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' }
+      ],
+      fixWebpackSourcePaths: true,
+      check: {
+        global: {
+          statements: 55,
+          branches: 30,
+          functions: 45,
+          lines: 50
+        }
+      },
     },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
@@ -31,6 +42,13 @@ module.exports = function (config) {
     restartOnFileChange: true,
     proxies: {
       "/assets/": "/base/src/assets/"
+    },
+    // Headless Chrome with no-sandbox to execute in CI containers
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
     },
     files: [
       {pattern: 'src/assets/*', watched: false, included: false, served: true, nocache: false}

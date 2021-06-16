@@ -9,7 +9,6 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NgxSmartModalModule } from 'ngx-smart-modal';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { Community } from '../../model/orvium';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -17,32 +16,26 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { SharedModule } from '../../shared/shared.module';
 import { FontAwesomeTestingModule } from '@fortawesome/angular-fontawesome/testing';
+import { BenefitsComponent } from '../benefits/benefits.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatChipsModule } from '@angular/material/chips';
+import { CallForPapersComponent } from '../call-for-papers/call-for-papers.component';
+import { communityTest } from '../../shared/test-data';
+import { CommunityDTO } from '../../model/api';
 
 describe('CommunityViewComponent', () => {
   let component: CommunityViewComponent;
   let fixture: ComponentFixture<CommunityViewComponent>;
 
-  const community: Community = {
-    _id: '123412341234',
-    name: 'Delft University of Technology (TU Delft)',
-    description: 'Top education and research are at the heart of the oldest and largest technical university in the Netherlands. ' +
-      'Our 8 faculties offer 16 bachelors and more than 30 masters programmes. ' +
-      'Our more than 25,000 students and 6,000 employees share a fascination for science, design and technology. ' +
-      'Our common mission: impact for a better society.',
-    country: 'Delft, Netherlands',
-    twitterURL: 'https://twitter.com/tudelft',
-    facebookURL: 'https://www.facebook.com/TUDelft/',
-    websiteURL: 'https://www.tudelft.nl/',
-    users: [],
-    logoURL: '',
-    acknowledgement: '',
-    guidelinesURL: '',
+
+  const community: CommunityDTO = communityTest();
+  const routeSnapshot = {
+    data: of({ community })
   };
-  const routeSnapshot = { data: of({ community }) };
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [CommunityViewComponent],
+      declarations: [CommunityViewComponent, BenefitsComponent, CallForPapersComponent],
       imports: [
         RouterTestingModule,
         SharedModule,
@@ -55,10 +48,12 @@ describe('CommunityViewComponent', () => {
         NoopAnimationsModule,
         MatFormFieldModule,
         MatIconModule, MatCardModule, FontAwesomeModule, ShareModule,
-        FontAwesomeTestingModule
+        FontAwesomeTestingModule,
+        MatTabsModule,
+        MatChipsModule,
       ],
       providers: [
-        { provide: ActivatedRoute, useValue: routeSnapshot },
+        { provide: ActivatedRoute, useValue: routeSnapshot }
       ]
     })
       .compileComponents();

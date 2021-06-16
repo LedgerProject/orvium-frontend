@@ -1,13 +1,31 @@
 .container {
   display: grid;
   grid-template-columns: 70% 30%;
+  grid-template-rows: max-content;
+  grid-template-areas:
+    "main side"
+    "comments side";
   grid-column-gap: 1em;
+  grid-row-gap: 2em;
 }
 
 .main {
   display: flex;
   flex-direction: column;
   gap: 1em;
+  max-width: 95%;
+  height: max-content;
+  grid-area: main;
+}
+
+.side {
+  grid-area: side;
+}
+
+.comments {
+  grid-area: comments;
+  max-width: 95%;
+  margin-top: 3em;
 }
 
 .box {
@@ -21,6 +39,10 @@
 .info-paper-html {
   border-left: 3px solid;
   margin: 3px;
+}
+
+.git {
+  margin-left: 3%;
 }
 
 ::ng-deep mat-horizontal-stepper {
@@ -41,14 +63,54 @@
   }
 }
 
+.images_container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+.deposit_image {
+  margin: 5px;
+  width: 150px;
+  height: 150px;
+}
+
+.openaire {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.mat-icon {
+  vertical-align: middle;
+}
+
+.click-link {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .container {
     grid-template-columns: 1fr;
+    grid-row-gap: 1em;
+    grid-template-areas:
+      "main"
+      "side"
+      "comments";
   }
 
   .side {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .main {
+    max-width: 100%;
+  }
+
+  .comments {
+    max-width: 100%;
   }
 
   mat-horizontal-stepper {

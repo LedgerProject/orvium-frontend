@@ -1,0 +1,38 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+mat-card {
+  width: 50%;
+}
+
+.margin-input {
+  margin: 5px;
+}
+
+.term {
+  width: 30%;
+  background-color: #f6f9ff;
+}
+
+.query {
+  width: 70%;
+}
+
+.status {
+  width: 30%;
+}
+
+@media (max-width: 768px) {
+  mat-card {
+    width: 100%;
+  }
+
+  .margin-input {
+    margin: 0;
+  }
+}

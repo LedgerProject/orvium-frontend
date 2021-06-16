@@ -9,7 +9,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { NgCircleProgressModule } from 'ng-circle-progress';
 import { GravatarModule } from 'ngx-gravatar';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,14 +28,23 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { MatMenuModule } from '@angular/material/menu';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { ShareModule } from 'ngx-sharebuttons';
 import { DepositReviewersInvitationsComponent } from './deposit-reviewers-invitations/deposit-reviewers-invitations.component';
 import { InviteReviewersComponent } from './invite-reviewers/invite-reviewers.component';
+import { CommentsComponent } from './comments/comments.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { AfterSubmitViewComponent } from './after-submit-view/after-submit-view.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { OrviumUxLibModule } from '@orvium/ux-components';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 
 const routes: Routes = [
+  {
+    path: 'submitted',
+    component: AfterSubmitViewComponent
+  },
   {
     path: ':depositId/edit',
     runGuardsAndResolvers: 'always',
@@ -66,7 +74,7 @@ const routes: Routes = [
     component: InviteReviewersComponent,
     canActivate: [AuthGuardService],
     resolve: { deposit: DepositResolver },
-  },
+  }
 ];
 
 @NgModule({
@@ -76,7 +84,9 @@ const routes: Routes = [
     DepositVersionsComponent,
     DepositsReviewsTableComponent,
     DepositReviewersInvitationsComponent,
-    InviteReviewersComponent
+    InviteReviewersComponent,
+    CommentsComponent,
+    AfterSubmitViewComponent
   ],
   imports: [
     CommonModule,
@@ -97,16 +107,18 @@ const routes: Routes = [
     ShareModule,
     MatChipsModule,
     MatDatepickerModule,
-    NgCircleProgressModule,
     GravatarModule,
-    NgxSpinnerModule,
     MatInputModule,
     MatButtonModule,
     RouterModule.forChild(routes),
     MatBadgeModule,
     NgxSmartModalModule.forChild(),
     FontAwesomeModule,
-    ClipboardModule
+    ClipboardModule,
+    MatSlideToggleModule,
+    DragDropModule,
+    OrviumUxLibModule,
+    MatExpansionModule
   ],
   exports: [RouterModule],
 })

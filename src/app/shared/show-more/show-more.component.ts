@@ -18,8 +18,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   ]
 })
 export class ShowMoreComponent implements OnInit {
-  @Input() text: string;
-  @Input() id: string;
+  @Input() text = '';
   truncateLength = 50;
   state = 'closed';
   displayText = '';
@@ -49,9 +48,5 @@ export class ShowMoreComponent implements OnInit {
       this.state = 'closed';
       this.displayText = this.inputWords.slice(0, this.truncateLength).join(' ') + '...';
     }
-  }
-
-  redirection(): void {
-    this.router.navigate(['deposits', this.id, 'view']);
   }
 }

@@ -1,0 +1,14 @@
+.mat-list-item {
+  max-width: 30em;
+}
+
+.text-wrap {
+  white-space: normal;
+}
+
+// Mobile
+@media (max-width: 768px) {
+  .mat-list-item {
+    max-width: 20em;
+  }
+}

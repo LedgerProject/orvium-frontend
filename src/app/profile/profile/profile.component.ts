@@ -1,16 +1,16 @@
-import { Discipline, Profile, USER_TYPE } from 'src/app/model/orvium';
 import { Component, ElementRef, IterableDiffers, OnInit, ViewChild } from '@angular/core';
 import { map, startWith } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { OrviumService } from '../../services/orvium.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CustomValidators } from '../../shared/CustomValidators';
+import { AppCustomValidators } from '../../shared/AppCustomValidators';
 import { ActivatedRoute } from '@angular/router';
 import errorMessagesJSON from 'src/assets/messages.json';
 import { DisciplinesService } from '../../services/disciplines.service';
+import { ProfileService } from '../profile.service';
+import { DisciplineDTO, USER_TYPE, UserPrivateDTO } from 'src/app/model/api';
 
 
 @Component({
@@ -19,38 +19,45 @@ import { DisciplinesService } from '../../services/disciplines.service';
   styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit {
-  @ViewChild('disciplineInput') disciplineInput: ElementRef<HTMLInputElement>;
-  @ViewChild('autoCompleteDisciplines') matAutocomplete: MatAutocomplete;
+  @ViewChild('disciplineInput') disciplineInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('autoCompleteDisciplines') matAutocomplete?: MatAutocomplete;
 
-  profile: Profile;
+  profile: UserPrivateDTO;
   errorMessages = errorMessagesJSON;
-  filteredDisciplines: Observable<Discipline[]>;
+  filteredDisciplines?: Observable<DisciplineDTO[]>;
   profileFormGroup: FormGroup;
   disciplinesControl = new FormControl();
   USER_TYPE = USER_TYPE;
+  focusFirstName?: boolean;
+  focusLastName?: boolean;
+  private disciplines: DisciplineDTO[] = [];
 
   constructor(private formBuilder: FormBuilder,
               private iterable: IterableDiffers,
               private snackBar: MatSnackBar,
-              private orviumService: OrviumService,
+              private profileService: ProfileService,
               private disciplinesService: DisciplinesService,
               private route: ActivatedRoute) {
-  }
-
-  ngOnInit(): void {
     this.profileFormGroup = this.formBuilder.group({
-      firstName: [null, [Validators.required, Validators.pattern(/.*\S.*/)]],
-      lastName: [null, [Validators.required, Validators.pattern(/.*\S.*/)]],
-      orcid: [null, CustomValidators.validateOrcid],
-      linkedin: [null, CustomValidators.validateLinkedin],
+      firstName: [null, [Validators.required, AppCustomValidators.validateIsNotBlank]],
+      lastName: [null, [Validators.required, AppCustomValidators.validateIsNotBlank]],
+      orcid: [null, AppCustomValidators.validateOrcid],
+      linkedin: [null, AppCustomValidators.validateLinkedin],
       blog: [],
       role: [],
       aboutMe: [],
-      email: [null, [CustomValidators.validateEmail, Validators.required]],
+      email: [null, [AppCustomValidators.validateEmail, Validators.required]],
       userType: [null, Validators.required],
       disciplines: [[]],
     });
 
+    this.profile = this.route.snapshot.data.profile;
+  }
+
+  ngOnInit(): void {
+    this.disciplinesService.getDisciplines().subscribe(
+      disciplines => this.disciplines = disciplines
+    );
     this.disciplinesControl.setValue([]); // Init control value
     this.filteredDisciplines = this.disciplinesControl.valueChanges.pipe(
       startWith(null),
@@ -71,7 +78,7 @@ export class ProfileComponent implements OnInit {
   }
 
   addDiscipline($event: MatChipInputEvent): void {
-    if (!this.matAutocomplete.isOpen) {
+    if (this.matAutocomplete && !this.matAutocomplete.isOpen) {
       const input = $event.input;
       const value = $event.value;
       const disciplines = this.disciplinesControl.value;
@@ -89,48 +96,50 @@ export class ProfileComponent implements OnInit {
     this.profileFormGroup.markAsDirty();
   }
 
-  private filterDisciplines(value: string): Discipline[] {
-    if (value) {
-      const filterValue = value.toLowerCase();
-
-      return this.disciplinesService.getDisciplines().filter(discipline =>
-        discipline.name.toLowerCase().includes(filterValue) &&
-        !this.profileFormGroup.get('disciplines')?.value.includes(discipline.name))
-        .slice(0, 50);
-    } else {
-      return this.disciplinesService.getDisciplines().filter(discipline =>
-        !this.profileFormGroup.get('disciplines')?.value.includes(discipline.name))
-        .slice(0, 50);
-    }
-  }
-
   selected($event: MatAutocompleteSelectedEvent): void {
     const disciplines = this.profileFormGroup.get('disciplines')?.value;
     disciplines.push($event.option.viewValue);
-    this.disciplineInput.nativeElement.value = '';
+    if (this.disciplineInput) {
+      this.disciplineInput.nativeElement.value = '';
+    }
     this.disciplinesControl.setValue(null);
   }
 
   save(): void {
-    this.orviumService.updateProfile(this.profileFormGroup.value)
+    this.profileService.updateProfile(this.profileFormGroup.value)
       .subscribe(profile => {
         this.refreshProfile(profile);
         this.snackBar.open('Profile saved', 'Dismiss', { panelClass: ['ok-snackbar'] });
       });
   }
 
-  refreshProfile(profile: Profile): void {
+  refreshProfile(profile: UserPrivateDTO): void {
     this.profile = profile;
     this.profileFormGroup.patchValue(this.profile);
     this.profileFormGroup.markAsPristine();
   }
 
   sendConfirmationEmail(): void {
-    this.orviumService.sendConfirmationEmail().
-    subscribe(response => {
-      this.snackBar.open('Confirmation email sent', 'Dismiss',
-        { panelClass: ['ok-snackbar'] });
+    this.profileService.sendConfirmationEmail().subscribe(
+      response => {
+        this.snackBar.open('Confirmation email sent', 'Dismiss',
+          { panelClass: ['ok-snackbar'] });
       }
     );
+  }
+
+  private filterDisciplines(value: string): DisciplineDTO[] {
+    if (value) {
+      const filterValue = value.toLowerCase();
+
+      return this.disciplines.filter(discipline =>
+        discipline.name.toLowerCase().includes(filterValue) &&
+        !this.profileFormGroup.get('disciplines')?.value.includes(discipline.name))
+        .slice(0, 50);
+    } else {
+      return this.disciplines.filter(discipline =>
+        !this.profileFormGroup.get('disciplines')?.value.includes(discipline.name))
+        .slice(0, 50);
+    }
   }
 }

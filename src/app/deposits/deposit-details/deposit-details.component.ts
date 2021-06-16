@@ -1,72 +1,70 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { OrviumService } from '../../services/orvium.service';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import {
-  ACCESS_RIGHT_LOV,
-  Author, Community,
-  CREDIT_LOV,
-  Deposit,
-  DEPOSIT_STATUS,
-  Discipline,
-  OrviumFile,
-  PeerReview,
-  Profile,
-  PUBLICATION_TYPE_LOV,
-  Reference,
-  REVIEW_TYPE
-} from 'src/app/model/orvium';
+import { ACCESS_RIGHT_LOV, CREDIT_LOV, PUBLICATION_TYPE_LOV } from 'src/app/model/orvium';
 import { EthereumService } from '../../blockchain/ethereum.service';
 import { environment } from '../../../environments/environment';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { filter, finalize, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { Observable } from 'rxjs';
 import { NGXLogger } from 'ngx-logger';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { NgxSmartModalService } from 'ngx-smart-modal';
-import { CustomValidators } from '../../shared/CustomValidators';
+import { AppCustomValidators } from '../../shared/AppCustomValidators';
 import { BlockchainService } from '../../blockchain/blockchain.service';
 import { DisciplinesService } from '../../services/disciplines.service';
 import { canOpenOverleaf } from '../../shared/shared-functions';
 import { HttpResponse } from '@angular/common/http';
 import { DepositsService } from '../deposits.service';
+import { ProfileService } from '../../profile/profile.service';
+import { AppSnackBarService } from '../../services/app-snack-bar.service';
+import {
+  AuthorDTO,
+  CommunityDTO,
+  DEPOSIT_STATUS,
+  DepositDTO,
+  DisciplineDTO,
+  FileMetadata,
+  Reference,
+  REVIEW_TYPE,
+  UserPrivateDTO
+} from 'src/app/model/api';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { OrvSpinnerService } from '@orvium/ux-components';
 
 @Component({
   selector: 'app-deposits-create',
   templateUrl: './deposit-details.component.html',
   styleUrls: ['./deposit-details.component.scss'],
 })
-export class DepositDetailsComponent implements OnInit, OnDestroy {
-  @ViewChild('disciplineInput') disciplineInput: ElementRef<HTMLInputElement>;
-  @ViewChild('autoCompleteDisciplines') matAutocomplete: MatAutocomplete;
+export class DepositDetailsComponent implements OnInit {
+  @ViewChild('disciplineInput') disciplineInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('autoCompleteDisciplines') matAutocomplete?: MatAutocomplete;
 
-  deposit: Deposit;
-  reviews: PeerReview[];
-  communities: Community[];
+  deposit!: DepositDTO;
+  communities: CommunityDTO[] = [];
   publicationTypeLOV = PUBLICATION_TYPE_LOV;
   accessRightLOV = ACCESS_RIGHT_LOV;
   creditTypeLOV = CREDIT_LOV;
   environment = environment;
   canOpenOverleaf = canOpenOverleaf;
-  filteredDisciplines: Observable<Discipline[]>;
+  filteredDisciplines?: Observable<DisciplineDTO[]>;
   disciplinesControl = new FormControl();
   canUpdateDeposit = false;
   canManageDeposit = false;
-  referenceUrl: string;
   columnsToDisplay = ['icon', 'filename', 'length', 'actions'];
-  balanceTokens: string;
-  allowanceTokens: string;
+  balanceTokens = '0';
+  allowanceTokens = '0';
   depositForm: FormGroup;
   authorsForm: FormGroup;
   referencesForm: FormGroup;
   readonly = false;
-  profile: Profile;
-  files: OrviumFile[];
+  profile?: UserPrivateDTO;
+  files: FileMetadata[] = [];
+  extraFilesCount = 0;
   PUBLICATIONS_EXTENSIONS_ALLOWED = '.docx,.doc,.rtf,.pdf,.tex';
-  OTHER_FILE_EXTENSIONS_ALLOWED = this.PUBLICATIONS_EXTENSIONS_ALLOWED + '.txt,.csv,.md,jpeg,.jpg,.png';
-  private subscription: Subscription;
+  OTHER_FILE_EXTENSIONS_ALLOWED = this.PUBLICATIONS_EXTENSIONS_ALLOWED + ',.txt,.csv,.md,jpeg,.jpg,.png';
 
   numberApproveTokensControl = new FormControl('', [
     Validators.required, Validators.min(1), Validators.max(100)
@@ -76,34 +74,27 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
     Validators.required, Validators.min(1), Validators.max(100)
   ]);
 
-  selectedReviewer: unknown;
-
   DEPOSIT_STATUS = DEPOSIT_STATUS;
   REVIEW_TYPE = REVIEW_TYPE;
+  private disciplines: DisciplineDTO[] = [];
 
   constructor(private orviumService: OrviumService,
+              private profileService: ProfileService,
               public blockchainService: BlockchainService,
               private route: ActivatedRoute,
               private router: Router,
               public ethereumService: EthereumService,
-              private snackBar: MatSnackBar,
-              private spinnerService: NgxSpinnerService,
+              private snackBar: AppSnackBarService,
+              private spinnerService: OrvSpinnerService,
               private logger: NGXLogger,
               private formBuilder: FormBuilder,
               private disciplinesService: DisciplinesService,
               public ngxSmartModalService: NgxSmartModalService,
-              private depositService: DepositsService
+              private depositService: DepositsService,
   ) {
-  }
-
-  ngOnInit(): void {
-    this.deposit = this.route.snapshot.data.deposit;
-    this.orviumService.getMyCommunities().subscribe(communities => {
-      this.communities = communities;
-    });
 
     this.depositForm = this.formBuilder.group({
-      title: [null, [Validators.required, Validators.pattern(/.*\S.*/)]],
+      title: [null, [Validators.required, AppCustomValidators.validateIsNotBlank]],
       abstract: [],
       authors: [[]],
       references: [[]],
@@ -111,20 +102,18 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       accessRight: [],
       community: [],
       keywords: [[]],
-      doi: [null, Validators.pattern(/^10.\d{4,9}\/[-._;()/:A-Z0-9]+$/i)],
+      doi: [null, AppCustomValidators.validateDOI],
       reviewType: [],
       disciplines: [[]],
+      canBeReviewed: [true],
+      gitRepository: [null, AppCustomValidators.gitHubURL],
     });
 
-    this.filteredDisciplines = this.disciplinesControl.valueChanges.pipe(
-      startWith(null),
-      map((discipline: string | null) => this.filterDisciplines(discipline)));
-
     this.authorsForm = this.formBuilder.group({
-      name: [null, [Validators.pattern(/.*\S.*/)]],
-      surname: [null, [Validators.pattern(/.*\S.*/)]],
-      email: [null, CustomValidators.validateEmail],
-      orcid: [null, CustomValidators.validateOrcid],
+      name: [null, [AppCustomValidators.validateIsNotBlank]],
+      surname: [null, [AppCustomValidators.validateIsNotBlank]],
+      email: [null, AppCustomValidators.validateEmail],
+      orcid: [null, AppCustomValidators.validateOrcid],
       credit: [[]],
     });
 
@@ -133,6 +122,25 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       reference: [],
       url: ['', Validators.pattern(urlRegex)],
     });
+  }
+
+  ngOnInit(): void {
+    this.deposit = this.route.snapshot.data.deposit;
+    const profile = this.profileService.profile.getValue();
+    this.disciplinesService.getDisciplines().subscribe(
+      disciplines => this.disciplines = disciplines
+    );
+
+    if (!profile) {
+      throw new Error('Profile is undefined');
+    }
+
+    this.communities = profile.communities;
+
+    this.filteredDisciplines = this.disciplinesControl.valueChanges.pipe(
+      startWith(null),
+      map((discipline: string | null) => this.filterDisciplines(discipline)));
+
 
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
@@ -141,23 +149,8 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       this.refreshDeposit(this.deposit);
     });
 
-    this.orviumService.getPeerReviews(this.deposit._id).subscribe(reviews => {
-      this.reviews = reviews;
-    });
-
-    const profile = this.orviumService.profile.getValue();
-    if (profile) {
-      this.profile = profile;
-    }
-
     this.refreshDeposit(this.deposit);
 
-  }
-
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
   }
 
   removeDiscipline(discipline: unknown): void {
@@ -172,7 +165,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
   }
 
   addDiscipline($event: MatChipInputEvent): void {
-    if (!this.matAutocomplete.isOpen) {
+    if (this.matAutocomplete && !this.matAutocomplete.isOpen) {
       const input = $event.input;
       const value = $event.value;
       const disciplines = this.disciplinesControl.value;
@@ -190,36 +183,24 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private filterDisciplines(value: string | null): Discipline[] {
-    if (value) {
-      const filterValue = value.toLowerCase();
-
-      return this.disciplinesService.getDisciplines().filter(discipline =>
-        discipline.name.toLowerCase().includes(filterValue) &&
-        !this.depositForm.get('disciplines')?.value.includes(discipline.name))
-        .slice(0, 50);
-    } else {
-      return this.disciplinesService.getDisciplines().filter(discipline =>
-        !this.depositForm.get('disciplines')?.value.includes(discipline.name))
-        .slice(0, 50);
-    }
-  }
-
   selected($event: MatAutocompleteSelectedEvent): void {
     const disciplines = this.depositForm.get('disciplines')?.value;
     disciplines.push($event.option.viewValue);
-    this.disciplineInput.nativeElement.value = '';
+    if (this.disciplineInput) {
+      this.disciplineInput.nativeElement.value = '';
+    }
     this.disciplinesControl.setValue(null);
     this.depositForm.markAsDirty();
     this.depositForm.get('disciplines')?.updateValueAndValidity();
   }
 
-  refreshDeposit(deposit: Deposit): void {
+  refreshDeposit(deposit: DepositDTO): void {
     this.deposit = deposit;
     this.files = deposit.publicationFile ? [deposit.publicationFile].concat(deposit.files || []) : deposit.files || [];
-    this.depositForm.reset( {...this.deposit, ...{community: deposit.community?._id}});
+    this.depositForm.reset({ ...this.deposit, ...{ community: deposit.community?._id } });
+    this.extraFilesCount = deposit.files.length;
 
-    this.canUpdateDeposit = this.depositService.canUpdateDeposit(this.profile, this.deposit);
+    this.canUpdateDeposit = this.depositService.canUpdateDeposit(this.deposit);
     this.canManageDeposit = this.depositService.canManageDeposit(this.profile, this.deposit);
 
     if (this.canUpdateDeposit) {
@@ -234,7 +215,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       this.readonly = true;
     }
 
-    if (this.ethereumService.isInitialized) {
+    if (this.ethereumService.isInitialized && this.ethereumService.account) {
       this.ethereumService.getUserTokenBalance(this.ethereumService.account, this.deposit)
         .subscribe(result => {
           this.balanceTokens = result.toString();
@@ -244,14 +225,29 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  proofOwnership(): void {
-    if (!this.deposit.keccak256) {
-      this.snackBar.open('Upload a file first to publish to blockchain',
-        'Dismiss', { panelClass: ['error-snackbar'] });
+  async proofOwnership(): Promise<void> {
+    if (!this.ethereumService.isReady()) {
+      this.snackBar.error('No Ethereum provider detected, check if blockchain is activated');
       return;
     }
 
-    this.ethereumService.publicationProofOwnership(this.deposit.keccak256).subscribe(transaction => {
+    if (!this.deposit.publicationFile) {
+      this.snackBar.error('Upload a file first to publish to blockchain');
+      return;
+    }
+
+    // Calculate hash
+    const fileUrl = `${environment.apiEndpoint}/deposits/${this.deposit._id}/files/${this.deposit.publicationFile.filename}`;
+    let responseFile = await fetch(fileUrl);
+    let arrayBuffer = await responseFile.arrayBuffer();
+    const fileHash = this.ethereumService.hashFile(arrayBuffer);
+
+    if (!fileHash) {
+      this.snackBar.error('Incorrect publication hash');
+      return;
+    }
+
+    this.ethereumService.publicationProofOwnership(fileHash).subscribe(transaction => {
       const spinnerName = 'spinnerProof';
       this.logger.debug('Transaction', transaction);
       this.spinnerService.show(spinnerName);
@@ -260,29 +256,48 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       }
 
       if (this.ethereumService.currentNetwork.value) {
-        this.deposit.transactions[this.ethereumService.currentNetwork.value.name] = transaction;
+        const blockchainNetwork = this.ethereumService.currentNetwork.value.name;
+        const update: Partial<DepositDTO> = {};
+        update.transactions = {};
+        update.transactions[blockchainNetwork] = transaction;
+        update.keccak256 = fileHash;
+        this.orviumService.updateDeposit(this.deposit._id, update)
+          .subscribe(response => {
+            this.refreshDeposit(response);
+            this.depositForm.markAsPristine();
+            this.snackBar.info('Publication saved');
+            this.logger.debug('Deposit saved');
+          });
       }
-      this.save();
 
 
       transaction.wait().then(receipt => {
         this.logger.debug('Receipt', receipt);
+        const update: Partial<DepositDTO> = {};
+        update.transactions = {};
+
         this.spinnerService.hide(spinnerName);
         if (!this.deposit.transactions) {
-          this.deposit.transactions = {};
+          update.transactions = {};
         }
         if (this.ethereumService.currentNetwork.value) {
-          this.deposit.transactions[this.ethereumService.currentNetwork.value.name] = receipt;
+          const blockchainNetwork = this.ethereumService.currentNetwork.value.name;
+          update.transactions[blockchainNetwork] = receipt;
         }
-        this.save();
+        this.orviumService.updateDeposit(this.deposit._id, update)
+          .subscribe(response => {
+            this.refreshDeposit(response);
+            this.depositForm.markAsPristine();
+            this.snackBar.info('Publication saved');
+            this.logger.debug('Deposit saved');
+          });
       });
     });
   }
 
   showDepositTokens(): void {
     if (!this.ethereumService.isReady()) {
-      this.snackBar.open('No Ethereum provider detected, check if Metamask is installed in your browser',
-        'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('No Ethereum provider detected, check if blockchain is activated');
       return;
     }
     this.ngxSmartModalService.open('depositORVtokens');
@@ -305,8 +320,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
 
   showApproveDepositTokens(): void {
     if (!this.ethereumService.isReady()) {
-      this.snackBar.open('No Ethereum provider detected, check if Metamask is installed in your browser',
-        'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('No Ethereum provider detected, check if blockchain is activated');
       return;
     }
     this.ngxSmartModalService.open('approveORVtokens');
@@ -340,7 +354,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
     ).subscribe(response => {
       this.refreshDeposit(response);
       this.depositForm.markAsPristine();
-      this.snackBar.open('Publication saved', 'Dismiss', { panelClass: ['ok-snackbar'] });
+      this.snackBar.info('Publication saved');
       this.logger.debug('Deposit saved');
     });
   }
@@ -358,23 +372,25 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
         submissionDate: new Date().toISOString()
       }).subscribe(response => {
         this.refreshDeposit(response);
-        this.snackBar.open('Deposit pending approval', 'Dismiss', { panelClass: ['ok-snackbar'] });
+        this.snackBar.info('Deposit pending approval');
+        this.router.navigateByUrl('deposits/submitted', { state: { deposit: this.deposit } });
       });
     }
     this.ngxSmartModalService.close('acknowledgementModal');
+
   }
 
   canBeSentToReview(): boolean {
-    if (!this.deposit.publicationFile?.keccak256) {
-      this.snackBar.open('Upload your publication files', 'Dismiss', { panelClass: ['error-snackbar'] });
+    if (!this.deposit.publicationFile) {
+      this.snackBar.error('Upload your publication files');
       return false;
     }
     if (!this.depositForm.pristine) {
-      this.snackBar.open('Save all your changes first', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Save all your changes first');
       return false;
     }
     if (!this.deposit.authors || this.deposit.authors.length === 0) {
-      this.snackBar.open('Please add publication authors', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Please add publication authors');
       return false;
     }
     ['abstract', 'authors', 'keywords', 'publicationType', 'accessRight', 'reviewType', 'disciplines']
@@ -385,7 +401,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
         ctr?.markAsTouched();
       });
     if (!this.depositForm.valid) {
-      this.snackBar.open('Please complete all required information', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Please complete all required information');
     }
     return this.depositForm.valid;
   }
@@ -397,7 +413,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
         this.spinnerService.hide();
       })
     ).subscribe(response => {
-      this.snackBar.open('Deposit deleted', 'Dismiss', { panelClass: ['ok-snackbar'] });
+      this.snackBar.info('Deposit deleted');
       this.router.navigate(['/publications'], { queryParams: { query: '', page: 1, size: 10, drafts: 'yes' } });
       this.ngxSmartModalService.close('deleteModal');
     });
@@ -405,10 +421,10 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
 
   deleteFilesModal(fileId: string): boolean {
     if (!this.depositForm.pristine) {
-      this.snackBar.open('Save all your changes first', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Save all your changes first');
       return false;
     }
-    this.ngxSmartModalService.setModalData(fileId, 'deleteFileModal');
+    this.ngxSmartModalService.setModalData(fileId, 'deleteFileModal', true);
     this.ngxSmartModalService.open('deleteFileModal');
     return true;
   }
@@ -423,7 +439,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
         this.spinnerService.hide();
       })
     ).subscribe(response => {
-      this.snackBar.open('File deleted', 'Dismiss', { panelClass: ['ok-snackbar'] });
+      this.snackBar.info('File deleted');
       this.refreshDeposit(response);
       this.ngxSmartModalService.resetModalData('deleteFileModal');
     });
@@ -465,7 +481,7 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       this.authorsForm.get('surname')?.value &&
       this.authorsForm.get('email')?.value &&
       this.authorsForm.valid) {
-      const newAuthor = new Author();
+      const newAuthor = new AuthorDTO();
       newAuthor.name = this.authorsForm.get('name')?.value;
       newAuthor.surname = this.authorsForm.get('surname')?.value;
       newAuthor.email = this.authorsForm.get('email')?.value;
@@ -475,11 +491,11 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       this.depositForm.markAsDirty();
       this.authorsForm.reset();
     } else {
-      this.snackBar.open('Invalid Author. First name, last name and email are required', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Invalid author. First name, last name and email are required');
     }
   }
 
-  removeAuthor(author: Author): void {
+  removeAuthor(author: AuthorDTO): void {
     const index = this.deposit.authors.indexOf(author);
     if (index >= 0) {
       this.deposit.authors.splice(index, 1);
@@ -487,18 +503,9 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  filesUploaded($event: { originalEvent: HttpResponse<unknown>, files: File[] }): void {
-    const updatedDeposit = $event.originalEvent.body as Deposit;
+  async filesUploaded($event: { originalEvent: HttpResponse<unknown>, files: File[] }): Promise<void> {
+    const updatedDeposit = await this.orviumService.getDeposit(this.deposit._id).toPromise();
     this.refreshDeposit(updatedDeposit);
-  }
-
-  onSelectFiles($event: unknown): boolean {
-    if (!this.depositForm.pristine) {
-      this.snackBar.open('You need to save all your changes before uploading files',
-        'Dismiss', { panelClass: ['error-snackbar'] });
-      return false;
-    }
-    return true;
   }
 
   addReference(): void {
@@ -510,13 +517,13 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
       this.depositForm.markAsDirty();
       this.referencesForm.reset();
     } else {
-      this.snackBar.open('Invalid Reference', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Invalid reference');
     }
   }
 
   removeReference(reference: Reference): void {
     if (!this.deposit.references) {
-      this.snackBar.open('No references found', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('No references found');
       return;
     }
     const index = this.deposit.references.indexOf(reference);
@@ -526,7 +533,35 @@ export class DepositDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  reviewTypeChange(): void {
-    this.deposit.reviewType = this.depositForm.get('reviewType')?.value;
+  beforeUpload($event: unknown): boolean {
+    if (!this.depositForm.pristine) {
+      if (this.depositForm.valid) {
+        this.save();
+      } else {
+        this.snackBar.error('Some data is invalid, please review');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  drop(event: CdkDragDrop<AuthorDTO[]>): void {
+    moveItemInArray(this.deposit.authors, event.previousIndex, event.currentIndex);
+    this.depositForm.markAsDirty();
+  }
+
+  private filterDisciplines(value: string | null): DisciplineDTO[] {
+    if (value) {
+      const filterValue = value.toLowerCase();
+
+      return this.disciplines.filter(discipline =>
+        discipline.name.toLowerCase().includes(filterValue) &&
+        !this.depositForm.controls.disciplines?.value?.includes(discipline.name))
+        .slice(0, 50);
+    } else {
+      return this.disciplines.filter(discipline =>
+        !this.depositForm.controls.disciplines?.value?.includes(discipline.name))
+        .slice(0, 50);
+    }
   }
 }

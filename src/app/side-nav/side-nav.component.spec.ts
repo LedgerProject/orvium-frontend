@@ -10,16 +10,19 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Profile } from '../model/orvium';
-import { profileTest } from '../shared/test-data';
+import { NotificationsPanelComponent } from '../notification/notifications-panel/notifications-panel.component';
+import { ProfileService } from '../profile/profile.service';
+import { profilePrivateTest } from '../shared/test-data';
+import { UserPrivateDTO } from '../model/api';
+import { SharedModule } from '../shared/shared.module';
+import { OrviumUxLibModule } from '@orvium/ux-components';
 
 describe('SideNavComponent', () => {
   let component: SideNavComponent;
   let fixture: ComponentFixture<SideNavComponent>;
 
-  const profile = profileTest;
+  const profile = profilePrivateTest();
 
   beforeEach(waitForAsync(() => {
     const sidenavSpy = jasmine.createSpyObj('SidenavService', ['toggle', 'setSidenav']);
@@ -28,16 +31,17 @@ describe('SideNavComponent', () => {
     orviumServiceSpy.getProfile.and.returnValue(of(Promise.resolve({})));
 
     TestBed.configureTestingModule({
-      declarations: [SideNavComponent],
+      declarations: [SideNavComponent, NotificationsPanelComponent],
       imports: [RouterTestingModule, MatSnackBarModule, HttpClientModule, MatSidenavModule,
         MatIconModule,
         MatListModule,
-        NgxSpinnerModule,
+        SharedModule,
         NoopAnimationsModule,
-        MatDialogModule
+        MatDialogModule,
+        OrviumUxLibModule
       ],
       providers: [
-        { provide: SidenavService, useValue: sidenavSpy },
+        // { provide: SidenavService, useValue: sidenavSpy },
         { provide: OrviumService, useValue: orviumServiceSpy },
       ]
     }).compileComponents();
@@ -46,8 +50,8 @@ describe('SideNavComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SideNavComponent);
     component = fixture.componentInstance;
-    const orviumService = fixture.debugElement.injector.get(OrviumService);
-    orviumService.profile = new BehaviorSubject<Profile | undefined>(profile);
+    const profileService = fixture.debugElement.injector.get(ProfileService);
+    profileService.profile = new BehaviorSubject<UserPrivateDTO | undefined>(profile);
     fixture.detectChanges();
   });
 

@@ -1,0 +1,59 @@
+<div class="orv-hero">
+  <h1 class="mat-display-3 primary">Advanced <strong>search</strong></h1>
+  <h1 class="mat-title grey">Enter your search terms and discover new publications.</h1>
+</div>
+<div class="container">
+  <mat-card class="noshadow" [formGroup]="searchFormGroup" (keyup.enter)="searchPapers()">
+    <mat-form-field appearance="outline" class="advancedSearch">
+      <mat-label>Term</mat-label>
+      <mat-select formControlName="term">
+        <mat-option value="query">Title, Abstract, Author etc.</mat-option>
+        <mat-option value="doi">DOI</mat-option>
+        <mat-option value="orcid">ORCID iD</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="query" *ngIf="searchFormGroup.get('term')?.value == 'query'">
+      <input matInput placeholder="Special Theory of Relativity" id="titleInput" formControlName="query" type="text">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="query" *ngIf="searchFormGroup.get('term')?.value == 'doi'">
+      <input matInput id="doiInput" placeholder="10.1016/j.cub.2016.10.008" formControlName="doi" type="url">
+      <mat-error>
+        Invalid DOI
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="query" *ngIf="searchFormGroup.get('term')?.value == 'orcid'">
+      <input matInput id="orcidInput" placeholder="https://orcid.org/0000-0000-0000-0000" formControlName="orcid" type="url">
+      <mat-error>
+        Invalid ORCID
+      </mat-error>
+    </mat-form-field>
+    <a>Submission date: </a>
+    <mat-form-field appearance="outline" class="margin-input">
+      <mat-label>From</mat-label>
+      <input matInput readonly [matDatepicker]="picker1" formControlName="from">
+      <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+      <mat-datepicker #picker1></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="margin-input">
+      <mat-label>Until</mat-label>
+      <input matInput readonly [matDatepicker]="picker2" formControlName="until">
+      <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+      <mat-datepicker #picker2></mat-datepicker>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="outline" class="status margin-input">
+      <mat-label>Publications Status</mat-label>
+      <mat-select formControlName="status" multiple>
+        <mat-option *ngFor="let option of DEPOSIT_STATUS_PUBLIC_LOV" [value]="option.value">
+          {{option.viewValue}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </mat-card>
+  <mat-card-actions>
+    <button mat-raised-button color="primary" (click)="searchPapers()">
+      <mat-icon>search</mat-icon>
+      Search
+    </button>
+  </mat-card-actions>
+</div>

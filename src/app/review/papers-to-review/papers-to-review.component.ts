@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { OrviumService } from '../../services/orvium.service';
 import { Title } from '@angular/platform-browser';
-import { Deposit } from '../../model/orvium';
+import { DepositDTO } from '../../model/api';
 
 @Component({
   selector: 'app-papers-to-review',
@@ -9,7 +9,7 @@ import { Deposit } from '../../model/orvium';
   styleUrls: ['./papers-to-review.component.scss']
 })
 export class PapersToReviewComponent implements OnInit {
-  deposits: Deposit[];
+  deposits: DepositDTO[] = [];
 
   constructor(private orviumService: OrviumService,
               private titleService: Title) {
@@ -17,8 +17,9 @@ export class PapersToReviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('Papers to review');
-    this.orviumService.getPreprintDeposits().subscribe(deposits => {
+    this.orviumService.getPapersToReview().subscribe(deposits => {
       this.deposits = deposits;
+      console.log(this.deposits);
     });
   }
 

@@ -1,18 +1,10 @@
-<div class="hero">
+<div class="orv-hero">
   <h1 class="mat-display-3 primary">Become a <strong>reviewer</strong></h1>
   <h1 class="mat-title grey">Showcase your work as peer reviewer to obtain recognition and increase your professional opportunities.</h1>
 </div>
 <div class="container" [formGroup]="reviewerFormGroup">
   <mat-card>
     <h1 class="mat-title grey">YOUR PREFERENCES</h1>
-    <p>Number of simultaneous reviews</p>
-    <mat-slider
-      thumbLabel
-      [displayWith]="formatLabel"
-      tickInterval="1000"
-      min="1"
-      max="25" (change)="updateValueSlider($event)"></mat-slider>
-    <h1 class="mat-subheading-1 grey" align="right">Papers/Month</h1>
     <p>Disciplines you are interested in</p>
     <mat-form-field appearance="outline" class="disciplines">
       <mat-chip-list #disciplineChips aria-label="Discipline selection" formControlName="disciplines">
@@ -32,11 +24,11 @@
       </mat-autocomplete>
     </mat-form-field>
     <div class="reviewers-code" align="right">
-      <mat-checkbox formControlName="reviewersCode" class="grey">
+      <mat-checkbox id="becomeCheckbox" #becomeCheckbox formControlName="reviewersCode" class="grey">
         I accept <a class="primary" href="https://help.orvium.io/reviews/reviewers-code/" target="_blank">Reviewers Code</a>
       </mat-checkbox>
       <br>
-      <button mat-raised-button color="primary"
+      <button mat-raised-button color="primary" id="becomeButton" #becomeButton class="becomeButton"
               [disabled]="!reviewerFormGroup.get('reviewersCode')?.value || reviewerFormGroup.get('disciplines')?.value.length == 0"
               (click)="becomeReviewer()">Become a reviewer
       </button>

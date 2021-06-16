@@ -15,15 +15,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ShareModule } from 'ngx-sharebuttons';
-import { Profile } from '../model/orvium';
-import { OrviumService } from '../services/orvium.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { MatInputModule } from '@angular/material/input';
 import { FontAwesomeTestingModule } from '@fortawesome/angular-fontawesome/testing';
-import { profileTest } from '../shared/test-data';
 import { SharedModule } from '../shared/shared.module';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { ProfileService } from '../profile/profile.service';
+import { UserPrivateDTO } from '../model/api';
+import { profilePrivateTest } from '../shared/test-data';
 
 // Noop component is only a workaround to trigger change detection
 @Component({
@@ -60,9 +60,7 @@ describe('InviteComponent', () => {
   let overlayContainerElement: HTMLElement;
   let fixture: ComponentFixture<InviteComponent>;
   let component: InviteComponent;
-
-  const profile = profileTest;
-  const profileBehaviour = new BehaviorSubject<Profile | undefined>(profile);
+  let profileBehaviour: BehaviorSubject<UserPrivateDTO | undefined>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -88,12 +86,19 @@ describe('InviteComponent', () => {
         },
         {
           provide: MatDialogRef,
-          useValue: {}
+          useValue: {
+            open: (): void => {
+            },
+            close: (): void => {
+            }
+          }
         }
       ],
     })
       .compileComponents();
 
+    const profile = profilePrivateTest();
+    profileBehaviour = new BehaviorSubject<UserPrivateDTO | undefined>(profile);
     dialog = TestBed.inject(MatDialog);
 
   }));
@@ -101,8 +106,8 @@ describe('InviteComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(InviteComponent);
     component = fixture.componentInstance;
-    const orviumService = fixture.debugElement.injector.get(OrviumService);
-    orviumService.profile = profileBehaviour;
+    const profileService = fixture.debugElement.injector.get(ProfileService);
+    profileService.profile = profileBehaviour;
     fixture.detectChanges();
   });
 
@@ -125,6 +130,28 @@ describe('InviteComponent', () => {
     expect(component.emails.length).toBe(1);
   });
 
+  it('should not add empty', async () => {
+    expect(component.emails.length).toBe(0);
+    const inputDiscipline = fixture.debugElement.query(By.css('#inputEmails'));
+    const event: MatChipInputEvent = {
+      input: inputDiscipline.nativeElement,
+      value: '',
+    };
+    component.add(event);
+    expect(component.emails.length).toBe(0);
+  });
+
+  it('should not add invalid email', async () => {
+    expect(component.emails.length).toBe(0);
+    const inputDiscipline = fixture.debugElement.query(By.css('#inputEmails'));
+    const event: MatChipInputEvent = {
+      input: inputDiscipline.nativeElement,
+      value: 'notvalid',
+    };
+    component.add(event);
+    expect(component.emails.length).toBe(0);
+  });
+
   it('should remove an email', async () => {
     const inputDiscipline = fixture.debugElement.query(By.css('#inputEmails'));
     const event: MatChipInputEvent = {
@@ -136,5 +163,29 @@ describe('InviteComponent', () => {
     component.remove('johndoe@gmail.com');
     expect(component.emails.length).toBe(0);
   });
+
+  it('should not remove not existing emails', async () => {
+    expect(component.emails.length).toBe(0);
+    component.remove('hello@test.com');
+    expect(component.emails.length).toBe(0);
+  });
+
+  it('should send invites ', () => {
+    const profileService = fixture.debugElement.injector.get(ProfileService);
+    const spy = spyOn(profileService, 'sendInvite').and.returnValue(of({}));
+    spyOn(component.dialogRef, 'close');
+    fixture.detectChanges();
+    component.emails = ['test@test.com'];
+    component.send();
+    expect(component.emails.length).toBe(1);
+    expect(component.dialogRef.close).toHaveBeenCalled();
+  });
+
+  it('should close dialogRef', () => {
+    spyOn(component.dialogRef, 'close');
+    component.onNoClick();
+    expect(component.dialogRef.close).toHaveBeenCalled();
+  });
+
 });
 

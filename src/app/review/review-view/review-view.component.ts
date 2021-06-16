@@ -1,16 +1,18 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Deposit, OrviumFile, PeerReview, Profile, REVIEW_DECISION_LOV, REVIEW_STATUS, ReviewDecisionLov } from '../../model/orvium';
+import { REVIEW_DECISION_LOV, ReviewDecisionLov } from '../../model/orvium';
 import { OrviumService } from '../../services/orvium.service';
 import { environment } from '../../../environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { EthereumService } from '../../blockchain/ethereum.service';
 import { FormControl, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxSmartModalService } from 'ngx-smart-modal';
 import { NGXLogger } from 'ngx-logger';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { canOpenOverleaf } from '../../shared/shared-functions';
+import { ProfileService } from '../../profile/profile.service';
+import { AppSnackBarService } from '../../services/app-snack-bar.service';
+import { DepositDTO, FileMetadata, REVIEW_STATUS, ReviewDTO, UserPrivateDTO } from 'src/app/model/api';
+import { OrvSpinnerService } from '@orvium/ux-components';
 
 @Component({
   selector: 'app-review-view',
@@ -18,40 +20,39 @@ import { canOpenOverleaf } from '../../shared/shared-functions';
   styleUrls: ['./review-view.component.scss']
 })
 export class ReviewViewComponent implements OnInit, OnDestroy {
-  private metaElements: HTMLMetaElement[];
-  peerReview: PeerReview;
-  deposit: Deposit;
+  peerReview: ReviewDTO;
+  deposit: DepositDTO;
   environment = environment;
-  filelink: string;
-  files: OrviumFile[] = [];
-  isOwner: boolean;
+  files: FileMetadata[] = [];
+  isOwner = false;
   columnsToDisplay = ['icon', 'filename', 'length', 'edit'];
-  profile: Profile;
+  profile?: UserPrivateDTO;
   REVIEW_STATUS = REVIEW_STATUS;
-  balanceTokens: string;
-  reviewerAddress: string;
+  balanceTokens = '0';
+  reviewerAddress = '0';
   decisionSelected: ReviewDecisionLov | undefined;
   canOpenOverleaf = canOpenOverleaf;
-
   numberPayReviewerControl = new FormControl('', [
     Validators.required, Validators.min(1), Validators.max(100)
   ]);
+  private metaElements: HTMLMetaElement[] = [];
 
   constructor(public orviumService: OrviumService,
               private route: ActivatedRoute,
               private titleService: Title,
               private metaService: Meta,
-              private snackBar: MatSnackBar,
+              private snackBar: AppSnackBarService,
               public ethereumService: EthereumService,
-              private spinnerService: NgxSpinnerService,
+              private profileService: ProfileService,
+              private spinnerService: OrvSpinnerService,
               private logger: NGXLogger,
               public ngxSmartModalService: NgxSmartModalService,
               private router: Router) {
+    this.peerReview = this.route.snapshot.data.review;
+    this.deposit = this.peerReview.deposit;
   }
 
   ngOnInit(): void {
-    this.peerReview = this.route.snapshot.data.review;
-    this.deposit = this.peerReview.deposit;
     if (this.peerReview.decision) {
       this.decisionSelected = REVIEW_DECISION_LOV.find(x => x.value === this.peerReview.decision);
     }
@@ -59,8 +60,7 @@ export class ReviewViewComponent implements OnInit, OnDestroy {
       this.files = [];
       this.files.push(this.peerReview.file);
     }
-    this.filelink = `${environment.apiEndpoint}/reviews/${this.peerReview._id}/file`;
-    this.orviumService.getProfile().subscribe(profile => {
+    this.profileService.getProfile().subscribe(profile => {
       if (profile) {
         this.profile = profile;
         if (this.profile.userId === this.peerReview.owner) {
@@ -71,10 +71,14 @@ export class ReviewViewComponent implements OnInit, OnDestroy {
     if (this.peerReview.status === REVIEW_STATUS.published) {
       this.setSEOTags();
     }
-
     if (this.ethereumService.isInitialized) {
       if (this.peerReview.transactions && this.ethereumService.currentNetwork.value) {
-        this.reviewerAddress = this.peerReview.transactions[this.ethereumService.currentNetwork.value.name].from;
+        const transaction = this.peerReview.transactions[this.ethereumService.currentNetwork.value.name];
+        // @ts-ignore
+        if (transaction && transaction.from) {
+          // @ts-ignore
+          this.reviewerAddress = transaction.from;
+        }
       }
     }
     this.refreshBalance();
@@ -100,7 +104,7 @@ export class ReviewViewComponent implements OnInit, OnDestroy {
   }
 
   refreshBalance(): void {
-    if (this.ethereumService.isInitialized) {
+    if (this.ethereumService.isInitialized && this.ethereumService.account) {
       this.ethereumService.getUserTokenBalance(this.ethereumService.account, this.deposit)
         .subscribe(result => {
           this.balanceTokens = result.toString();
@@ -110,14 +114,12 @@ export class ReviewViewComponent implements OnInit, OnDestroy {
 
   showPayReviewer(): void {
     if (!this.ethereumService.isReady()) {
-      this.snackBar.open('No Ethereum provider detected, check if Metamask is installed in your browser',
-        'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('No Ethereum provider detected, check if Metamask is installed in your browser');
       return;
     }
     console.log(this.balanceTokens);
     if (!this.balanceTokens || this.balanceTokens === '0') {
-      this.snackBar.open('Please, deposit first some ORV tokens to make the reward',
-        'Dismiss', { panelClass: ['info-snackbar'] });
+      this.snackBar.info('Please, deposit first some ORV tokens to make the reward');
       return;
     }
     this.ngxSmartModalService.open('displayPayReviewer');

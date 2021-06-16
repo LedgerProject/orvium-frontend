@@ -1,0 +1,17 @@
+<orv-access-denied *ngIf="!deposit"></orv-access-denied>
+<div *ngIf="deposit" class="container">
+  <div class="section">
+    <h1 class="mat-display-3 primary"><strong>Congratulations!</strong></h1>
+    <h1 class="mat-title grey">Your article has been submitted to Orvium.</h1>
+    <h1 class="mat-display-1 primary" style="margin-top: 2em;">What is next?</h1>
+    <h1 class="mat-title grey"><strong>Before making your article public</strong></h1>
+    <h1 class="mat-subheading-2 grey">Your article is now in <span class="primary">Pending Approval</span>.
+      We will superficially check the content, format and metadata entered, in order to ensure accessibility and correct reading of your
+      article.
+    </h1>
+    <div align="center">
+      <button mat-raised-button color="primary" [routerLink]="['/']">BROWSE ARTICLES</button>
+    </div>
+  </div>
+  <orv-deposit-status-info [status]="deposit.status"></orv-deposit-status-info>
+</div>

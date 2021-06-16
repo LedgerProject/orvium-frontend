@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
 import { BlockchainService } from './blockchain.service';
-import { Network } from '../model/orvium';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { BlockchainNetworkDTO } from '../model/api';
 
 describe('BlockchainService', () => {
   let service: BlockchainService;
 
-  const networks: Network[] = [{
+  const networks: BlockchainNetworkDTO[] = [{
     name: 'ropsten',
     networkId: 3,
     displayName: 'Ropsten',

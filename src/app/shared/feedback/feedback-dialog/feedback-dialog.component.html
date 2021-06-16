@@ -1,0 +1,45 @@
+<div class="dialog light-theme" *ngIf="!showToolbar" data-html2canvas-ignore="true">
+  <h1 mat-dialog-title>Send feedback</h1>
+  <div class="dialog-content">
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput placeholder="Email" [(ngModel)]="feedback.email">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Feedback type</mat-label>
+      <mat-select matInput required [value]="selected">
+        <mat-option *ngFor="let feedbackType of feedbackTypes" [value]="feedbackType.value">
+          {{feedbackType.viewValue}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="description">
+      <mat-label>Description</mat-label>
+      <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="3" cdkAutosizeMaxRows="3" required
+                [(ngModel)]="feedback.description"></textarea>
+    </mat-form-field>
+  </div>
+  <mat-checkbox [(ngModel)]="includeScreenshot"
+                (change)="isIncludeScreenshot()">Include screenshot
+  </mat-checkbox>
+
+  <div #screenshotParent class="screenshot-content" (click)="expandDrawingBoard()" *ngIf="includeScreenshot">
+    <div>
+      <mat-icon>highlight_alt</mat-icon>
+      <span>Click to highlight or hide info</span>
+    </div>
+  </div>
+
+  <mat-dialog-actions align="center">
+    <button mat-button color="primary" (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="dialogRef.close(true)">Send</button>
+  </mat-dialog-actions>
+</div>
+<div *ngIf="showToolbar" data-html2canvas-ignore="true">
+  <app-feedback-toolbar [drawColor]="drawColor" (manipulate)="manipulate($event)"></app-feedback-toolbar>
+</div>
+<div *ngFor="let rectangle of rectangles; index as index">
+  <app-feedback-rectangle [rectangle]="rectangle" (removeRectangle)="closeRect(index)">
+  </app-feedback-rectangle>
+</div>
+<canvas id="draw-canvas" class="drawCanvas" [ngClass]="{'pointerCursor': !showToolbar}"></canvas>

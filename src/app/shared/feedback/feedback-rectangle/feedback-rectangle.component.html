@@ -1,0 +1,15 @@
+<div class="rect"
+     [ngStyle]="{
+     'left.px': rectangle.startX,
+     'top.px': rectangle.startY,
+     'width.px': rectangle.width,
+     'height.px': rectangle.height}"
+
+     [ngClass]="{'highlight': rectangle.color === feedbackService.highlightedColor,
+                'hide': rectangle.color !== feedbackService.highlightedColor}">
+  <button exclude-rect="true" *ngIf="showCloseTag"
+          mat-mini-fab class="close"
+          (click)="onClose()" matTooltip="Highlight issues">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>

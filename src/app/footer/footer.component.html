@@ -8,4 +8,8 @@
       <button mat-flat-button color="primary" (click)="dismissBanner()">Accept</button>
     </div>
   </mat-toolbar>
+  <button mat-flat-button appFeedback class="feedback mat-elevation-z5" color="primary"
+          [user]="profileService.profile.getValue()"
+          (send)="onSend($event)">feedback
+  </button>
 </footer>

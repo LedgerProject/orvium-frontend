@@ -12,8 +12,8 @@ describe('PapersToReviewComponent', () => {
   let fixture: ComponentFixture<PapersToReviewComponent>;
 
   beforeEach(waitForAsync(() => {
-    const orviumServiceSpy = jasmine.createSpyObj('OrviumService', ['getPreprintDeposits']);
-    orviumServiceSpy.getPreprintDeposits.and.returnValue(of([]));
+    const orviumServiceSpy = jasmine.createSpyObj('OrviumService', ['getPapersToReview']);
+    orviumServiceSpy.getPapersToReview.and.returnValue(of([]));
     TestBed.configureTestingModule({
       declarations: [
         PapersToReviewComponent,

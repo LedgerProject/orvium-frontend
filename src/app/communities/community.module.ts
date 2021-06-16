@@ -11,7 +11,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { NgCircleProgressModule } from 'ng-circle-progress';
 import { GravatarModule } from 'ngx-gravatar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -22,6 +21,15 @@ import { CommunityResolver } from '../shared/orvium.resolvers';
 import { NgxSmartModalModule } from 'ngx-smart-modal';
 import { SharedModule } from '../shared/shared.module';
 import { ModeratorPanelComponent } from './moderator-panel/moderator-panel.component';
+import { BenefitsComponent } from './benefits/benefits.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { CallForPapersComponent } from './call-for-papers/call-for-papers.component';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { CommunityDetailsComponent } from './community-details/community-details.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatListModule } from '@angular/material/list';
+import { OrviumUxLibModule } from '@orvium/ux-components';
 
 const routes: Routes = [
   {
@@ -33,6 +41,11 @@ const routes: Routes = [
     path: ':communityId/moderate',
     component: ModeratorPanelComponent,
     resolve: { community: CommunityResolver }
+  },
+  {
+    path: ':communityId/edit',
+    component: CommunityDetailsComponent,
+    resolve: { community: CommunityResolver }
   }
 ];
 
@@ -40,7 +53,10 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     CommunityViewComponent,
-    ModeratorPanelComponent
+    ModeratorPanelComponent,
+    BenefitsComponent,
+    CallForPapersComponent,
+    CommunityDetailsComponent
   ],
   imports: [
     CommonModule,
@@ -56,7 +72,6 @@ const routes: Routes = [
     MatCardModule,
     MatChipsModule,
     MatDatepickerModule,
-    NgCircleProgressModule,
     GravatarModule,
     MatInputModule,
     MatButtonModule,
@@ -64,6 +79,13 @@ const routes: Routes = [
     FontAwesomeModule,
     ShareModule,
     NgxSmartModalModule.forChild(),
+    MatTabsModule,
+    MatChipsModule,
+    MatExpansionModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatListModule,
+    OrviumUxLibModule
   ],
   exports: [RouterModule]
 })

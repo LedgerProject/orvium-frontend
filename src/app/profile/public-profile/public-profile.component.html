@@ -1,0 +1,89 @@
+<section class="container">
+  <div class="main">
+    <div class="mat-h1">{{publicProfile?.firstName}} {{publicProfile?.lastName}}
+      <button *ngIf="isUser" mat-icon-button [routerLink]="['/profile']" matTooltip="Edit profile">
+        <mat-icon class="v-align-middle">settings</mat-icon>
+      </button>
+    </div>
+    <h1 class="mat-subheading-1 grey">{{publicProfile?.institution}}</h1>
+    <p class="mat-body grey">{{publicProfile?.aboutMe}}</p>
+    <div class="subcontainer">
+      <h1 class="mat-subheading-1 primary">Publications ({{deposits?.length}})</h1>
+      <div *ngFor="let deposit of deposits">
+        <mat-card class="noshadow">
+          <mat-card-title>
+            <a [routerLink]="['/deposits', deposit._id, 'view']">
+              {{ deposit.title }}
+            </a>
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{(deposit.publicationDate | date:'dd MMMM yyyy') || (deposit.submissionDate | date:'dd MMMM yyyy')}} | By
+            <orv-author-button *ngFor="let author of deposit.authors"
+                               [author]="author" [showMenu]="(author.orcid || author.credit && author.credit.length > 0) ? true : false">
+            </orv-author-button>
+          </mat-card-subtitle>
+        </mat-card>
+      </div>
+    </div>
+    <div class="subcontainer">
+      <h1 class="mat-subheading-1 primary">Peer reviews ({{reviews?.length}})</h1>
+      <div *ngFor="let review of reviews">
+        <mat-card class="noshadow">
+          <mat-card-title>
+            <a [routerLink]="['/reviews', review._id, 'view']">
+              {{ review.deposit.title }}
+            </a>
+          </mat-card-title>
+          <mat-card-subtitle>
+            Decision: {{review.decision}}
+          </mat-card-subtitle>
+        </mat-card>
+      </div>
+    </div>
+    <div class="subcontainer">
+      <h1 class="mat-subheading-1 primary">Communities ({{communities?.length}})</h1>
+      <div *ngFor="let community of communities" class="communities">
+        <div>
+          <mat-card class="community noshadow">
+            <a [routerLink]="['/communities', community._id, 'view']">
+              <img src="{{community.logoURL}}" class="orv-community-logo">
+            </a>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="side">
+    <img ngxGravatar [md5Hash]="publicProfile?.gravatar || '2e7854c294602808422223306eff0e33'" [size]="200" class="orv-community-logo"/>
+    <div class="community-metrics subcontainer">
+      <span mat-button class="mat-subheading-1 grey">
+          <mat-icon>menu_book</mat-icon>
+        {{deposits?.length}} Publications
+      </span>
+    </div>
+    <div class="text-align-center">
+      <a *ngIf="publicProfile?.linkedin"
+         mat-button
+         class="icon-with-text-button"
+         href="{{publicProfile?.linkedin}}"
+         target="_blank">
+        <fa-icon [icon]="['fab', 'linkedin']" size="lg"
+                 [styles]="{color: share.prop.linkedin?.color || '#0e76a8'}"></fa-icon>
+        <span>LinkedIn</span>
+      </a>
+      <a *ngIf="publicProfile?.orcid" mat-button
+         class="icon-with-text-button"
+         href="{{publicProfile?.orcid}}" target="_blank">
+        <fa-icon [icon]="['fab', 'orcid']" size="lg" [styles]="{color: '#A6CE39'}"></fa-icon>
+        <span>ORCID</span>
+      </a>
+      <a *ngIf="publicProfile?.blog" mat-button
+         class="icon-with-text-button"
+         href="{{publicProfile?.blog}}" target="_blank">
+        <mat-icon color="primary">public</mat-icon>
+        <span>Website</span>
+      </a>
+    </div>
+  </div>
+</section>
+

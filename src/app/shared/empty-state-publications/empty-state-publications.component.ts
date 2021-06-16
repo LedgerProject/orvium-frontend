@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgxSmartModalService } from 'ngx-smart-modal';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrviumService } from '../../services/orvium.service';
 import { Router } from '@angular/router';
-import { Profile } from '../../model/orvium';
+import { ProfileService } from '../../profile/profile.service';
+import { AppSnackBarService } from '../../services/app-snack-bar.service';
+import { UserPrivateDTO } from '../../model/api';
 
 @Component({
   selector: 'app-empty-state-publications',
@@ -13,20 +14,22 @@ import { Profile } from '../../model/orvium';
 })
 export class EmptyStatePublicationsComponent implements OnInit {
   newPublicationForm: FormGroup;
-  profile: Profile;
+  profile?: UserPrivateDTO;
 
   constructor(public ngxSmartModalService: NgxSmartModalService,
               public router: Router,
-              private snackBar: MatSnackBar,
+              private snackBar: AppSnackBarService,
               public orviumService: OrviumService,
+              private profileService: ProfileService
   ) {
-  }
-
-  ngOnInit(): void {
     this.newPublicationForm = new FormGroup({
       title: new FormControl(''),
     });
-    this.orviumService.getProfile().subscribe(profile => {
+  }
+
+  ngOnInit(): void {
+
+    this.profileService.getProfile().subscribe(profile => {
       if (profile) {
         this.profile = profile;
       }
@@ -40,7 +43,7 @@ export class EmptyStatePublicationsComponent implements OnInit {
         this.router.navigate(['deposits', response._id, 'edit']);
       });
     } else {
-      this.snackBar.open('Please, enter a title for your publication', 'Dismiss', { panelClass: ['error-snackbar'] });
+      this.snackBar.error('Please, enter a title for your publication');
       this.newPublicationForm.reset();
     }
     this.close();
@@ -52,8 +55,8 @@ export class EmptyStatePublicationsComponent implements OnInit {
   }
 
   create(): void {
-    if (!this.profile?.isOnboarded) {
-      this.snackBar.open('Complete your profile first to create publications', 'Dismiss', { panelClass: ['info-snackbar'] });
+    if (!this.profile?.isOnboarded || !this.profile?.emailConfirmed) {
+      this.snackBar.info('Complete your profile & confirm your email first');
     } else {
       this.ngxSmartModalService.open('createDeposit');
     }

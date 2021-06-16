@@ -14,24 +14,27 @@
       <mat-form-field *ngIf="!smallScreen" appearance="outline">
         <mat-label>Search Publications</mat-label>
         <input matInput placeholder="Search papers by title, abstract, etc." [(ngModel)]="searchInput"
-               (keyup.enter)="searchPapers()">
+               (keydown.enter)="searchPapers()" type="search">
         <button mat-button *ngIf="searchInput" matSuffix mat-icon-button aria-label="Clear" (click)="searchInput=''">
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
     </p>
-
+    <button *ngIf="!smallScreen" mat-button matSuffix aria-label="search" [routerLink]="['/advanced-search']">
+      Advanced Search
+    </button>
     <span class="right"></span>
     <ng-container *ngIf="ethereumIsEnabled">
       <button mat-button matTooltip="You are connected to this Ethereum network">
-        <mat-icon svgIcon="ethereum" aria-label="Ethereum logo"></mat-icon>
+        <fa-icon [icon]="['fab', 'ethereum']" size="lg"></fa-icon>
         {{ this.ethereumService.currentNetwork?.value?.displayName }}
       </button>
     </ng-container>
-    <mat-slide-toggle *ngIf="!smallScreen" color="primary" [checked]="ethereumIsEnabled" [disabled]="!ethereumIsAvailable"
+    <mat-slide-toggle *ngIf="!smallScreen" color="primary"
+                      [checked]="ethereumIsEnabled"
+                      [disabled]="(this.ethereumService.isAvailable | async) === false"
                       (change)="toggleBlockchain($event)">Blockchain
     </mat-slide-toggle>
-
     <mat-divider *ngIf="!smallScreen" [vertical]="true" class="style-fix"></mat-divider>
 
     <button mat-icon-button *ngIf="smallScreen" [matMenuTriggerFor]="searchMenu">
@@ -47,6 +50,9 @@
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
+      <button mat-button matSuffix aria-label="search" [routerLink]="['/advanced-search']">
+        Advanced Search
+      </button>
     </mat-menu>
 
 
@@ -54,39 +60,15 @@
       <button mat-icon-button (click)="create()">
         <mat-icon>create</mat-icon>
       </button>
-      <button mat-icon-button [matMenuTriggerFor]="notificationsMenu">
+      <button mat-icon-button (click)="toggleRightSidenav()">
         <mat-icon matBadge="{{notifications?.length}}" matBadgeColor="accent"
+                  [ngClass]="{'notification-animation': notifications.length > 0}"
                   [matBadgeHidden]="notifications?.length == 0">
           notifications
         </mat-icon>
       </button>
-
-      <mat-menu #notificationsMenu="matMenu" [overlapTrigger]="false" xPosition="before">
-        <div class="mat-subheading-2 push-none textThemeColor">Notifications</div>
-        <mat-nav-list dense>
-          <mat-divider></mat-divider>
-          <mat-list-item *ngFor="let notification of notifications; let index = index">
-            <mat-icon class="notification-icon" matListIcon>{{notification.icon}}</mat-icon>
-            <a *ngIf="notification.action.includes('http')" matLine
-               href="{{notification.action}}"
-               target="_blank">
-              <h4 class="text-wrap primary">{{notification.title}}</h4>
-              <p class="text-wrap">{{notification.body}}</p>
-            </a>
-            <a *ngIf="!notification.action.includes('http')" matLine
-               [routerLink]="notification.action">
-              <h4 class="text-wrap primary">{{notification.title}}</h4>
-              <p class="text-wrap">{{notification.body}}</p>
-            </a>
-            <p matLine>{{notification.date | date:'medium'}}</p>
-            <mat-action-list>
-              <mat-icon class="notification-close-icon" (click)="deleteNotification(index, $event)">cancel</mat-icon>
-            </mat-action-list>
-            <mat-divider></mat-divider>
-          </mat-list-item>
-        </mat-nav-list>
-      </mat-menu>
     </div>
+
     <a mat-icon-button href="https://help.orvium.io/" target="_blank">
       <mat-icon>help_outline</mat-icon>
     </a>
@@ -105,18 +87,20 @@
               </div>
               <div class="mat-body primary">{{ profile?.firstName }} {{ profile?.lastName }}</div>
               <div class="mat-body">{{ profile.userType | titlecase }}</div>
-              <div class="mat-body">{{ profile?.institution }}</div>
+              <div class="mat-body" *ngIf="profile.userType !== USER_TYPE.citizen">{{ profile?.institution }}</div>
             </div>
             <mat-divider></mat-divider>
             <button class="nav-button" (click)="changeTheme()" matSubheader mat-menu-item>
               <mat-icon>brightness_6</mat-icon>
               Switch theme
             </button>
-            <button class="nav-button" matSubheader mat-menu-item [routerLink]="['profile']" routerLinkActive="active-sub-link">
+            <button class="nav-button" matSubheader mat-menu-item [routerLink]="['profile', profile.nickname]"
+                    routerLinkActive="active-sub-link">
               <mat-icon>perm_identity</mat-icon>
               Profile
             </button>
-            <button class="nav-button" (click)="logout()"
+            <button class="nav-button"
+                    (click)="logout()"
                     matSubheader mat-menu-item>
               <mat-icon>exit_to_app</mat-icon>
               Logout
@@ -142,6 +126,21 @@
   </mat-form-field>
   <br>
   <button mat-raised-button class="dialogButton" color="primary" (click)="save()" [disabled]="!newPublicationForm.valid">
+    Create
+  </button>
+  <button mat-button (click)="createWithDOI()" color="primary">Import publication by DOI</button>
+</ngx-smart-modal>
+
+<ngx-smart-modal #createNewDepositWithDOI identifier="createNewDepositWithDOI" class="modal light-theme"
+                 [formGroup]="newPublicationWithDOIForm">
+  <h2 class="mat-h2 primary">Please, enter below your publication DOI:</h2>
+  <p class="black">All public information from the publication will be imported.</p>
+  <mat-form-field class="flex flex-direction-column">
+    <mat-label>Publication DOI</mat-label>
+    <input matInput formControlName="doi" (keydown.enter)="saveWithDOI()" placeholder="10.1016/j.cub.2016.10.008">
+  </mat-form-field>
+  <br>
+  <button mat-raised-button class="dialogButton" color="primary" (click)="saveWithDOI()" [disabled]="!newPublicationWithDOIForm.valid">
     Create
   </button>
 </ngx-smart-modal>

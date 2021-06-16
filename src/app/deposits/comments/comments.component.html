@@ -1,0 +1,33 @@
+<div class="comment-view">
+  <mat-card *ngFor="let comment of comments">
+    <mat-card-header>
+      <img mat-card-avatar ngxGravatar
+           [md5Hash]="comment.author.gravatar || '2e7854c294602808422223306eff0e33'"
+           [routerLink]="['/profile', comment.author.nickname]"
+      />
+      <mat-card-title>
+        <p>
+          {{ comment.author.name }} {{ comment.author.surname}}
+          <span *ngFor="let tag of comment.tags" class="badge badge-{{tag}}">{{ tag | titlecase }}</span>
+        </p>
+      </mat-card-title>
+      <mat-card-subtitle>{{comment.createdOn | date:'short'}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p>{{comment.content}}</p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-icon-button *ngIf="canModerate || profile?.userId === comment.author.userId">
+        <mat-icon class="grey" (click)="deleteComment(comment.id)">delete</mat-icon>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+<div *ngIf="profile">
+  <div [formGroup]="commentForm">
+    <mat-form-field appearance="outline">
+      <textarea matInput formControlName="content"></textarea>
+    </mat-form-field>
+  </div>
+  <button mat-raised-button color="primary" [disabled]="!commentForm.valid" (click)="addComment()">Comment</button>
+</div>

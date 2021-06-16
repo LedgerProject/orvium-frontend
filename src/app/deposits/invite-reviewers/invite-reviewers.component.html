@@ -1,17 +1,17 @@
-<app-access-denied *ngIf="!canInviteReviewers"></app-access-denied>
+<orv-access-denied *ngIf="!canInviteReviewers"></orv-access-denied>
 
 <div *ngIf="canInviteReviewers">
   <div>
-    <h1 class="mat-h1 primary">Invite Reviewers</h1>
-    <h2 class="mat-h2">Publication title: <a [routerLink]="['..','view']">{{ deposit.title }}</a></h2>
+    <h2 class="mat-h2 primary">Invite Reviewers</h2>
+    <p class="black">An invite email will be sent to the reviewer to review the publication.</p>
   </div>
   <div class="section" [formGroup]="inviteForm">
     <mat-form-field appearance="outline">
-      <mat-label>Email</mat-label>
-      <input matInput id="emailInput" placeholder="Email" formControlName="email" required>
+      <mat-label>Reviewer email</mat-label>
+      <input matInput id="emailInput" formControlName="email" type="email" required>
     </mat-form-field>
   </div>
-  <div>
+  <div align="right">
     <button mat-raised-button color="primary"
             [disabled]="!inviteForm.valid"
             (click)="createInvitation()"

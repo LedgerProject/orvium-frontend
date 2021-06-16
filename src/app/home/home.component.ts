@@ -3,10 +3,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { OrviumService } from '../services/orvium.service';
 import { environment } from '../../environments/environment';
-import { Community, Deposit, Profile } from '../model/orvium';
+import { TopDisciplinesQuery } from '../model/orvium';
 import { InviteComponent } from '../invite/invite.component';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ProfileService } from '../profile/profile.service';
+import { AppSnackBarService } from '../services/app-snack-bar.service';
+import { CommunityDTO, DepositDTO, UserPrivateDTO } from '../model/api';
 
 
 @Component({
@@ -15,20 +17,22 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private metaElements: HTMLMetaElement[];
-  deposits: Deposit[];
-  profile: Profile;
-
+  deposits: DepositDTO[] = [];
+  profile?: UserPrivateDTO;
   environment = environment;
-  communities: Community[] = [];
+  communities: CommunityDTO[] = [];
+  topDisciplines: TopDisciplinesQuery[] = [];
+  chipClass: string[] = ['chip-aquamarine', 'chip-yellow', 'chip-pink', 'chip-blue'];
+  private metaElements: HTMLMetaElement[] = [];
 
   constructor(private router: Router,
               private titleService: Title,
               public orviumService: OrviumService,
+              private profileService: ProfileService,
               private route: ActivatedRoute,
               private metaService: Meta,
               private dialog: MatDialog,
-              private snackBar: MatSnackBar) {
+              private snackBar: AppSnackBarService) {
   }
 
   ngOnInit(): void {
@@ -51,7 +55,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       { name: 'og:site_name', content: 'Orvium' }
     ]);
 
-    this.orviumService.getProfile().subscribe(profile => {
+    this.profileService.getProfile().subscribe(profile => {
       if (profile) {
         this.profile = profile;
       }
@@ -59,6 +63,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.orviumService.getCommunities().subscribe(communities => {
       this.communities = communities;
+    });
+
+    this.orviumService.getTopDisciplines().subscribe(topDisciplines => {
+      this.topDisciplines = topDisciplines;
+      console.log(topDisciplines);
     });
   }
 
@@ -72,15 +81,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   openInviteDialog(): void {
     if (!this.profile) {
-      this.snackBar.open('You need to log in before invite your colleages',
-        'Dismiss',
-        { panelClass: ['info-snackbar'] });
+      this.snackBar.info('You need to log in before invite your colleages');
       return;
     }
     if (!this.profile.isOnboarded) {
-      this.snackBar.open('You need to complete your profile first',
-        'Dismiss',
-        { panelClass: ['info-snackbar'] });
+      this.snackBar.info('You need to complete your profile first');
       return;
     }
 
@@ -89,4 +94,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       console.log('The invite dialog was closed');
     });
   }
+
+  searchByDiscipline(discipline: string): void {
+    this.router.navigate(['/search'],
+      { queryParams: { discipline: discipline, page: 1, size: 10 }, queryParamsHandling: 'merge' });
+  }
+
 }

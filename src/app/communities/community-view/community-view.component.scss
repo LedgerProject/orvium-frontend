@@ -13,6 +13,8 @@ mat-icon {
 }
 
 .community-metrics {
+  text-align: center;
+
   > span {
     margin: 0.5rem;
   }
@@ -21,56 +23,57 @@ mat-icon {
 .content {
   display: grid;
   grid-template-columns: 70% 30%;
-  grid-column-gap: 1em;
+  grid-template-rows: 0fr;
   justify-content: center;
   justify-items: center;
+  grid-template-areas:
+    "recent logo"
+    "recent moderators"
+    "recent information";
 }
 
 .recent {
+  grid-area: recent;
   margin-bottom: 20px;
-  grid-row-gap: 10px;
+  width: 80%;
 }
 
-.community-header {
-  display: grid;
-  grid-template-columns: 70% 30%;
-  grid-row-gap: 1em;
-  grid-column-gap: 1em;
-  margin-bottom: 2rem;
-  justify-content: center;
-  justify-items: center;
-  grid-template-areas: "column-left column-right";
+.information {
+  grid-area: information;
+}
 
-  > header {
-    grid-area: header;
-    justify-self: center;
-  }
+.moderators {
+  grid-area: moderators;
+  width: 100%;
+}
 
-  > .column-left {
-    grid-area: column-left;
-    max-width: 900px;
-  }
+.logo {
+  grid-area: logo;
+}
 
-  > .column-right {
-    grid-area: column-right;
-    text-align: center;
-  }
+.moderators-info {
+  display: inline-flex;
+}
+
+.mat-list-item {
+  margin-bottom: 0.7em;
+}
+
+.pointer {
+  margin-right: 1em;
 }
 
 @media (max-width: 768px) {
   .content {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-areas:
+      "logo"
+      "recent"
+      "moderators"
+      "information";
   }
 
-  .community-header {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "column-right"
-      "column-left";
-
-    > .column-left {
-      grid-area: column-left;
-      margin-left: 0%;
-    }
+  .recent {
+    width: 100%;
   }
 }

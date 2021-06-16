@@ -1,0 +1,28 @@
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 1em;
+  margin-bottom: 2em;
+}
+
+.mat-icon {
+  display: inline;
+  font-size: 3.5em;
+}
+
+.mat-card {
+  text-align: center;
+  min-height: 220px;
+}
+
+@media (max-width: 768px) {
+  .benefits {
+    grid-template-columns: 100%;
+    grid-row-gap: 1em;
+  }
+
+  .mat-card {
+    min-height: auto;
+    font-size: 60%;
+  }
+}

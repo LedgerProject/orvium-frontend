@@ -1,6 +1,9 @@
 <div class="container" [ngClass]="theme">
   <app-toolbar class="toolbar"></app-toolbar>
-  <app-side-nav class="sidenav"></app-side-nav>
+  <app-side-nav *ngIf="this.profile" class="sidenav"></app-side-nav>
+  <div *ngIf="!this.profile" class="content backgroundColor" id="main-content">
+    <router-outlet (activate)="resetPosition()"></router-outlet>
+  </div>
   <app-footer class="footer"></app-footer>
 </div>
 

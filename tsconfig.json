@@ -6,12 +6,12 @@
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
-//    "strict": true,
+    "strict": true,
     "alwaysStrict": true,
     "strictBindCallApply": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-//    "strictPropertyInitialization": true,
+    "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -28,15 +28,13 @@
       "es2018",
       "dom"
     ],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
     // Allow importing json files in the project such as disciplines.json and blockchain json interfaces
     "resolveJsonModule": true,
     // Needed to import blockchain contract interfaces (eg. OrviumToken.json)
     "allowSyntheticDefaultImports": true
   },
   "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true

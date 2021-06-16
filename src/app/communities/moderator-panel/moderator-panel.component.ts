@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Community, Deposit, Profile } from '../../model/orvium';
 import { ActivatedRoute } from '@angular/router';
 import { OrviumService } from '../../services/orvium.service';
+import { ProfileService } from '../../profile/profile.service';
+import { CommunityDTO, DepositDTO, UserPrivateDTO } from '../../model/api';
+import { CommunityService } from '../community.service';
 
 @Component({
   selector: 'app-moderator-panel',
@@ -9,26 +11,37 @@ import { OrviumService } from '../../services/orvium.service';
   styleUrls: ['./moderator-panel.component.scss']
 })
 export class ModeratorPanelComponent implements OnInit {
-  deposits: Deposit[] = [];
-  profile: Profile;
-  community: Community;
+  deposits: DepositDTO[] = [];
+  profile?: UserPrivateDTO;
+  community!: CommunityDTO;
   isModerator = false;
+
   constructor(private route: ActivatedRoute,
-              private orviumService: OrviumService) { }
+              private orviumService: OrviumService,
+              private profileService: ProfileService,
+              private communityService: CommunityService
+  ) {
+  }
 
   ngOnInit(): void {
-    this.route.data.pipe().subscribe(async data => {
+    this.route.data.subscribe(async data => {
       this.community = data.community;
+      if (!this.community) {
+        throw new Error('Community not found');
+      }
+      this.init();
     });
-    this.orviumService.getProfile().subscribe(profile => {
+  }
+
+  private init(): void {
+    this.profileService.getProfile().subscribe(profile => {
       if (profile) {
         this.profile = profile;
-        this.isModerator = this.profile.roles.includes('moderator:' + this.community._id);
+        this.isModerator = this.communityService.canModerateCommunity(this.community);
       }
     });
     this.orviumService.getModeratorDeposits(this.community._id).subscribe(deposits => {
       this.deposits = deposits;
     });
   }
-
 }

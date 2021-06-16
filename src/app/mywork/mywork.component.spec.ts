@@ -7,23 +7,28 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 import { depositDraft } from '../shared/test-data';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { SharedModule } from '../shared/shared.module';
+import { Component, Input } from '@angular/core';
+import { DepositDTO } from '../model/api';
+
+@Component({ selector: 'app-deposits-list', template: '' })
+class DepositListStubComponent {
+  @Input() deposits: DepositDTO[] = [];
+}
 
 describe('MyworkComponent', () => {
   let component: MyworkComponent;
   let fixture: ComponentFixture<MyworkComponent>;
   let router: Router;
 
-  const deposits = [depositDraft];
+  const deposits = [depositDraft()];
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [MyworkComponent],
+      declarations: [MyworkComponent, DepositListStubComponent],
       imports: [
         RouterTestingModule.withRoutes([]),
         MatSnackBarModule,
         HttpClientTestingModule,
-        SharedModule
       ]
     }).compileComponents();
 

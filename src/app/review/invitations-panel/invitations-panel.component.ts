@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Invite, PeerReview, REVIEW_STATUS } from '../../model/orvium';
 import { OrviumService } from '../../services/orvium.service';
+import { InviteDTO, REVIEW_STATUS, ReviewDTO } from '../../model/api';
 
 @Component({
   selector: 'app-invitations-panel',
@@ -9,9 +9,9 @@ import { OrviumService } from '../../services/orvium.service';
 })
 export class InvitationsPanelComponent implements OnInit {
   displayedColumns = ['publication', 'author', 'deadline', 'action'];
-  invites: Invite[];
-  inProgress: PeerReview[];
-  resolved: PeerReview[];
+  invites: InviteDTO[] = [];
+  inProgress: ReviewDTO[] = [];
+  resolved: ReviewDTO[] = [];
 
   constructor(private orviumService: OrviumService) {
   }

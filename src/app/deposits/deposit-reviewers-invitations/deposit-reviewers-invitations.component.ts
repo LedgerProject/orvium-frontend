@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Deposit, Invite, Profile } from '../../model/orvium';
 import { ActivatedRoute } from '@angular/router';
 import { OrviumService } from '../../services/orvium.service';
 import { DepositsService } from '../deposits.service';
+import { NgxSmartModalService } from 'ngx-smart-modal';
+import { ProfileService } from '../../profile/profile.service';
+import { DepositDTO, InviteDTO, UserPrivateDTO } from '../../model/api';
 
 @Component({
   selector: 'app-deposit-reviewers-invitations',
@@ -11,19 +13,21 @@ import { DepositsService } from '../deposits.service';
 })
 export class DepositReviewersInvitationsComponent implements OnInit {
   displayedColumns = ['reviewer', 'request_date', 'deadline', 'status'];
-  invites: Invite[] = [];
-  profile: Profile;
-  deposit: Deposit;
+  invites: InviteDTO[] = [];
+  profile?: UserPrivateDTO;
+  deposit: DepositDTO;
   canInviteReviewers = false;
 
   constructor(private route: ActivatedRoute,
               private orviumService: OrviumService,
-              private depositService: DepositsService) {
+              private profileService: ProfileService,
+              private depositService: DepositsService,
+              public ngxSmartModalService: NgxSmartModalService) {
+    this.deposit = this.route.snapshot.data.deposit;
   }
 
   ngOnInit(): void {
-    this.deposit = this.route.snapshot.data.deposit;
-    const profile = this.orviumService.profile.getValue();
+    const profile = this.profileService.profile.getValue();
     if (profile) {
       this.profile = profile;
     }
@@ -38,5 +42,9 @@ export class DepositReviewersInvitationsComponent implements OnInit {
     this.orviumService.getDepositInvitations(this.deposit._id).subscribe((response) => {
       this.invites = response;
     });
+  }
+
+  openInviteReviewerModal(): void {
+    this.ngxSmartModalService.open('inviteReviewerModal');
   }
 }

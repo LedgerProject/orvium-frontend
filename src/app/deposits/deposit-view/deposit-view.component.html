@@ -36,13 +36,11 @@
           </mat-icon>
         </button>
       </div>
-
     </div>
     <div *ngIf="deposit.authors" class="row mat-body">
-      <span>{{ deposit.publicationDate | date: 'd MMM yyyy' }} | By </span>
-      <app-author-button *ngFor="let author of deposit.authors"
-                         [author]="author">
-      </app-author-button>
+      <span>{{(deposit.publicationDate | date:'dd MMMM yyyy') || (deposit.submissionDate | date:'dd MMMM yyyy')}} | By </span>
+      <orv-author-button *ngFor="let author of deposit.authors" [author]="author"
+                         [showMenu]="(author.orcid || author.credit && author.credit.length > 0) ? true : false"></orv-author-button>
     </div>
     <div class="row mat-body">
       <mat-chip-list>
@@ -51,14 +49,52 @@
     </div>
     <mat-card *ngIf="deposit.abstract" class="abstract">
       <mat-card-header>
-        <mat-card-title>Abstract</mat-card-title>
+        <mat-card-title class="primary">Abstract</mat-card-title>
       </mat-card-header>
-      <mat-card-content>
+      <mat-card-content class="mat-body-1" style="text-align: justify;">
         {{deposit.abstract}}
       </mat-card-content>
     </mat-card>
-    <p *ngIf="deposit.html" class="info-paper-html">&nbsp;&nbsp;*Content automatically extracted from the publication file</p>
-    <div class="paper-html" *ngIf="deposit.html" [innerHTML]="deposit.html"></div>
+    <mat-expansion-panel *ngIf="deposit.html" [expanded]="true">
+      <mat-expansion-panel-header>
+        <div>
+          <h2 class="mat-h2 primary">
+            <mat-icon class="primary">article</mat-icon>
+            Publication Content
+          </h2>
+        </div>
+      </mat-expansion-panel-header>
+      <p *ngIf="deposit.html" class="info-paper-html">&nbsp;&nbsp;*Content automatically extracted from the publication file</p>
+      <div class="paper-html" *ngIf="deposit.html" [innerHTML]="deposit.html">
+      </div>
+      <h2 class="mat-h2 primary" *ngIf="images.length > 0">Figures ({{images.length}})</h2>
+      <div *ngIf="images.length > 0" class="flex-wrap">
+        <img *ngFor="let image of images; let i=index" [src]="image.src" class="deposit_image pointer"/>
+      </div>
+    </mat-expansion-panel>
+    <mat-expansion-panel *ngIf="deposit.references && deposit.references.length > 0">
+      <mat-expansion-panel-header>
+        <div>
+          <h2 class="mat-h2 primary">
+            <mat-icon class="primary">launch</mat-icon>
+            References
+          </h2>
+        </div>
+      </mat-expansion-panel-header>
+      <ol>
+        <li *ngFor="let reference of deposit.references" class="mat-body-1">
+          <a *ngIf="reference.url" href="{{reference.url}}" target="_blank" class="click-link">{{reference.reference}}</a>
+          <span *ngIf="!reference.url">{{reference.reference}}</span>
+        </li>
+      </ol>
+    </mat-expansion-panel>
+  </div>
+  <div class="comments" *ngIf="deposit.status != DEPOSIT_STATUS.pendingApproval && deposit.status != DEPOSIT_STATUS.draft">
+    <h2 class="mat-h2 primary">Comments ({{deposit.comments.length}})</h2>
+    <app-comments [comments]="deposit.comments"
+                  (newComment)="addComment($event)"
+                  (delete)="deleteComment($event)"
+                  [canModerate]="canModerateDeposit" [profile]="profile"></app-comments>
   </div>
   <div class="side">
     <div class="box" *ngIf="deposit.community">
@@ -70,7 +106,8 @@
     <div class="box">
       <h2 class="mat-h2 primary">Files</h2>
       <div *ngFor="let file of files">
-        <a mat-button href="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/files/{{file.filename}}"
+        <a mat-button
+           href="{{file.presignedURL || environment.apiEndpoint+'/deposits/'+deposit._id+'/files/'+file.filename}}"
            target="_blank">
           <fa-icon class="primary" [icon]="file.contentType.includes('word') ? 'file-word' :
                                        file.contentType.includes('pdf') ? 'file-pdf' :
@@ -81,33 +118,47 @@
                                        file.contentType.includes('rtf') ? 'file-alt' : 'file'" size="lg">
           </fa-icon>
           {{file.filename | shorten:30}}
-          <span *ngIf="file.filename==deposit.publicationFile?.filename"
-                class="badge badge-impact">Publication</span>
+          <span *ngFor="let tag of file.tags"
+                class="badge badge-impact">{{tag}}</span>
         </a>
       </div>
+      <a mat-icon-button class="git" *ngIf="deposit.gitRepository" href="{{deposit.gitRepository}}" target="_blank">
+        <fa-icon [icon]="['fab', 'github']" size="lg"></fa-icon>
+        <a href="{{deposit.binderURL}}" target="_blank"> Open in Binder</a>
+      </a>
       <div class="orv-button-group">
         <a *ngIf="deposit.pdfUrl" mat-flat-button color="primary"
-           href="{{environment.apiEndpoint}}/deposits/{{deposit._id}}/pdf"
+           href="{{deposit.presignedPDFURL || environment.apiEndpoint+'/deposits/'+deposit._id+'/pdf'}}"
            target="_blank" download="{{deposit.title}}">Download PDF</a>
       </div>
     </div>
-    <div class="box">
+    <div *ngIf="deposit.canBeReviewed" class="box">
       <h2 class="mat-h2 primary">Reviews</h2>
-      <app-deposits-reviews-table *ngIf="deposit.peerReviews"
+      <app-deposits-reviews-table *ngIf="deposit.peerReviews && deposit.peerReviews.length > 0"
                                   [reviews]="deposit.peerReviews" [basic]="true">
       </app-deposits-reviews-table>
       <div class="orv-button-group">
-        <button *ngIf="canCreateReview" mat-raised-button color="primary"
-                (click)="createReview()">
-          <mat-icon>rate_review</mat-icon>
-          Create Review
-        </button>
+        <div *ngIf="canCreateReview">
+          <button *ngIf="!hasBeenInvitedToReview" mat-raised-button color="primary"
+                  (click)="createReview()">
+            <mat-icon>rate_review</mat-icon>
+            Create Review
+          </button>
+          <button *ngIf="hasBeenInvitedToReview" mat-raised-button color="primary"
+                  [routerLink]="['/reviews', 'myreviews']">
+            <mat-icon>rate_review</mat-icon>
+            My Reviews
+          </button>
+        </div>
         <button *ngIf="canInviteReviewers" class="" mat-raised-button color="primary"
                 [routerLink]="['..','reviewers']">
           <mat-icon>mail</mat-icon>
           Invite Reviewers
         </button>
       </div>
+      <p *ngIf="hasBeenInvitedToReview" class="mat-card-subtitle" style="margin-top: 1em;">*You have been invited to review this
+        publication. Go to <a class="primary" [routerLink]="['/reviews', 'myreviews']">My Reviews</a> to accept or decline the invitation.
+      </p>
     </div>
     <div class="box">
       <app-deposit-versions [deposits]="depositVersions"></app-deposit-versions>
@@ -118,46 +169,11 @@
         </button>
       </div>
     </div>
-    <div *ngIf="deposit.references && deposit.references.length>0" class="box">
-      <h2 class="mat-h2 primary">References</h2>
-      <ol>
-        <li *ngFor="let reference of deposit.references" class="mat-caption">
-          {{reference.reference}}
-          <a mat-icon-button *ngIf="reference.url" href="{{reference.url}}" target="_blank">
-            <mat-icon>
-              open_in_new
-            </mat-icon>
-          </a>
-        </li>
-      </ol>
-    </div>
     <div class="box">
       <h2 class="mat-h2 primary">Keywords</h2>
       <mat-chip-list>
         <mat-chip class="mat-body" *ngFor="let key of deposit.keywords">{{key}}</mat-chip>
       </mat-chip-list>
-    </div>
-    <div class="box">
-      <h2 class="mat-h2 primary">Details</h2>
-      <ul class="mat-body">
-        <li *ngIf="deposit.doi">DOI:
-          <span class="primary">{{deposit.doi}}</span>
-        </li>
-        <li>Access type:
-          <span class="primary">
-            <a class="primary" href="https://help.orvium.io/licenses/"
-               target="_blank">{{deposit.accessRight | titlecase}}</a></span>
-        </li>
-        <li>Review type:
-          <span class="primary">{{deposit.reviewType | titlecase}}</span>
-        </li>
-        <li>Publication type:
-          <span class="primary">{{deposit.publicationType | titlecase}}</span>
-        </li>
-        <li>Publication date:
-          <span class="primary">{{deposit.publicationDate |  date:'d MMMM yyyy'}}</span>
-        </li>
-      </ul>
     </div>
     <div class="box" *ngIf="canModerateDeposit">
       <h2 class="mat-h2 primary">Moderate</h2>
@@ -174,6 +190,51 @@
                 (click)="setStatus(statusSelect.value)">Change
         </button>
       </div>
+    </div>
+    <div class="box">
+      <h2 class="mat-h2 primary">Details</h2>
+      <ul class="mat-body-1">
+        <li *ngIf="deposit.doi">DOI:
+          <a class="primary"
+             target="_blank"
+             href="https://doi.org/{{deposit.doi}}">{{deposit.doi}}</a>
+        </li>
+        <li>License:
+          <span>
+            <a class="primary click-link" href="https://help.orvium.io/licenses/"
+               target="_blank">{{deposit.accessRight | uppercase}}
+              <mat-icon class="black" style="font-size: 1em;">help_outline</mat-icon></a></span>
+        </li>
+        <li *ngIf="deposit.canBeReviewed">Review type:
+          <span class="primary">{{deposit.reviewType | titlecase}}</span>
+        </li>
+        <li>Publication type:
+          <span class="primary">{{deposit.publicationType | titlecase}}</span>
+        </li>
+        <li>Submission date:
+          <span class="primary">{{deposit.submissionDate |  date:'d MMMM yyyy'}}</span>
+        </li>
+        <li *ngIf="deposit.publicationDate">Publication date:
+          <span class="primary">{{deposit.publicationDate |  date:'d MMMM yyyy'}}</span>
+        </li>
+      </ul>
+      <div align="center">
+        <a href="https://creativecommons.org/licenses/" target="_blank">
+          <fa-icon [icon]="['fab', 'creative-commons']" size="lg"></fa-icon>
+          <fa-icon *ngIf="deposit.accessRight === ACCESS_RIGHT.CC0" [icon]="['fab', 'creative-commons-zero']" size="lg"
+                   [matTooltip]="ACCESS_RIGHT.CC0 | uppercase"></fa-icon>
+          <fa-icon *ngIf="deposit.accessRight === ACCESS_RIGHT.CCBY" [icon]="['fab', 'creative-commons-by']" size="lg"
+                   [matTooltip]="ACCESS_RIGHT.CCBY | uppercase"></fa-icon>
+          <fa-icon *ngIf="deposit.accessRight === ACCESS_RIGHT.CCBYND" [icon]="['fab', 'creative-commons-nd']" size="lg"
+                   [matTooltip]="ACCESS_RIGHT.CCBYND | uppercase"></fa-icon>
+        </a>
+      </div>
+    </div>
+    <div class="box" *ngIf="deposit.openAireIdentifier">
+      <h2 class="mat-h2 primary">Indexed in</h2>
+      <a href="https://explore.openaire.eu/search/publication?articleId={{deposit.openAireIdentifier}}" target="_blank">
+        <img class="openaire" src="https://assets.orvium.io/openAIRE_logo.png">
+      </a>
     </div>
     <div class="box">
       <h2 class="mat-h2 primary">Share</h2>
@@ -194,6 +255,7 @@
     </div>
   </div>
 </div>
+
 <ngx-smart-modal #citationModal identifier="citationModal" class="modal">
   <h2 class="mat-h2 primary">Citation</h2>
   <p *ngIf="citation" class="black">{{citation.apa}}

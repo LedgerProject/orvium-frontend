@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ThemeService } from './theme.service';
+import { THEMES, ThemeService } from './theme.service';
 
 describe('ThemeService', () => {
   let service: ThemeService;
@@ -12,5 +12,10 @@ describe('ThemeService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('should toogle theme', () => {
+    service.toggleTheme();
+    expect(service.getTheme().value).toEqual(THEMES.dark);
   });
 });

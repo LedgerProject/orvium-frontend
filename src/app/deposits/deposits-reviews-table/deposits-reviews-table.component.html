@@ -2,9 +2,9 @@
   <ng-container matColumnDef="author">
     <th mat-header-cell *matHeaderCellDef>Reviewer</th>
     <td mat-cell *matCellDef="let element">
-      <div class="avatar" [ngClass]="{'pointer': element.status==REVIEW_STATUS.published || element.owner == profile?.userId}"
-           [routerLink]="element.status==REVIEW_STATUS.published || element.owner == profile?.userId ? ['/reviews', element._id, 'view'] : undefined">
-        <img mat-card-avatar ngxGravatar [md5Hash]="element.gravatar || '2e7854c294602808422223306eff0e33'"/>
+      <div class="avatar" [ngClass]="{'pointer': element.status==REVIEW_STATUS.published || element.owner == profile?.userId}">
+        <img mat-card-avatar ngxGravatar class="pointer"
+             [md5Hash]="element.gravatar || '2e7854c294602808422223306eff0e33'" [routerLink]="['/profile', element.ownerProfile.nickname]"/>
         <a class="primary">{{element.author}}</a>
       </div>
     </td>
@@ -53,25 +53,14 @@
     </td>
   </ng-container>
   <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <th mat-header-cell *matHeaderCellDef></th>
     <td mat-cell *matCellDef="let element">
-      <button *ngIf="element.status==='published'" mat-stroked-button color="primary"
-              [routerLink]="['/reviews', element._id, 'view']">
-        <mat-icon>visibility</mat-icon>
-        View
-      </button>
-      <button *ngIf="profile && element.status==='draft'
-      && this.profile?.userId===element.owner" mat-stroked-button color="primary"
-              [routerLink]="['/reviews', element._id, 'edit']">
-        <mat-icon>edit</mat-icon>
-        Edit
-      </button>
+      <a *ngIf="(element.status == REVIEW_STATUS.published) || (this.profile?.userId===element.owner)" mat-flat-button class="primary"
+         [routerLink]="['/reviews', element._id, 'view']">
+        <strong>View</strong></a>
     </td>
   </ng-container>
   <tr mat-header-row *matHeaderRowDef="basic ? reviewColumnsToDisplayBasic : reviewColumnsToDisplay"></tr>
   <tr mat-row
-      [ngClass]="{'hand-pointer': element.status == REVIEW_STATUS.published || element.owner == profile?.userId,
-      'disabled-pointer': element.status != REVIEW_STATUS.published && element.owner != profile?.userId}"
-      [routerLink]="element.status==REVIEW_STATUS.published || element.owner == profile?.userId ? ['/reviews', element._id, 'view'] : undefined"
       *matRowDef="let element; columns: (basic ? reviewColumnsToDisplayBasic : reviewColumnsToDisplay);"></tr>
 </table>

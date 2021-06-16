@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { OrviumService } from '../services/orvium.service';
-import { Deposit } from '../model/orvium';
+import { DepositDTO } from '../model/api';
 
 
 @Component({
@@ -10,7 +10,7 @@ import { Deposit } from '../model/orvium';
   styleUrls: ['./mywork.component.scss']
 })
 export class MyworkComponent implements OnInit {
-  deposits: Deposit[] = [];
+  deposits: DepositDTO[] = [];
   initialized = false;
 
   constructor(private titleService: Title,

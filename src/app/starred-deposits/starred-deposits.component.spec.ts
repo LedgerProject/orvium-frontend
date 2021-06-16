@@ -10,6 +10,7 @@ import { MatTableModule } from '@angular/material/table';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 
 describe('StarredDepositsComponent', () => {
   let component: StarredDepositsComponent;
@@ -40,7 +41,7 @@ describe('StarredDepositsComponent', () => {
     fixture = TestBed.createComponent(StarredDepositsComponent);
     component = fixture.componentInstance;
     const disciplinesService = fixture.debugElement.injector.get(DisciplinesService);
-    spyOn(disciplinesService, 'getDisciplines').and.returnValue([]);
+    spyOn(disciplinesService, 'getDisciplines').and.returnValue(of([]));
 
     fixture.detectChanges();
 

@@ -24,14 +24,6 @@
   margin-bottom: 1em;
 }
 
-.table-fileicon {
-  flex: 0 0 5%;
-}
-
-.table-filename {
-  flex: 0 0 40%;
-}
-
 @media (max-width: 768px) {
   .container {
     grid-template-columns: 1fr;
